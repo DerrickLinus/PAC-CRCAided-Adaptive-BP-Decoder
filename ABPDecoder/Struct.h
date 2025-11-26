@@ -1,0 +1,132 @@
+#pragma once
+#include "define.h"
+
+// Simulation Parameter struct
+struct SPStruct
+{
+	int SNRtype;        //0--Eb/No, 1--Es/No
+	double startSNR;
+	double endSNR;
+	double stepSNR;
+
+	int leastErrorFrame;
+	int leastTestFrame;
+	int sourceType;
+	int displayStep;
+};
+
+//random seed struct
+struct SEED
+{
+	unsigned long ix;					//long seed
+	unsigned long iy;					//long seed
+	unsigned long iz;					//long seed
+	unsigned long ixx;					//long seed
+	unsigned long iyy;					//long seed
+	unsigned long izz;					//long seed
+};
+
+//AWGN channel struct
+struct AWGN
+{
+	struct SEED *seed;			//random seed to generate Gauss variable
+	int seedmethod;             //random seed generate method,1--Module, 2--Shift register
+	double  snr;				//channel SNR--dB
+	double  sigma;				//variation of Gauss process
+	double  isigma;				//1/(sigma*sigma)
+};
+
+struct StatisStruct
+{
+	int testFrames;
+	int errorFrames;
+	int errorBits;
+	int errorSym;
+	int undetectedErrorFrames;		// undetectable error
+	double FER;
+	double SER;
+	double BER;
+	double UER;
+	long long IterTime;
+	double avgIterTime;
+};
+
+struct IterStruct
+{
+	int **CNindex;
+	int *CNdegree;
+	double *pLLR;
+	double** R;
+};
+
+
+struct PACStruct {
+	//Impulse response
+	int IR_size = 7;
+	int IR[7] = { 1,0,1,1,0,1,1 };
+	//int IR[7] = { 1,0,0,0,0,0,0 };
+	int* PolarCode;
+	int** T;
+	int** T_1;		//T^-1
+	int** G;		//G=T*G_polar
+	int** P;		//P=G*T^-1
+	int** H;		//校验矩阵H
+	int L;			//SCL list size
+	//ABP 译码时，暂时不考虑系统形式
+	int system;		//1:系统码,0:非系统码
+	int** T0;		//T0:GMatrix*T中A所在的行和列，然后取逆
+
+};
+
+struct ADPStruct
+{
+	char codefile[80];
+	double rate;
+	int N;						// code length
+	int K;						// message length
+	int M;						// M = N - K
+
+	int codeMode = 1;			// 0:polar code; 1:PAC code; 注意此次修改需要修改对应的IR序列
+	int DecodingMethod;			// SPA or MSA
+	int **H;					// parity-check matrix
+	int **G;					// generator matrix
+	int G_K;					// the number of rows of G, K or N
+	int **P;					// procoding matrix, make the G to a systematic form
+	
+	int puncture;				// punctured bits
+	int* PunctureIndex;			//index for puncture 
+	
+	int shorten = 0;				// shortened bits
+	int* ShortenIndex;			//index for puncture 
+
+	int *A;						// the active positions, for Polar
+	int N1;						// inner iteration
+	int N2;						// outer iteration
+	double damping_factor;
+	int Deg2;
+	double IterTime;
+	int HDD;
+	int *Deg2RandSeq;
+	int Interchange;
+
+	int check_flag;
+	int CRC_len;
+	//int Gen[9] = { 1,1,0,0,1,1,0,1,1 };
+	int EncodeAdd0;				// for Polar codes
+	int **H_crc;				// the parity-check matrix of the CRC code
+	int** H_crc_add0;			//the parity-check matrix of the CRC code with zero (N*N)
+	int CRC_len_for_ABP;		// the number of CRC bits used in ABP
+	int **H_cc;					// the full parity-check matrix of the CRC-coded concatenated code
+	int use_channel_LLR;
+	double ML_metric_th;
+	int** Joint_check_matrix;
+	struct IterStruct *IterDec;		// the adaptived Tanner
+	struct IterStruct *Tanner;		// the original Tanner
+
+	struct PACStruct* PAC_code;
+	int SG_Scheme = 2;
+	double ReliableFactor = 1;
+
+};
+
+

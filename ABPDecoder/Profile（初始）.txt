@@ -1,0 +1,37 @@
+ABP Decoder Profile:
+
+Codefile:			CF.Polar.128.64.txt
+N:					128
+K:      			40
+CRC:				0
+Add Zeros:			1
+Puncture:			8
+Shorten:			8
+Decoding Method:	6
+
+ABP Scheme:			20 10
+ABP Damping:		0.08
+ABP Deg-2:			1
+ABP Interchange:	2
+ABP Use CRC:		16
+ABP Use ChannelLLR: 0
+Metric Threshold:   41
+SCLD ListSize:      32
+PAC	SystemCode:     0
+
+SNR Type:   0
+Start SNR:  0
+End SNR:    5
+Step SNR:   1
+Least Test Frame: 1000
+Least Error Frame: 100
+Random Codewords:	1
+Display Step:	    100
+
+*******************************************************************
+N:				code length before puncturing
+K:				information length
+CRC:			CRC length, 6, 11, 16, 24 are supported
+Add Zeros:		set 1 for polar codes, add zeros at frozen bits before encoding
+Puncture:		the number of punctured bits at the beginning, for 5G LDPC codes
+DecodingMethod: 1 -- TCA-ABP/MSA, 2 -- TCA-ABP/SPA

@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2002
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ABPDecoder", "ABPDecoder\ABPDecoder.vcxproj", "{EB9B0A48-0F01-446B-A63A-588EC5F8DB0F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EB9B0A48-0F01-446B-A63A-588EC5F8DB0F}.Debug|x64.ActiveCfg = Debug|x64
+		{EB9B0A48-0F01-446B-A63A-588EC5F8DB0F}.Debug|x64.Build.0 = Debug|x64
+		{EB9B0A48-0F01-446B-A63A-588EC5F8DB0F}.Debug|x86.ActiveCfg = Debug|Win32
+		{EB9B0A48-0F01-446B-A63A-588EC5F8DB0F}.Debug|x86.Build.0 = Debug|Win32
+		{EB9B0A48-0F01-446B-A63A-588EC5F8DB0F}.Release|x64.ActiveCfg = Release|x64
+		{EB9B0A48-0F01-446B-A63A-588EC5F8DB0F}.Release|x64.Build.0 = Release|x64
+		{EB9B0A48-0F01-446B-A63A-588EC5F8DB0F}.Release|x86.ActiveCfg = Release|Win32
+		{EB9B0A48-0F01-446B-A63A-588EC5F8DB0F}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6DB1B820-2A98-4083-98F0-45DABB99B856}
+	EndGlobalSection
+EndGlobal
