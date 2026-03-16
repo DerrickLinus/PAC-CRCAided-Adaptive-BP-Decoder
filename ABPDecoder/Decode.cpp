@@ -1,14 +1,14 @@
 #include "define.h"
-#include<algorithm>
-#include<numeric>
-#include<iostream>
+#include <algorithm>
+#include <numeric>
+// #include <iostream>
 using namespace std;
 /*
 Check the code if it satisfies the parity-check matrix
 return 0:		is satisfied
 return 1:		not satisfied
 */
-int CheckCode(const int *codeseq, int M, struct IterStruct *Iter)
+int CheckCode(const int *codeseq, int M, struct IterStruct *Iter) // M = ADP->M + ADP->CRC_len
 {
 	int i = 0;
 	int j = 0;
@@ -35,30 +35,38 @@ int CheckCode(const int *codeseq, int M, struct IterStruct *Iter)
 /*
 Sort the abs |double values| by descending order
 */
-void SortLLR(const double *bitsoft, int N, int *ReliabilityOrder)
-{
-	int i, j;
-	double temp_float;
-	int temp_int;
-	double *llr_temp = new double[N];
-	memcpy(llr_temp, bitsoft, sizeof(double)*N);
-	for (i = 0; i < N; i++) ReliabilityOrder[i] = i;
-	for (i = 0; i < N - 1; i++)
-	{
-		for (j = 0; j < N - 1 - i; j++)
-		{
-			if (fabs(llr_temp[j]) < fabs(llr_temp[j + 1]))
-			{
-				temp_float = llr_temp[j];
-				llr_temp[j] = llr_temp[j + 1];
-				llr_temp[j + 1] = temp_float;
-				temp_int = ReliabilityOrder[j];
-				ReliabilityOrder[j] = ReliabilityOrder[j + 1];
-				ReliabilityOrder[j + 1] = temp_int;
-			}
-		}
-	}
-	delete[] llr_temp;
+//void SortLLR(const double *bitsoft, int N, int *ReliabilityOrder) // 源代码版本，复杂度为O(N^2)
+//{
+//	int i, j;
+//	double temp_float;
+//	int temp_int;
+//	double *llr_temp = new double[N];
+//	memcpy(llr_temp, bitsoft, sizeof(double)*N);
+//	for (i = 0; i < N; i++) ReliabilityOrder[i] = i;
+//	for (i = 0; i < N - 1; i++)
+//	{
+//		for (j = 0; j < N - 1 - i; j++)
+//		{
+//			if (fabs(llr_temp[j]) < fabs(llr_temp[j + 1]))
+//			{
+//				temp_float = llr_temp[j];
+//				llr_temp[j] = llr_temp[j + 1];
+//				llr_temp[j + 1] = temp_float;
+//				temp_int = ReliabilityOrder[j];
+//				ReliabilityOrder[j] = ReliabilityOrder[j + 1];
+//				ReliabilityOrder[j + 1] = temp_int;
+//			}
+//		}
+//	}
+//	delete[] llr_temp;
+//}
+void SortLLR(const double* bitsoft, int N, int* ReliabilityOrder) // 性能优化版，复杂度为O(NlogN)
+{ 
+	for (int i = 0; i < N; i++) ReliabilityOrder[i] = i;
+	std::sort(ReliabilityOrder, ReliabilityOrder + N,
+		[bitsoft](int a, int b) {
+			return fabs(bitsoft[a]) > fabs(bitsoft[b]);
+		});
 }
 
 double FaiFunction(double x)
@@ -442,6 +450,11 @@ void ideal_ABP_MSA(double *bitsoft, double *y, int **H, int N, int M, int *outse
 	int *Interchange_Buf;
 	double R;
 	double minSED = MAXVALUE;//minimum squared Euclidean distance
+	double min_val = 0.0;
+	int vn_index = 0;
+	bool is_reliable = false;
+	double alpha_factor = 1.0;
+	double beta_factor = 0.0;
 	ADP->check_flag = 0;
 	ADP->IterTime = 0;
 
@@ -517,6 +530,7 @@ void ideal_ABP_MSA(double *bitsoft, double *y, int **H, int N, int M, int *outse
 				memcpy(ReliabilityOrder + N - ADP->Interchange, Interchange_Buf, sizeof(int)*ADP->Interchange);
 				
 			}
+			
 			OSD_GE_H(H, adaptiveH, M, N, &K, ReliabilityOrder, ReliabilityOrderGE, InterGE);
 			if (ADP->Deg2 == 1)
 			{
@@ -529,7 +543,9 @@ void ideal_ABP_MSA(double *bitsoft, double *y, int **H, int N, int M, int *outse
 					}
 				}
 			}
+			
 			for (i = 0; i < N; i++) adaptive_p1[i] = p1[ReliabilityOrderGE[i]];
+			
 			InitialIter(M, N, adaptiveH, Iter);
 			
 			//for(int i=0;i<N;i++)
@@ -573,22 +589,44 @@ void ideal_ABP_MSA(double *bitsoft, double *y, int **H, int N, int M, int *outse
 				}
 				for (i = 0; i < Iter->CNdegree[m]; i++)
 				{
-					if (i == pos)
+					min_val = (i == pos) ? min2 : min1;
+					vn_index = Iter->CNindex[m][i];
+					is_reliable = (vn_index < (N - M));
+					alpha_factor = is_reliable ? ADP->alpha_fixed : ADP->alpha_fixed2;
+					beta_factor = is_reliable ? ADP->beta_fixed : ADP->beta_fixed2;
+
+					// ms_type: 0-标准MS, 1-NMS, 2-OMS, 3-NMS+OMS
+					if (ADP->ms_type == 0)
 					{
-						R = min2;
+						// 标准Min-Sum
+						R = min_val;
+					}
+					else if (ADP->ms_type == 1)
+					{
+						// NMS: R = alpha * min
+						R = alpha_factor * min_val;
+					}
+					else if (ADP->ms_type == 2)
+					{
+						// OMS: R = max(min - beta, 0)
+						R = max(min_val - beta_factor, 0.0);
 					}
 					else
 					{
-						R = min1;
+						// NMS + OMS: R = alpha * max(min - beta, 0)
+						R = alpha_factor * max(min_val - beta_factor, 0.0);
 					}
+
 					R *= (sign * alpha[i]);
 					Iter->pLLR[Iter->CNindex[m][i]] += R;
 				}
 			}
+
 			// recover the LLRs' orders
 			for (i = 0; i < N; i++)
 				adaptive_p1[ReliabilityOrderGE[i]] = Iter->pLLR[i];
 			memcpy(Iter->pLLR, adaptive_p1, sizeof(double)*N);
+
 			// hard decision
 			for (i = 0; i < N; i++)
 			{
@@ -679,7 +717,7 @@ void ideal_ABP_MSA(double *bitsoft, double *y, int **H, int N, int M, int *outse
 /*
 ABP/MSA
 */
-void ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
+void ABP_MSA(double snr, double* bitsoft, double* y, int** H, int N, int M, int* outseq,
 	struct IterStruct* Iter, struct IterStruct* Tanner, struct ADPStruct* ADP)
 {
 	int i = 0;
@@ -705,23 +743,41 @@ void ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
 	int* Interchange_Buf;
 	double R;
 	double minSED = MAXVALUE;//minimum squared Euclidean distance
+	double min_val = 0.0;
+	int vn_index = 0;
+	bool is_reliable = false;
+	double alpha_factor = 1.0;
+	double beta_factor = 0.0;
+	/*double alpha_factor = ADP->alpha_factor;
+	double beta_factor = ADP->beta_factor;*/
 	ADP->check_flag = 0;
 	ADP->IterTime = 0;
+
+	// 1. 定义线性衰减参数
+	double damp_start = 0.12;
+	double damp_end = 0.04;
+	double current_damping = 1;
+
+	//saveMatrixToFile(H, M+ADP->CRC_len - ADP->CRC_len_for_ABP, N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\H_128.txt");
 
 	//hard decision
 	codeword = new int[N];
 	for (i = 0; i < N; i++)
 	{
-		if (*(bitsoft + i) > 0)
+		if (bitsoft[i] > 0)
 		{
-			*(codeword + i) = 0;
+			codeword[i] = 0;
 		}
 		else
 		{
-			*(codeword + i) = 1;
+			codeword[i] = 1;
 		}
 	}
-	if (CheckCode(codeword, M+ADP->CRC_len-ADP->CRC_len_for_ABP, Tanner) == 0)
+	//saveArrayToFile(codeword, ADP->N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\codeword_128.txt");
+	
+	int check_errors;
+	check_errors = CheckCode(codeword, M + ADP->CRC_len - ADP->CRC_len_for_ABP, Tanner);
+	if (CheckCode(codeword, M+ADP->CRC_len-ADP->CRC_len_for_ABP, Tanner) == 0) // M = ADP->M+ADP->CRC_len_for_ABP
 	//if (CheckCode(codeword, M , Tanner) == 0)
 	{
 		if (ADP->PAC_code->system == 0) {
@@ -738,6 +794,7 @@ void ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
 		return;
 		//if (CRC_DEC(outseq, ADP->CRC_len, ADP->K) == 0)
 	}
+
 	y_H = new int[N];
 	alpha = new int[N];
 	p1 = new double[N];
@@ -751,6 +808,9 @@ void ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
 
 	memcpy(y_H, codeword, sizeof(int) * N);
 	double Min_ML_metric = 10000.0;
+	double prev_metric = 1e10;	// 3.14修改
+	int stall_count = 0;		// 3.14修改
+
 	for (outer_it = 0; outer_it < ADP->N2; outer_it++)
 	{
 		memcpy(Iter->pLLR, bitsoft, sizeof(double) * N);
@@ -762,6 +822,8 @@ void ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
 
 			// adaptive the PCM
 			SortLLR(p1, N, ReliabilityOrder);
+			//saveArrayToFile(ReliabilityOrder, ADP->N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\ReliabilityOrder_128.txt");
+
 			if (k == 0 && outer_it > 0)	// outer iterations, various grouping
 			{
 				//固定可靠比特，逐次变换不可靠比特
@@ -773,20 +835,27 @@ void ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
 				memcpy(ReliabilityOrder + ADP->Interchange, ReliabilityOrder, sizeof(int)*(N - M + (outer_it - 1)*ADP->Interchange));
 				memcpy(ReliabilityOrder, Interchange_Buf, sizeof(int)*ADP->Interchange);// 交换的位置放到最左边(最可靠)，防止GE过程因为列交换而被选到
 				*/
+				
 				//固定不可靠比特，逐次变换可靠比特
-
 				for (i = 0; i < ADP->Interchange; i++)
 				{
 					Interchange_Buf[i] = ReliabilityOrder[N - M - outer_it * ADP->Interchange + i];
 				}
 				memcpy(ReliabilityOrder + N - M - outer_it * ADP->Interchange, ReliabilityOrder + N - M - (outer_it - 1) * ADP->Interchange, sizeof(int) * (M + (outer_it - 1) * ADP->Interchange));
 				memcpy(ReliabilityOrder + N - ADP->Interchange, Interchange_Buf, sizeof(int) * ADP->Interchange);
-
+				//saveArrayToFile(ReliabilityOrder, ADP->N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\ReliabilityOrder_Interchange_128.txt");
 			}
+			
 			OSD_GE_H(H, adaptiveH, M, N, &K, ReliabilityOrder, ReliabilityOrderGE, InterGE);
+			//saveMatrixToFile(adaptiveH, M, N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\adaptiveH_128.txt");
+			//saveArrayToFile(ReliabilityOrderGE, ADP->N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\ReliabilityOrderGE_128.txt");
+			//saveArrayToFile(InterGE, ADP->N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\InterGE_128.txt");
+			
 			if (ADP->Deg2 == 1)
 			{
+				//saveArrayToFile(ADP->Deg2RandSeq, M, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\Deg2RandSeq_beforePermuted_128.txt");
 				Permute(ADP->Deg2RandSeq, M);
+				//saveArrayToFile(ADP->Deg2RandSeq, M, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\Deg2RandSeq_Permuted_128.txt");
 				for (i = 0; i < M - 1; i++)
 				{
 					for (j = 0; j < N; j++)
@@ -795,7 +864,12 @@ void ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
 					}
 				}
 			}
+			//saveMatrixToFile(adaptiveH, M, N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\adaptiveH_Deg2_128.txt");
+			
+			// 根据adaptiveH的列顺序（即置换后的顺序）调整LLR顺序
 			for (i = 0; i < N; i++) adaptive_p1[i] = p1[ReliabilityOrderGE[i]];
+			
+			// 基于adaptiveH建立图连接
 			InitialIter(M, N, adaptiveH, Iter);
 
 			//for(int i=0;i<N;i++)
@@ -803,25 +877,29 @@ void ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
 			//int minposition = min_element(adaptive_p1, adaptive_p1 + N) - adaptive_p1;
 			//printf("%d ", minposition);
 
+			// 校验节点更新
 			for (m = 0; m < M; m++)
 			{
 				sign = 1;
-				pos = -1;
-				min1 = MAXVALUE;
-				min2 = MAXVALUE;
+				pos = -1;			
+				min1 = MAXVALUE;	// 最小值
+				min2 = MAXVALUE;	// 次小值
 
+				//double tanh_product = 1.0;  // Sum-Product: tanh乘积
+
+				// 计算最小值和次小值以及符号部分
 				for (i = 0; i < Iter->CNdegree[m]; i++)
 				{
 					tempd = adaptive_p1[Iter->CNindex[m][i]];
 					if (tempd < 0)
 					{
-						*(alpha + i) = -1;
+						alpha[i] = -1;
 						sign = 0 - sign;
 						tempd = 0 - tempd;
 					}
 					else
 					{
-						*(alpha + i) = 1;
+						alpha[i] = 1;
 					}
 					if (tempd < min1)
 					{
@@ -836,54 +914,146 @@ void ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
 							min2 = tempd;
 						}
 					}
+
+					//// Sum-Product: 计算tanh(|L|/2)的乘积
+					//double tanh_val = tanh(tempd / 2.0);
+					//*(alpha + Iter->CNdegree[m] + i) = tanh_val;  // 存储每个节点的tanh值，复用alpha数组后半部分
+					//tanh_product *= tanh_val;
 				}
+				// 计算幅度部分并组合符号
 				for (i = 0; i < Iter->CNdegree[m]; i++)
 				{
-					if (i == pos)
+					min_val = (i == pos) ? min2 : min1;
+					vn_index = Iter->CNindex[m][i];
+					is_reliable = (vn_index < (N - M));
+					alpha_factor = is_reliable ? ADP->alpha_fixed : ADP->alpha_fixed2;
+					beta_factor = is_reliable ? ADP->beta_fixed : ADP->beta_fixed2;
+
+					// ms_type: 0-标准MS, 1-NMS, 2-OMS, 3-NMS+OMS
+					if (ADP->ms_type == 0)
 					{
-						R = min2;
+						// 标准Min-Sum
+						R = min_val;
+					}
+					else if (ADP->ms_type == 1)
+					{
+						// NMS: R = alpha * min
+						R = alpha_factor * min_val;
+					}
+					else if (ADP->ms_type == 2)
+					{
+						// OMS: R = max(min - beta, 0)
+						R = max(min_val - beta_factor, 0.0);
 					}
 					else
 					{
-						R = min1;
+						// NMS + OMS: R = alpha * max(min - beta, 0)
+						R = alpha_factor * max(min_val - beta_factor, 0.0);
 					}
 					R *= (sign * alpha[i]);
-					Iter->pLLR[Iter->CNindex[m][i]] += R;
+					Iter->pLLR[Iter->CNindex[m][i]] += R; // 实际是在计算 Sum of C2V（所有连接到该变量节点的校验节点传来的消息之和）
+
+					// 标准和积 (SPA) 校验节点更新: R = 2 * atanh( Π tanh(L/2) )
+					//{
+					//	double prod = 1.0;
+					//	for (j = 0; j < Iter->CNdegree[m]; j++)
+					//	{
+					//		if (j == i) continue;
+					//		tempd = adaptive_p1[Iter->CNindex[m][j]];
+					//		prod *= tanh(0.5 * tempd);
+					//	}
+					//	// 避免 atanh 数值溢出
+					//	if (prod > 0.999999) prod = 0.999999;
+					//	else if (prod < -0.999999) prod = -0.999999;
+					//	R = 2.0 * atanh(prod);
+					//}
+					//Iter->pLLR[Iter->CNindex[m][i]] += R;
+
+					//// Sum-Product: R = 2 * atanh(乘积 / 本节点的tanh值) * 符号
+					//double tanh_i = *(alpha + Iter->CNdegree[m] + i);
+					//double product_exclude_i = (fabs(tanh_i) > 1e-10) ? (tanh_product / tanh_i) : tanh_product;
+					//// 限制product_exclude_i的范围，避免atanh溢出
+					//if (product_exclude_i > 0.9999999) product_exclude_i = 0.9999999;
+					//if (product_exclude_i < -0.9999999) product_exclude_i = -0.9999999;
+					//R = 2.0 * atanh(product_exclude_i);
+					//R *= (sign * alpha[i]);
+					//Iter->pLLR[Iter->CNindex[m][i]] += R;
+
 				}
 			}
-			// recover the LLRs' orders
+
+			// recover the LLRs' orders 恢复原始LLR顺序（因为后面要加bitsoft或p1，这两个对应原始的码字顺序）
 			for (i = 0; i < N; i++)
 				adaptive_p1[ReliabilityOrderGE[i]] = Iter->pLLR[i];
 			memcpy(Iter->pLLR, adaptive_p1, sizeof(double) * N);
-			// hard decision
+
+			// 变量节点更新及硬判决（这里的变量节点更新没有排除目标校验节点的信息）
+			// 2. 计算当前迭代 k 的动态阻尼因子
+			// k 是当前内层迭代次数 (0 到 ADP->N1 - 1)
+			// 信噪比差异化线性衰减阻尼因子
+			//if (snr < 2.5){
+			//	current_damping = 0.08;
+			//}
+			//else {
+			//	if (ADP->N1 > 1) {
+			//		current_damping = damp_start - ((double)k / (double)(ADP->N1 - 1)) * (damp_start - damp_end);
+			//	}
+			//	else {
+			//		current_damping = damp_start; // 防止除以0
+			//	}
+			//}
+			// 统一线性衰减阻尼因子（不区分信噪比）
+			//if (ADP->N1 > 1) {
+			//	current_damping = damp_start - ((double)k / (double)(ADP->N1 - 1)) * (damp_start - damp_end);
+			//}
+			//else {
+			//	current_damping = damp_start; // 防止除以0
+			//}
 			for (i = 0; i < N; i++)
 			{
 				if (ADP->use_channel_LLR)
-					Iter->pLLR[i] = Iter->pLLR[i] * ADP->damping_factor + bitsoft[i];
+					// 使用初始信道LLR（一般BP做法）	
+					// Iter->pLLR[i] = Iter->pLLR[i] * ADP->damping_factor + bitsoft[i]; // 源代码这里应该有问题，使用初始信道LLR时，不能使用阻尼因子，否则会无法收敛
+					Iter->pLLR[i] = Iter->pLLR[i] + bitsoft[i];	// dlh修正
 				else
-					Iter->pLLR[i] = Iter->pLLR[i] * ADP->damping_factor + p1[i];
+					// 使用上次迭代得到的LLR						
+					Iter->pLLR[i] = Iter->pLLR[i] * ADP->damping_factor + p1[i]; // 固定阻尼因子
+					//Iter->pLLR[i] = Iter->pLLR[i] * current_damping + p1[i];	   // 线性衰减阻尼因子
 
 				if (Iter->pLLR[i] > 0)
 				{
-					*(codeword + i) = 0;
+					codeword[i] = 0;
 				}
 				else
 				{
-					*(codeword + i) = 1;
+					codeword[i] = 1;
 				}
 			}
 
+			// 计算ML度量
 			double metric = 0;
-
 			for (int i = 0; i < N; i++)
 			{
 				metric += (fabs(bitsoft[i]) * (y_H[i] ^ codeword[i]));
-			}
+			} // dlh test 注释掉
 
-			if (CheckCode(codeword, M + ADP->CRC_len - ADP->CRC_len_for_ABP, Tanner) == 0 && metric < Min_ML_metric)
+			// 收敛速率检测（与校验结果无关，每次迭代都追踪）- 3.14修改
+			/*double relative_change = (prev_metric > 1e-10) ?
+				fabs(prev_metric - metric) / prev_metric : 1.0;
+			if (relative_change < ADP->convergence_epsilon) {
+				stall_count++;
+			}
+			else {
+				stall_count = 0;
+			}
+			prev_metric = metric;*/
+
+			// 码字校验+ML阈值判断
+			if (CheckCode(codeword, M + ADP->CRC_len - ADP->CRC_len_for_ABP, Tanner) == 0 && metric < Min_ML_metric) // dlh test 注释掉
+			//if (CheckCode(codeword, M + ADP->CRC_len - ADP->CRC_len_for_ABP, Tanner) == 0) // dlh test
 			//if (CheckCode(codeword, M, Tanner) == 0)
 			{
-				Min_ML_metric = metric;
+				Min_ML_metric = metric; // dlh test 注释掉
 				//Recover_Info(codeword, outseq, ADP);
 				if (ADP->PAC_code->system == 0) {
 					Recover_Info(codeword, outseq, ADP);
@@ -894,11 +1064,18 @@ void ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
 					for (int i = 0; i < ADP->K; i++)
 						outseq[i] = codeword[ADP->A[i]];
 				}
+				
 				//if (CRC_DEC(outseq, ADP->CRC_len, ADP->K) == 0 && JudgeCodeword(y_H, codeword, y, N, ADP->ML_metric_th) == 1)
-				if (metric <= ADP->ML_metric_th) {
+
+				if (metric <= ADP->ML_metric_th) { // 3.14修改，注释掉
+				//if (metric <= ADP->ML_metric_th || stall_count >= ADP->convergence_window) { // 3.14修改，添加收敛速率检测的自动停机条件
 					ADP->check_flag = 1;
 					break;
-				}
+				} // dlh test 注释掉
+
+				//ADP->check_flag = 1; // dlh test
+				//break;				 // dlh test
+
 			}
 			/*
 			if (ADP->check_flag == 1) {
@@ -910,25 +1087,26 @@ void ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
 				if (count == ADP->N)
 					ADP->check_flag = 0;
 			}*/
-		}
+		} // 内循环结束
 
 		// Auto stop
 		if (ADP->check_flag == 1)
 		{
 			break;
 		}
-	}
+	} // 外循环结束
+
 	if (ADP->check_flag == 0)
 	{
 		for (i = 0; i < N; i++)
 		{
-			if (*(bitsoft + i) > 0)
+			if (bitsoft[i] > 0)
 			{
-				*(codeword + i) = 0;
+				codeword[i] = 0;
 			}
 			else
 			{
-				*(codeword + i) = 1;
+				codeword[i] = 1;
 			}
 		}
 		//Recover_Info(codeword, outseq, ADP);
@@ -940,6 +1118,7 @@ void ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
 				outseq[i] = codeword[ADP->A[i]];
 		}
 	}
+
 	delete[] y_H;
 	delete[] alpha;
 	delete[] p1;
@@ -1826,19 +2005,23 @@ void Decode_PLVA_SC(double* LLR, int N, int K, int L, int** GMatrix, int* A, int
 	delete[] Inter_result;
 }
 
-void Decode(double* bitsoft, double* y, int* result, struct ADPStruct* ADP)
+void Decode(double snr, double* bitsoft, double* y, int* result, struct ADPStruct* ADP)
 {
-	srand(731);
+	// C标准库 rand() 当前正在使用
+	srand(731); // srand()设置的种子是进程级别的全局变量，会影响后续的rand()调用，每帧重置
+
+	// C++11 default_random_engine 在第1035-1036行被注释
 	default_random_engine rng;
 	uniform_real_distribution<double> URD(0, 1);
 	rng.seed(173);
+
 	if (ADP->DecodingMethod == 1)
 	{
 		ideal_ABP_MSA(bitsoft, y, ADP->Joint_check_matrix, ADP->N, ADP->M+ADP->CRC_len_for_ABP, result, ADP->IterDec, ADP->Tanner, ADP);
 	}
 	else if (ADP->DecodingMethod == 2)
 	{
-		ABP_MSA(bitsoft, y, ADP->Joint_check_matrix, ADP->N, ADP->M + ADP->CRC_len_for_ABP, result, ADP->IterDec, ADP->Tanner, ADP);
+		ABP_MSA(snr, bitsoft, y, ADP->Joint_check_matrix, ADP->N, ADP->M + ADP->CRC_len_for_ABP, result, ADP->IterDec, ADP->Tanner, ADP);
 	}
 	else if (ADP->DecodingMethod == 3)
 	{

@@ -140,6 +140,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="CF.Polar.128.64.txt" />
+    <Text Include="Performance.txt" />
+    <Text Include="Performance_1_1.txt" />
+    <Text Include="Performance_1_2.txt" />
     <Text Include="Profile.txt" />
   </ItemGroup>
   <ItemGroup>

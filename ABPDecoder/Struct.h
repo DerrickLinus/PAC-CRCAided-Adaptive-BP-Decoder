@@ -60,7 +60,8 @@ struct IterStruct
 };
 
 
-struct PACStruct {
+struct PACStruct 
+{
 	//Impulse response
 	int IR_size = 7;
 	int IR[7] = { 1,0,1,1,0,1,1 };
@@ -94,10 +95,10 @@ struct ADPStruct
 	int **P;					// procoding matrix, make the G to a systematic form
 	
 	int puncture;				// punctured bits
-	int* PunctureIndex;			//index for puncture 
+	int* PunctureIndex;			// index for puncture 
 	
-	int shorten = 0;				// shortened bits
-	int* ShortenIndex;			//index for puncture 
+	int shorten;				// shortened bits
+	int* ShortenIndex;			// index for puncture 
 
 	int *A;						// the active positions, for Polar
 	int N1;						// inner iteration
@@ -127,6 +128,19 @@ struct ADPStruct
 	int SG_Scheme = 2;
 	double ReliableFactor = 1;
 
+	// Neural Min-Sum 参数
+	double alpha_fixed;				// NMS缩放因子，1.0为标准MS
+	double beta_fixed;				// OMS偏移量，0.0为标准MS
+	double alpha_fixed2;			// NMS缩放因子(不可靠比特组)
+	double beta_fixed2;				// OMS偏移量(不可靠比特组)
+	int ms_type;					// 0:标准MS, 1:NMS, 2:OMS, 3:NMS+OMS
+
+	double alpha_factor;
+	double beta_factor;
+
+	// 收敛速率早停参数
+	double convergence_epsilon;		// 相对变化阈值，metric变化小于此比例视为停滞 - 3.14修改
+	int convergence_window;			// 连续停滞次数阈值，达到则触发早停 - 3.14修改
 };
 
 

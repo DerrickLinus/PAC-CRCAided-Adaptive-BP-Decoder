@@ -31,6 +31,13 @@ void ReadProfile(struct ADPStruct *ADP, struct SPStruct *SP)
 	fscanf(profile, "%*s%*s%lf", &(ADP->ML_metric_th));
 	fscanf(profile, "%*s%*s%d", &(ADP->PAC_code->L));
 	fscanf(profile, "%*s%*s%d", &(ADP->PAC_code->system));
+	fscanf(profile, "%*s%*s%d", &(ADP->ms_type));
+	fscanf(profile, "%*s%*s%lf", &(ADP->alpha_fixed));
+	fscanf(profile, "%*s%*s%lf", &(ADP->beta_fixed));
+	fscanf(profile, "%*s%*s%lf", &(ADP->alpha_fixed2));
+	fscanf(profile, "%*s%*s%lf", &(ADP->beta_fixed2));
+	fscanf(profile, "%*s%*s%lf", &(ADP->convergence_epsilon));
+	fscanf(profile, "%*s%*s%d", &(ADP->convergence_window));
 
 	fscanf(profile, "%*s%*s%d", &(SP->SNRtype));
 	fscanf(profile, "%*s%*s%lf", &(SP->startSNR));
@@ -44,16 +51,6 @@ void ReadProfile(struct ADPStruct *ADP, struct SPStruct *SP)
 	fclose(profile);
 }
 
-//void printMatrix(int** G, int M, int N)
-//{
-//	for (int i = 0; i < M; i++)
-//	{
-//		for (int j = 0; j < N; j++)
-//			printf("%d ", G[i][j]);
-//		printf("\n");
-//	}
-//} // dlh added for debug
-
 void ReadCodefile(struct ADPStruct *ADP)
 {
 	int i, j;
@@ -66,12 +63,11 @@ void ReadCodefile(struct ADPStruct *ADP)
 		exit(0);
 	}
 
-	// read the generator matrix G
+	// read the generator matrix G=F⊗n
 	ADP->G_K = (ADP->EncodeAdd0 ? ADP->N : ADP->K);
 	ADP->G = new int*[ADP->G_K];
 	for (i = 0; i < ADP->G_K; i++)
 		ADP->G[i] = new int[ADP->N];
-
 	fscanf(codefile, "%*s%*s%*s");
 	for (i = 0; i < ADP->G_K; i++)
 	{
@@ -80,8 +76,24 @@ void ReadCodefile(struct ADPStruct *ADP)
 			fscanf(codefile, "%d", &(ADP->G[i][j]));
 		}
 	}
-	
-	//printMatrix(ADP->G, ADP->G_K, ADP->N); // dlh added for debug
+
+	// 采用函数生成 the generator matrix G=F⊗n (for test)
+	//int n = 7;
+	//ADP->G_K = (ADP->EncodeAdd0 ? ADP->N : ADP->K);
+	//ADP->G = new int*[ADP->G_K];
+	//for (i = 0; i < ADP->G_K; i++)
+	//	ADP->G[i] = new int[ADP->N];
+	//ADP->G = generate_polar_matrix(n);
+	//cout << "Matrix P_n:" << endl;
+	////printf("Matrix P_n:\n");
+	//for (int i = 0; i < ADP->N; i++) {
+	//	for (int j = 0; j < ADP->N; j++) {
+	//		cout << ADP->G[i][j] << " ";
+	//		//printf("%d ", ADP->G[i][j]);
+	//	}
+	//	cout << endl;
+	//	//printf("\n");
+	//}
 
 	// read the parity-check matrix H
 	ADP->M = ADP->N - ADP->K;
@@ -130,28 +142,40 @@ void MallocIter(int M, int N, struct IterStruct *Iter)
 }
 
 // 初始化迭代译码所需参数，M,N,H均为比特级
-void InitialIter(int M, int N, int **H, struct IterStruct *Iter)
+//void InitialIter(int M, int N, int **H, struct IterStruct *Iter) // 源代码，每次内层迭代都需要扫描两遍H矩阵
+//{
+//	for (int i = 0; i < M; i++) Iter->CNdegree[i] = 0;
+//	for (int i = 0; i < M; i++)
+//	{
+//		for (int j = 0; j < N; j++)
+//		{
+//			if (H[i][j] == 1)
+//				Iter->CNdegree[i] += 1;
+//		}
+//	}
+//
+//	for (int i = 0; i < M; i++)
+//	{
+//		int k = 0;
+//		for (int j = 0; j < N; j++)
+//		{
+//			if (H[i][j] == 1)
+//				Iter->CNindex[i][k++] = j;
+//		}
+//	}
+//}
+void InitialIter(int M, int N, int** H, struct IterStruct* Iter) // 性能优化版，将两遍扫描合并为一遍扫描
 {
-	for (int i = 0; i < M; i++) Iter->CNdegree[i] = 0;
-	for (int i = 0; i < M; i++)
-	{
-		for (int j = 0; j < N; j++)
-		{
-			if (H[i][j] == 1)
-				Iter->CNdegree[i] += 1;
-		}
-	}
-
-	for (int i = 0; i < M; i++)
-	{
+	for (int i = 0; i < M; i++) {
 		int k = 0;
-		for (int j = 0; j < N; j++)
-		{
+		for (int j = 0; j < N; j++) {
 			if (H[i][j] == 1)
 				Iter->CNindex[i][k++] = j;
 		}
+		Iter->CNdegree[i] = k;
 	}
 }
+
 // calculate Matrix inverse
 void Calculate__Inverse_Matrix(int **T, int **T_1,int N) {
 	//Augmented matrix
@@ -250,9 +274,10 @@ void Initial(struct ADPStruct *ADP, struct SPStruct *SP)
 	ReadProfile(ADP, SP);
 	ReadCodefile(ADP);
 	
-	//ADP->rate = (double)(ADP->K -ADP->CRC_len) / (double)(ADP->N -ADP->puncture-ADP->shorten);
-	ADP->rate = (double)(ADP->K) / (double)(ADP->N - ADP->puncture - ADP->shorten);
+	//ADP->rate = (double)(ADP->K -ADP->CRC_len) / (double)(ADP->N -ADP->puncture-ADP->shorten);	// 有效信息码率R_net（从系统层有效信息传输效率视角）
+	ADP->rate = (double)(ADP->K) / (double)(ADP->N - ADP->puncture - ADP->shorten);			// 编码码率R（从通信理论/5G标准/编码器视角，仿真用这个）
 	//ADP->rate = 0.8;
+	
 	//上三角矩阵T
 	ADP->PAC_code->T = new int*[ADP->N];
 	for (int i = 0; i < ADP->N; i++){
@@ -260,10 +285,17 @@ void Initial(struct ADPStruct *ADP, struct SPStruct *SP)
 		memset(ADP->PAC_code->T[i], 0, sizeof(int)* ADP->G_K);
 	}
 	for (int i = 0; i < ADP->N; i++) {
-		for (int j = i; j < min(int(i + ADP->PAC_code->IR_size), ADP->N); j++) {
+		for (int j = i; j < min(i + ADP->PAC_code->IR_size, ADP->N); j++) {
 			ADP->PAC_code->T[i][j] = ADP->PAC_code->IR[j - i];	
 		}
 	}
+	/*printf("Matrix T:\n");
+	for (int i = 0; i < ADP->N; i++) {
+		for (int j = 0; j < ADP->N; j++) {
+			printf("%d ", ADP->PAC_code->T[i][j]);
+		}
+		printf("\n");
+	}*/
 
 	//矩阵T的逆矩阵
 	//T^-1
@@ -345,6 +377,7 @@ void Initial(struct ADPStruct *ADP, struct SPStruct *SP)
 		}
 	}
 	fclose(codefile);
+
 	if (ADP->codeMode == 0) {
 		sort(infoIndex.begin() + (ADP->M - ADP->puncture - ADP->shorten), infoIndex.end());
 		for (int i = 0; i < ADP->K; i++) {
@@ -361,7 +394,7 @@ void Initial(struct ADPStruct *ADP, struct SPStruct *SP)
 			//printf("%d ", ADP->A[i]);
 		}
 	}
-	
+	//saveArrayToFile(ADP->A, ADP->K, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\Infobits_128.txt");
 	
 	//FILE* codefile;
 	/*
@@ -457,6 +490,15 @@ void Initial(struct ADPStruct *ADP, struct SPStruct *SP)
 		if (H_index == ADP->M)
 			break;
 	}
+	//saveMatrixToFile(ADP->PAC_code->H, ADP->M, ADP->N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\PAC_H_128.txt");
+	//cout << "H_I:" << endl;
+	////printf("H_I:\n");
+	//for(int i=0;i<ADP->M;i++){
+	//	for (int j = 0; j < ADP->N; j++) {
+	//		cout << ADP->PAC_code->H[i][j]<<" ";
+	//	}
+	//	cout << endl;
+	//}
 
 	// ABP Initial
 	if (ADP->N2 > 1 && ADP->Interchange * (ADP->N2 - 1) > ADP->K)
@@ -469,13 +511,16 @@ void Initial(struct ADPStruct *ADP, struct SPStruct *SP)
 	for (int i = 0; i < ADP->CRC_len; i++)
 		ADP->H_crc[i] = new int[ADP->K];
 	CRC_H_initial(ADP->H_crc, ADP->CRC_len, ADP->K - ADP->CRC_len);
-
+	//saveMatrixToFile(ADP->H_crc, ADP->CRC_len, ADP->K, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\H_crc_128.txt");
+	//cout << "H_crc:" << endl;
+	////printf("H_crc:\n");
 	//for (int i = 0; i < ADP->CRC_len; i++) {
 	//	for (int j = 0; j < ADP->K; j++) {
 	//		cout << ADP->H_crc[i][j]<<" ";
 	//	}
 	//	cout << endl;
 	//}
+
 	ADP->H_crc_add0 = new int* [ADP->CRC_len];
 	for (int i = 0; i < ADP->CRC_len; i++)
 	{
@@ -495,7 +540,9 @@ void Initial(struct ADPStruct *ADP, struct SPStruct *SP)
 			ADP->H_crc_add0[j][ADP->A[i]] = ADP->H_crc[j][i];
 		}
 	}
-
+	//saveMatrixToFile(ADP->H_crc_add0, ADP->CRC_len, ADP->N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\H_crc_add0_128.txt");
+	//cout << "H_crc_add0:" << endl;
+	//printf("H_crc_add0:\n");
 	//for (int i = 0; i < ADP->CRC_len; i++) {
 	//	for (int j = 0; j < ADP->N; j++) {
 	//		cout << ADP->H_crc_add0[i][j]<<" ";
@@ -509,25 +556,29 @@ void Initial(struct ADPStruct *ADP, struct SPStruct *SP)
 		memset(ADP->Joint_check_matrix[i], 0, sizeof(int)* ADP->N);
 	}
 	Joint_H_Initial(ADP);
-
-	//for (int i = 0; i < ADP->M+ADP->CRC_len; i++) {
-	//	for (int j = 0; j < ADP->N; j++) {
-	//		cout << ADP->Joint_check_matrix[i][j]<<" ";
-	//	}
-	//	cout << endl;
-	//}
+	//saveMatrixToFile(ADP->Joint_check_matrix, ADP->M + ADP->CRC_len, ADP->N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\Joint_H_Matrix_128.txt");
+	//cout << "Joint_check_matrix:" << endl;
+	/*printf("Joint_check_matrix:\n");
+	for (int i = 0; i < ADP->M+ADP->CRC_len; i++) {
+		for (int j = 0; j < ADP->N; j++) {
+			cout << ADP->Joint_check_matrix[i][j]<<" ";
+		}
+		cout << endl;
+	}*/
 
 	//PAC code 
 	MallocIter(ADP->M + ADP->CRC_len_for_ABP, ADP->N, ADP->IterDec);
 	MallocIter(ADP->M + ADP->CRC_len, ADP->N, ADP->Tanner);
 	InitialIter(ADP->M + ADP->CRC_len, ADP->N, ADP->Joint_check_matrix, ADP->Tanner);
+
 	// 产生随机置换序列,Deg-2使用
 	if (ADP->Deg2 == 1)
 	{
 		ADP->Deg2RandSeq = new int[ADP->M + ADP->CRC_len_for_ABP];
 		for (int i = 0; i < ADP->M + ADP->CRC_len_for_ABP; i++)
 			ADP->Deg2RandSeq[i] = i;
-		int temp;
+		// 方式一：交换10000次
+		/*int temp;
 		int pos1, pos2;
 		for (int i = 0; i < 10000; i++)
 		{
@@ -536,8 +587,16 @@ void Initial(struct ADPStruct *ADP, struct SPStruct *SP)
 			temp = ADP->Deg2RandSeq[pos1];
 			ADP->Deg2RandSeq[pos1] = ADP->Deg2RandSeq[pos2];
 			ADP->Deg2RandSeq[pos2] = temp;
+		}*/
+		// 方式二：Fisher–Yates shuffle算法
+		for (int i = ADP->M + ADP->CRC_len_for_ABP - 1; i > 0; i--)
+		{
+			int j = rand() % (i + 1);
+			swap(ADP->Deg2RandSeq[i], ADP->Deg2RandSeq[j]);
 		}
 	}
+	//saveArrayToFile(ADP->Deg2RandSeq, ADP->M + ADP->CRC_len_for_ABP, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\Deg2RandSeq_128.txt");
+	
 	for (int i = 0; i < ADP->N; i++)
 		delete[] temp[i];
 	delete[] temp;

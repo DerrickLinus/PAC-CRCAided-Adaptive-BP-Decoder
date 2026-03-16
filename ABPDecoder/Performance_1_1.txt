@@ -1,0 +1,698 @@
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, shorten = 0, puncture = 0, CRC = 24, rate = 0.750
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 2, Use CRC = 0, Use Channel LLR = 0
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Tue Dec  9 22:39:56 2025（128,96，Use CRC = 0）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    653      0    6.530e-01   0.000e+00   3.274e-01   141.475
+  1.50       1000    417      0    4.170e-01   0.000e+00   2.073e-01   98.128
+
+Program  ends    at: Tue Dec  9 22:41:25 2025
+Total running time: 0 hours 1 minutes 29 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 64, K = 64, A = 40, shorten = 0, puncture = 0, CRC = 24, rate = 40/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 2, Use CRC = 16, Use Channel LLR = 0
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Tue Dec  9 23:19:32 2025（128,64，Use CRC=16）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  2.00       1000    129      1    1.290e-01   0.000e+00   6.459e-02   48.588
+  2.50       1807    100      0    5.534e-02   0.000e+00   2.732e-02   28.134
+  3.00       3868    100      0    2.585e-02   0.000e+00   1.279e-02   18.444
+  3.50      13955    100      0    7.166e-03   0.000e+00   3.651e-03   12.132
+  4.00      72606    100      0    1.377e-03   0.000e+00   6.902e-04   8.911
+  4.50     329860    100      0    3.032e-04   0.000e+00   1.517e-04   7.395
+  5.00    1504709    100      0    6.646e-05   0.000e+00   3.325e-05   6.491
+
+Program  ends    at: Wed Dec 10 04:28:25 2025
+Total running time: 5 hours 8 minutes 53 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, rate = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 2, Use CRC = 16, Use Channel LLR = 0
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Wed Dec 10 10:00:41 2025（128,96，Use CRC=16, rate是不对的）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  2.00       1000    171      2    1.710e-01   0.000e+00   8.552e-02   52.898
+  2.50       1312    100      3    7.622e-02   0.000e+00   3.739e-02   28.286
+  3.00       4431    100      1    2.257e-02   0.000e+00   1.129e-02   15.011
+  3.50      18951    100      2    5.277e-03   0.000e+00   2.680e-03   8.985
+  4.00     122541    100      3    8.161e-04   0.000e+00   4.082e-04   6.340
+  4.50     410231     36      0    8.776e-05   0.000e+00   4.558e-05   5.101
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 2, Use CRC = 16, Use Channel LLR = 0
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Wed Dec 10 11:32:18 2025（128,96，Use CRC=16）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    112      0    1.120e-01   0.000e+00   5.546e-02   38.781
+  1.50       2746    100      1    3.642e-02   0.000e+00   1.805e-02   19.021
+  2.00      12187    100      0    8.205e-03   0.000e+00   4.092e-03   10.950
+  2.50      26112     60      0    2.298e-03   0.000e+00   1.139e-03   7.476
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 64, K = 64, A = 40, shorten = 0, puncture = 0, CRC = 24, R = 64/128, R_net = 40/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 2, Use CRC = 16, Use Channel LLR = 0
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Wed Dec 10 11:56:42 2025（128,64，Use CRC=16）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       4140    100      0    2.415e-02   0.000e+00   1.198e-02   18.600
+  1.50      15149    100      0    6.601e-03   0.000e+00   3.369e-03   11.672
+  2.00      73937    100      0    1.353e-03   0.000e+00   6.784e-04   8.761
+  2.50     308182    100      0    3.245e-04   0.000e+00   1.590e-04   7.327
+  3.00    2001377    100      0    4.997e-05   0.000e+00   2.465e-05   6.427
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 64, K = 64, A = 40, shorten = 0, puncture = 0, CRC = 24, R = 64/128, R_net = 40/128
+* Decoding Method: ABP/MSA(20, 20), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 2, Use CRC = 16, Use Channel LLR = 0
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Sat Dec 13 09:50:39 2025（128,64，Use CRC=16，N2=20）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       9707    100      0    1.030e-02   0.000e+00   5.143e-03   19.413
+  1.50      35294    100      0    2.833e-03   0.000e+00   1.455e-03   12.202
+  2.00     155036    100      0    6.450e-04   0.000e+00   3.236e-04   8.920
+  2.50     776806    100      0    1.287e-04   0.000e+00   6.608e-05   7.346
+  3.00    2805060    100      0    3.565e-05   0.000e+00   1.776e-05   6.438
+  3.50   10706224    100      0    9.340e-06   0.000e+00   4.677e-06   5.733
+
+Program  ends    at: Sun Dec 14 22:31:06 2025
+Total running time: 36 hours 40 minutes 27 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 64, K = 64, A = 40, shorten = 0, puncture = 0, CRC = 24, R = 64/128, R_net = 40/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 2, Use CRC = 16, Use Channel LLR = 0
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Wed Dec 17 14:45:37 2025（128,64，Use CRC=16，Interchange=2）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       4140    100      0    2.415e-02   0.000e+00   1.198e-02   18.600
+  1.50      15149    100      0    6.601e-03   0.000e+00   3.369e-03   11.672
+  2.00      73937    100      0    1.353e-03   0.000e+00   6.784e-04   8.761
+  2.50     308182    100      0    3.245e-04   0.000e+00   1.590e-04   7.327
+  3.00    2001377    100      0    4.997e-05   0.000e+00   2.465e-05   6.427
+  3.50    7230789    100      0    1.383e-05   0.000e+00   6.965e-06   5.732
+
+Program  ends    at: Thu Dec 18 20:31:08 2025
+Total running time: 29 hours 45 minutes 31 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Fri Dec 26 14:29:11 2025
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    208      0    2.080e-01   0.000e+00   1.042e-01   60.015
+  1.50       1241    100      0    8.058e-02   0.000e+00   3.930e-02   30.954
+  2.00       3979    100      0    2.513e-02   0.000e+00   1.250e-02   15.944
+  2.50      19808    100      0    5.048e-03   0.000e+00   2.521e-03   8.734
+  3.00      96114    100      0    1.040e-03   0.000e+00   5.170e-04   6.260
+  3.50     738929    100      0    1.353e-04   0.000e+00   6.661e-05   4.911
+  4.00    7116621    100      0    1.405e-05   0.000e+00   7.052e-06   4.006
+  4.50   40392947     58      0    1.436e-06   0.000e+00   7.210e-07   3.220 
+
+Program  ends    at: Sun Dec 28 09:59:08 2025
+Total running time: 43 hours 30 minutes 31 seconds（手动计算，实际时间可能有误差）
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Mon Jan  5 15:37:58 2026（比特交换时的M用的ADP->M，实际上应该为ADP->M+ADP->CRC_len_for_ABP）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    210      0    2.100e-01   0.000e+00   1.035e-01   59.639
+  1.50       1183    100      0    8.453e-02   0.000e+00   4.177e-02   31.507
+  2.00       4005    100      0    2.497e-02   0.000e+00   1.239e-02   15.909
+  2.50      18629    100      0    5.368e-03   0.000e+00   2.705e-03   8.787
+  3.00      94240    100      0    1.061e-03   0.000e+00   5.270e-04   6.265
+  3.50     699989    100      0    1.429e-04   0.000e+00   7.149e-05   4.917
+  4.00    4245663     68      0    1.602e-05   0.000e+00   7.991e-06   4.005
+
+Program  ends    at: Mon Jan  5 22:12:04 2026
+Total running time: 
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 0, Use CRC = 12, Use Channel LLR = 0
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Mon Jan  5 22:15:14 2026（128,96，Interchange=0）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    213      0    2.130e-01   0.000e+00   1.057e-01   61.557
+  1.50       1184    100      0    8.446e-02   0.000e+00   4.151e-02   30.499
+  2.00       3093    100      0    3.233e-02   0.000e+00   1.635e-02   16.847
+  2.50      17422    100      0    5.740e-03   0.000e+00   2.918e-03   8.949
+  3.00     102845    100      0    9.723e-04   0.000e+00   4.808e-04   6.224
+  3.50     658635    100      0    1.518e-04   0.000e+00   7.688e-05   4.917
+  4.00    5625852    100      0    1.778e-05   0.000e+00   8.841e-06   4.008
+
+Program  ends    at: Tue Jan  6 04:31:50 2026
+Total running time: 6 hours 16 minutes 36 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 2, Use CRC = 12, Use Channel LLR = 0
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Tue Jan  6 09:58:59 2026（128,96，Interchange=2）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  4.00    8355902    100      0    1.197e-05   0.000e+00   5.983e-06   4.004
+
+Program  ends    at: Tue Jan  6 22:34:59 2026
+Total running time: 12 hours 36 minutes 0 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Wed Jan  7 09:36:14 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    208      0    2.080e-01   0.000e+00   1.042e-01   60.015
+  1.50       1241    100      0    8.058e-02   0.000e+00   3.930e-02   30.954
+  2.00       4696    100      0    2.129e-02   0.000e+00   1.078e-02   14.614
+  2.50      15762    100      0    6.344e-03   0.000e+00   3.191e-03   9.034
+  3.00     110936    100      0    9.014e-04   0.000e+00   4.503e-04   6.220
+  3.50     762383    100      0    1.312e-04   0.000e+00   6.515e-05   4.912
+  4.00    8273740    100      0    1.209e-05   0.000e+00   6.162e-06   4.005
+
+Method: 10000+length/2, fixed damping_factor, ML metric
+Program  ends    at: Wed Jan  7 21:08:10 2026
+Total running time: 11 hours 31 minutes 56 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 1 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha = 0.750, Beta = 0.200
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Thu Jan 15 11:57:06 2026（全局缩放最小和）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    261      0    2.610e-01   0.000e+00   1.305e-01   68.674
+  1.50       1000    110      0    1.100e-01   0.000e+00   5.400e-02   36.996
+  2.00       2820    100      0    3.546e-02   0.000e+00   1.759e-02   19.961
+  2.50      12462    100      0    8.024e-03   0.000e+00   4.098e-03   11.128
+  3.00      50198    100      0    1.992e-03   0.000e+00   1.002e-03   8.073
+  3.50     458475    100      0    2.181e-04   0.000e+00   1.094e-04   6.261
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 1 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha = 0.850, Beta = 0.200
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Thu Jan 15 19:35:16 2026（全局缩放最小和）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    228      0    2.280e-01   0.000e+00   1.131e-01   64.709
+  1.50       1043    100      0    9.588e-02   0.000e+00   4.674e-02   33.401
+  2.00       3178    100      0    3.147e-02   0.000e+00   1.599e-02   18.406
+  2.50      12829    100      0    7.795e-03   0.000e+00   3.899e-03   10.252
+  3.00      79985    100      0    1.250e-03   0.000e+00   6.307e-04   7.150
+  3.50     590905    100      0    1.692e-04   0.000e+00   8.338e-05   5.621
+  4.00       6446      0      0    0.000e+00   0.000e+00   0.000e+00   4.551
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 1 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha = 0.900, Beta = 0.200
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Thu Jan 15 14:38:28 2026（全局缩放最小和）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    203      0    2.030e-01   0.000e+00   1.015e-01   56.692
+  1.50       1061    100      0    9.425e-02   0.000e+00   4.654e-02   32.221
+  2.00       2760    100      0    3.623e-02   0.000e+00   1.813e-02   18.792
+  2.50      15531    100      0    6.439e-03   0.000e+00   3.214e-03   9.668
+  3.00      79652    100      0    1.255e-03   0.000e+00   6.225e-04   6.830
+  3.50     667354    100      0    1.498e-04   0.000e+00   7.511e-05   5.357
+  4.00     381369      7      0    1.835e-05   0.000e+00   8.932e-06   4.364
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 1 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha = 0.920, Beta = 0.200
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Fri Jan 16 15:07:08 2026（全局缩放最小和）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    215      0    2.150e-01   0.000e+00   1.070e-01   62.043
+  1.50       1034    100      0    9.671e-02   0.000e+00   4.633e-02   32.842
+  2.00       3878    100      0    2.579e-02   0.000e+00   1.296e-02   16.516
+  2.50      15018    100      0    6.659e-03   0.000e+00   3.298e-03   9.474
+  3.00      76591    100      0    1.306e-03   0.000e+00   6.509e-04   6.738
+  3.50     678609    100      0    1.474e-04   0.000e+00   7.363e-05   5.257
+
+Program  ends    at: Sat Jan 17 11:05:22 2026
+Total running time: 19 hours 58 minutes 14 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 1 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha = 0.950, Beta = 0.200
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Thu Jan 15 22:45:33 2026（全局缩放最小和）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    215      0    2.150e-01   0.000e+00   1.076e-01   60.508
+  1.50       1300    100      0    7.692e-02   0.000e+00   3.837e-02   31.570
+  2.00       3469    100      0    2.883e-02   0.000e+00   1.438e-02   16.392
+  2.50      16735    100      0    5.976e-03   0.000e+00   3.005e-03   9.251
+  3.00      99100    100      0    1.009e-03   0.000e+00   5.057e-04   6.492
+  3.50     798692    100      0    1.252e-04   0.000e+00   6.314e-05   5.118
+Program  ends    at:
+Total running time: 1 hours 28 minutes 27 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 1 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 0.960, Beta1 = 0.200, Alpha2 = 0.960, Beta2 = 0.000
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Sun Jan 18 23:21:52 2026（全局缩放最小和）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    206      0    2.060e-01   0.000e+00   1.034e-01   59.741
+  1.50       1329    100      1    7.524e-02   0.000e+00   3.772e-02   29.922
+  2.00       3777    100      0    2.648e-02   0.000e+00   1.320e-02   16.400
+  2.50      17009    100      0    5.879e-03   0.000e+00   2.948e-03   9.185
+  3.00      97904    100      1    1.021e-03   0.000e+00   5.160e-04   6.449
+  3.50     776476    100      0    1.288e-04   0.000e+00   6.406e-05   5.073
+
+Program  ends    at: Mon Jan 19 00:40:43 2026
+Total running time: 1 hours 18 minutes 51 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 1 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 0.980, Beta1 = 0.200, Alpha2 = 0.980, Beta2 = 0.000
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Sun Jan 18 19:52:05 2026（全局缩放最小和）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    208      0    2.080e-01   0.000e+00   1.039e-01   58.858
+  1.50       1085    100      0    9.217e-02   0.000e+00   4.502e-02   32.990
+  2.00       4337    100      0    2.306e-02   0.000e+00   1.141e-02   15.233
+  2.50      16277    100      1    6.144e-03   0.000e+00   3.095e-03   9.137
+  3.00     107447    100      0    9.307e-04   0.000e+00   4.649e-04   6.317
+  3.50     739708    100      0    1.352e-04   0.000e+00   6.697e-05   4.998
+
+Program  ends    at: Sun Jan 18 21:12:49 2026
+Total running time: 1 hours 20 minutes 44 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 1 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha = 1.000, Beta = 0.200
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Fri Jan 16 10:56:26 2026（标准最小和）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    208      0    2.080e-01   0.000e+00   1.042e-01   60.015
+  1.50       1241    100      0    8.058e-02   0.000e+00   3.930e-02   30.954
+  2.00       4696    100      0    2.129e-02   0.000e+00   1.078e-02   14.614
+  2.50      15762    100      0    6.344e-03   0.000e+00   3.191e-03   9.034
+  3.00     110936    100      0    9.014e-04   0.000e+00   4.503e-04   6.220
+  3.50     762383    100      0    1.312e-04   0.000e+00   6.515e-05   4.912
+
+Program  ends    at: Fri Jan 16 14:59:06 2026
+Total running time: 4 hours 2 minutes 40 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 1 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 0.900, Beta1 = 0.200, Alpha2 = 1.000, Beta2 = 0.000
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Sun Jan 18 10:27:03 2026（固定不可靠、缩放可靠）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    221      0    2.210e-01   0.000e+00   1.096e-01   62.684
+  1.50       1197    100      0    8.354e-02   0.000e+00   4.095e-02   30.527
+  2.00       3514    100      0    2.846e-02   0.000e+00   1.414e-02   16.176
+  2.50      13780    100      0    7.257e-03   0.000e+00   3.647e-03   9.165
+  3.00      81004    100      0    1.235e-03   0.000e+00   6.126e-04   6.343
+  3.50     625523    100      0    1.599e-04   0.000e+00   7.858e-05   4.942
+
+Program  ends    at: Sun Jan 18 12:20:25 2026
+Total running time: 1 hours 53 minutes 22 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 1 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 0.950, Beta1 = 0.200, Alpha2 = 1.000, Beta2 = 0.000
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Sun Jan 18 12:24:57 2026（固定不可靠、缩放可靠）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    230      0    2.300e-01   0.000e+00   1.150e-01   61.767
+  1.50       1343    100      0    7.446e-02   0.000e+00   3.725e-02   29.969
+  2.00       3474    100      0    2.879e-02   0.000e+00   1.417e-02   16.421
+  2.50      17923    100      0    5.579e-03   0.000e+00   2.803e-03   8.958
+  3.00      89878    100      0    1.113e-03   0.000e+00   5.622e-04   6.299
+  3.50     692187    100      0    1.445e-04   0.000e+00   7.231e-05   4.927
+
+Program  ends    at: Sun Jan 18 13:49:43 2026
+Total running time: 1 hours 24 minutes 46 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 1 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 0.980, Beta1 = 0.200, Alpha2 = 1.000, Beta2 = 0.000
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Sun Jan 18 21:23:41 2026（固定不可靠、缩放可靠）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    209      0    2.090e-01   0.000e+00   1.044e-01   60.176
+  1.50       1188    100      0    8.418e-02   0.000e+00   4.138e-02   29.498
+  2.00       4051    100      0    2.469e-02   0.000e+00   1.221e-02   15.995
+  2.50      17940    100      0    5.574e-03   0.000e+00   2.834e-03   8.795
+  3.00      84621    100      0    1.182e-03   0.000e+00   5.831e-04   6.316
+  3.50     743514    100      0    1.345e-04   0.000e+00   6.679e-05   4.920
+
+Program  ends    at: Sun Jan 18 23:21:21 2026
+Total running time: 1 hours 57 minutes 40 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 2 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.200, Alpha2 = 1.000, Beta2 = 0.200
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Mon Jan 19 23:14:31 2026（全局偏移最小和）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    245      0    2.450e-01   0.000e+00   1.244e-01   65.404
+  1.50       1071    100      0    9.337e-02   0.000e+00   4.656e-02   32.586
+  2.00       3325    100      0    3.008e-02   0.000e+00   1.520e-02   16.990
+  2.50      16309    100      1    6.132e-03   0.000e+00   3.101e-03   9.364
+  3.00      95330    100      0    1.049e-03   0.000e+00   5.320e-04   6.521
+  3.50     686371    100      0    1.457e-04   0.000e+00   7.274e-05   5.127
+
+Program  ends    at: Mon Jan 19 23:59:05 2026
+Total running time: 0 hours 44 minutes 34 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 2 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.100, Alpha2 = 1.000, Beta2 = 0.100
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Tue Jan 20 10:13:56 2026（全局偏移最小和）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    215      0    2.150e-01   0.000e+00   1.069e-01   58.998
+  1.50       1196    100      0    8.361e-02   0.000e+00   4.108e-02   30.483
+  2.00       3971    100      0    2.518e-02   0.000e+00   1.257e-02   16.219
+  2.50      15071    100      0    6.635e-03   0.000e+00   3.327e-03   9.243
+  3.00      97385    100      1    1.027e-03   0.000e+00   5.111e-04   6.402
+  3.50     772031    100      0    1.295e-04   0.000e+00   6.544e-05   5.011
+
+Program  ends    at: Tue Jan 20 11:56:21 2026
+Total running time: 1 hours 42 minutes 25 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 1
+* MS Type = 1 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 0.900, Beta1 = 0.150, Alpha2 = 0.900, Beta2 = 0.150
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Wed Jan 21 17:14:31 2026（使用初始信道LLR，NMS）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    460      0    4.600e-01   0.000e+00   2.306e-01   112.587
+  1.50       1000    242      0    2.420e-01   0.000e+00   1.208e-01   66.174
+  2.00       1000    131      0    1.310e-01   0.000e+00   6.607e-02   41.676
+  2.50       2494    100      0    4.010e-02   0.000e+00   2.022e-02   19.476
+  3.00      11474    100      0    8.715e-03   0.000e+00   4.318e-03   8.653
+  3.50      43110    100      0    2.320e-03   0.000e+00   1.153e-03   4.183
+
+Program  ends    at: Wed Jan 21 17:25:09 2026
+Total running time: 0 hours 10 minutes 38 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 1
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 0.900, Beta1 = 0.150, Alpha2 = 0.900, Beta2 = 0.150
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Mon Jan 26 16:50:47 2026（使用初始信道LLR）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  2.00       1000    148      0    1.480e-01   0.000e+00   7.452e-02   48.819
+  2.50       1575    100      1    6.349e-02   0.000e+00   3.136e-02   25.425
+  3.00       4624    100      0    2.163e-02   0.000e+00   1.083e-02   12.938
+  3.50      16885    100      0    5.922e-03   0.000e+00   2.965e-03   6.172
+  4.00      61373    100      0    1.629e-03   0.000e+00   8.196e-04   3.003
+  4.50     329046    100      0    3.039e-04   0.000e+00   1.519e-04   1.681
+
+Program  ends    at: Mon Jan 26 17:04:56 2026
+Total running time: 0 hours 14 minutes 9 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 1
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 0.900, Beta1 = 0.150, Alpha2 = 0.900, Beta2 = 0.150
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Mon Jan 26 17:10:48 2026（使用初始信道LLR）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  2.50       1778    100      0    5.624e-02   0.000e+00   2.772e-02   24.871
+  3.00       5149    100      0    1.942e-02   0.000e+00   9.860e-03   12.328
+  3.50      14680    100      0    6.812e-03   0.000e+00   3.375e-03   6.107
+  4.00      73331    100      0    1.364e-03   0.000e+00   6.769e-04   2.957
+  4.50     366172    100      0    2.731e-04   0.000e+00   1.381e-04   1.681
+  5.00    2196989    100      0    4.552e-05   0.000e+00   2.288e-05   1.113
+
+Program  ends    at: Mon Jan 26 18:07:53 2026
+Total running time: 0 hours 57 minutes 5 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 1
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 0.900, Beta1 = 0.150, Alpha2 = 0.900, Beta2 = 0.150
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Wed Jan 28 17:08:47 2026（使用初始信道LLR）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    519      0    5.190e-01   0.000e+00   2.593e-01   120.520
+  1.50       1000    267      0    2.670e-01   0.000e+00   1.343e-01   73.670
+  2.00       1000    164      0    1.640e-01   0.000e+00   8.231e-02   50.175
+  2.50       1469    100      0    6.807e-02   0.000e+00   3.440e-02   27.366
+  3.00       4962    100      0    2.015e-02   0.000e+00   1.007e-02   12.662
+  3.50      17869    100      0    5.596e-03   0.000e+00   2.796e-03   5.882
+  4.00      70342    100      0    1.422e-03   0.000e+00   7.148e-04   3.055
+  4.50     372156    100      0    2.687e-04   0.000e+00   1.345e-04   1.684
+  5.00    2179999    100      0    4.587e-05   0.000e+00   2.250e-05   1.112
+
+Program  ends    at: Wed Jan 28 18:47:30 2026
+Total running time: 1 hours 38 minutes 43 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 0.900, Beta1 = 0.150, Alpha2 = 0.900, Beta2 = 0.150
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Wed Jan 28 23:07:49 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    212      0    2.120e-01   0.000e+00   1.060e-01   59.577
+  1.50       1183    100      1    8.453e-02   0.000e+00   4.255e-02   29.663
+  2.00       3940    100      0    2.538e-02   0.000e+00   1.274e-02   14.202
+  2.50      19271    100      0    5.189e-03   0.000e+00   2.603e-03   7.282
+  3.00     103068    100      0    9.702e-04   0.000e+00   4.804e-04   4.840
+  3.50    1045871    100      0    9.561e-05   0.000e+00   4.741e-05   3.743
+  4.00   10915429    100      0    9.161e-06   0.000e+00   4.498e-06   3.035
+  4.50    5601866      4      0    7.140e-07   0.000e+00   3.700e-07   2.444
+
+Method: 10000+length/2, linear damping_factor, ML metric
+Program  ends    at: Thur Jan 29 12:30:30 2026
+Total running time: 13 hours 23 minutes 43 seconds
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 0.900, Beta1 = 0.150, Alpha2 = 0.900, Beta2 = 0.150
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Thu Jan 29 18:15:14 2026（去掉ML阈值判断）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    208      0    2.080e-01   0.000e+00   1.042e-01   60.015
+  1.50       1241    100      0    8.058e-02   0.000e+00   3.930e-02   30.954
+  2.00       4696    100      0    2.129e-02   0.000e+00   1.078e-02   14.614
+  2.50      15762    100      0    6.344e-03   0.000e+00   3.191e-03   9.034
+  3.00     110936    100      0    9.014e-04   0.000e+00   4.503e-04   6.220
+  3.50     762383    100      0    1.312e-04   0.000e+00   6.515e-05   4.912
+  4.00    8273740    100      0    1.209e-05   0.000e+00   6.162e-06   4.005
+  4.50    9097110     13      1    1.429e-06   0.000e+00   7.237e-07   3.220
+
+Program  ends    at: Fri Jan 30 13:31:30 2026
+Total running time: 
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 1 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.150, Alpha2 = 0.900, Beta2 = 0.150
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Fri Jan 30 14:08:49 2026（固定可靠、缩放不可靠）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    185      0    1.850e-01   0.000e+00   9.172e-02   54.997
+  1.50       1380    100      0    7.246e-02   0.000e+00   3.557e-02   29.271
+  2.00       4260    100      0    2.347e-02   0.000e+00   1.189e-02   15.828
+  2.50      19179    100      0    5.214e-03   0.000e+00   2.593e-03   9.357
+  3.00     103611    100      0    9.651e-04   0.000e+00   4.817e-04   6.718
+  3.50     796398    100      0    1.256e-04   0.000e+00   6.252e-05   5.327
+  4.00    6145259    100      2    1.627e-05   0.000e+00   8.170e-06   4.350
+  4.50   10036277     10      0    9.964e-07   0.000e+00   5.158e-07   3.492
+
+Program  ends    at: Sat Jan 31 10:58:30 2026
+Total running time: 20 hours 50minutes 
+******************************* Simulation End *******************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.0800, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 1 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.150, Alpha2 = 0.950, Beta2 = 0.150
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Sat Jan 31 14:11:49 2026（固定可靠、缩放不可靠）
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    234      0    2.340e-01   0.000e+00   1.176e-01   63.701
+  1.50       1196    100      0    8.361e-02   0.000e+00   4.180e-02   30.483
+  2.00       3523    100      0    2.838e-02   0.000e+00   1.463e-02   16.384
+  2.50      17581    100      0    5.688e-03   0.000e+00   2.873e-03   9.245
+  3.00      97181    100      1    1.029e-03   0.000e+00   5.194e-04   6.479
+  3.50     710320    100      0    1.408e-04   0.000e+00   7.043e-05   5.103
+  4.00    6597875    100      0    1.516e-05   0.000e+00   7.657e-06   4.168
+  4.50   23826122     26      0    1.091e-06   0.000e+00   5.338e-07   3.350
+
+Program  ends    at: Sun Feb 1 20:54:30 2026
+Total running time: 30 hours 43 minutes 
+******************************* Simulation End *******************************

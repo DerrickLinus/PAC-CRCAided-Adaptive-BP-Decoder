@@ -1,4 +1,52 @@
 #include "define.h"
+#include <signal.h>
+
+// 全局变量，用于信号处理函数访问
+static time_t g_start_time = 0;
+static volatile sig_atomic_t g_program_running = 0;
+
+// 记录程序结束时间和运行时长（可被正常结束和信号处理共同调用）
+void WriteEndTimeAndDuration(const char* reason)
+{
+	if (g_start_time == 0) return;  // 还未开始计时
+
+	time_t end_time = time(NULL);
+	double elapsed_seconds = difftime(end_time, g_start_time);
+	int hours = (int)(elapsed_seconds / 3600);
+	int minutes = (int)((elapsed_seconds - hours * 3600) / 60);
+	int seconds = (int)(elapsed_seconds - hours * 3600 - minutes * 60);
+
+	printf("\nMethod: Fisher-Yates+length/2, fixed damping_factor, ML metric+Convergence Rate,\n");
+	printf("Program  ends    at: %s", ctime(&end_time));
+	printf("Termination reason: %s\n", reason);
+	printf("Total running time: %d hours %d minutes %d seconds\n", hours, minutes, seconds);
+	printf("******************************************************************************\n");
+
+	// 同时写入到文件
+	FILE* outfile;
+	if ((outfile = fopen("Performance_1_2.txt", "a+")) != NULL)
+	{
+		fprintf(outfile, "\nMethod: Fisher-Yates+length/2, fixed damping_factor, ML metric+Convergence Rate\n");
+		fprintf(outfile, "Program  ends    at: %s", ctime(&end_time));
+		fprintf(outfile, "Termination reason: %s\n", reason);
+		fprintf(outfile, "Total running time: %d hours %d minutes %d seconds\n", hours, minutes, seconds);
+		fprintf(outfile, "******************************************************************************\n");
+		fclose(outfile);
+	}
+
+	g_start_time = 0;  // 防止重复调用
+}
+
+// 信号处理函数 - 捕获 Ctrl+C
+void SignalHandler(int signum)
+{
+	if (g_program_running)
+	{
+		WriteEndTimeAndDuration("User terminated (Ctrl+C)");
+		g_program_running = 0;
+	}
+	exit(signum);
+}
 
 /*
 统计误码率
@@ -44,14 +92,24 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 	printf("\r                                                                             ");
 	printf("\r");
 
-	printf("******************************** ABP/SCLD Decoder ******************************\n");
+	printf("****************************** ABP/SCLD Decoder ******************************\n");
 	printf("* Version 1.2\n");
-	printf("* N = %d, M = %d, K = %d, shorten = %d, puncture = %d, CRC = %d, rate = %5.3f\n", ADP->N, ADP->M, ADP->K, ADP->shorten, ADP->puncture, ADP->CRC_len, ADP->rate);
+	printf("* N = %d, M = %d, K = %d, A = %d, shorten = %d, puncture = %d, CRC = %d, R = %d/%d, R_net = %d/%d\n", ADP->N, ADP->M, ADP->K, ADP->K - ADP->CRC_len, ADP->shorten, ADP->puncture, ADP->CRC_len, ADP->K, ADP->N - ADP->puncture - ADP->shorten, ADP->K - ADP->CRC_len, ADP->N - ADP->puncture - ADP->shorten);
 	printf("* Decoding Method: ");
 	if (ADP->DecodingMethod == 1)
-		printf("ideal-ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th, ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
+	{
+		printf("ideal-ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th);
+		printf("* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
+		printf("* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %5.3f, Beta1 = %5.3f, Alpha2 = %5.3f, Beta2 = %5.3f\n",
+			ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
+	}
 	else if (ADP->DecodingMethod == 2)
-		printf("ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th, ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
+	{
+		printf("ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th);
+		printf("* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
+		printf("* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %5.3f, Beta1 = %5.3f, Alpha2 = %5.3f, Beta2 = %5.3f\n",
+			ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
+	}
 	else if (ADP->DecodingMethod == 3)
 		printf("SG-ABP(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th, ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
 	else if (ADP->DecodingMethod == 4)
@@ -62,6 +120,7 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 		printf("SCLD L = %d,system = %d\n", ADP->PAC_code->L,ADP->PAC_code->system);
 	else
 		printf("Error!\n");
+	printf("* Convergence Early Stop: epsilon = %g, window = %d\n", ADP->convergence_epsilon, ADP->convergence_window); // 3.14修改
 	printf("* AWGN, BPSK, Source = %d, Seed = %d\n", SP->sourceType, 173);
 	printf("******************************************************************************\n");
 
@@ -76,20 +135,30 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 		printf(" Es/No       NTF     NEF     NUF    FER         SER         BER         IT\n");
 	}
 
-	if ((outfile = fopen("Performance.txt", "a+")) == NULL)
+	if ((outfile = fopen("Performance_1_2.txt", "a+")) == NULL)
 	{
 		printf("Can not open performance file !\n");
 		getch();
 		exit(0);
 	}
-	fprintf(outfile, "\n******************************** ABP/SCLD Decoder ******************************\n");
+	fprintf(outfile, "\n****************************** ABP/SCLD Decoder ******************************\n");
 	fprintf(outfile, "* Version 1.2\n");
-	fprintf(outfile, "* N = %d, M = %d, K = %d, shorten = %d, puncture = %d, CRC = %d, rate = %5.3f\n", ADP->N, ADP->M, ADP->K, ADP->shorten, ADP->puncture, ADP->CRC_len, ADP->rate);
+	fprintf(outfile, "* N = %d, M = %d, K = %d, A = %d, shorten = %d, puncture = %d, CRC = %d, R = %d/%d, R_net = %d/%d\n", ADP->N, ADP->M, ADP->K, ADP->K - ADP->CRC_len, ADP->shorten, ADP->puncture, ADP->CRC_len, ADP->K, ADP->N - ADP->puncture - ADP->shorten, ADP->K - ADP->CRC_len, ADP->N - ADP->puncture - ADP->shorten);
 	fprintf(outfile, "* Decoding Method: ");
 	if (ADP->DecodingMethod == 1)
-		fprintf(outfile, "ideal-ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th, ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
+	{
+		fprintf(outfile, "ideal-ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th);
+		fprintf(outfile, "* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
+		fprintf(outfile, "* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %5.3f, Beta1 = %5.3f, Alpha2 = %5.3f, Beta2 = %5.3f\n",
+			ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
+	}
 	else if (ADP->DecodingMethod == 2)
-		fprintf(outfile, "ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th, ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
+	{
+		fprintf(outfile, "ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th);
+		fprintf(outfile, "* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
+		fprintf(outfile, "* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %5.3f, Beta1 = %5.3f, Alpha2 = %5.3f, Beta2 = %5.3f\n",
+			ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
+	}
 	else if (ADP->DecodingMethod == 3)
 		fprintf(outfile, "SG-ABP(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th, ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
 	else if (ADP->DecodingMethod == 4)
@@ -100,6 +169,7 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 		fprintf(outfile, "SCLD L = %d,system = %d\n", ADP->PAC_code->L, ADP->PAC_code->system);
 	else
 		fprintf(outfile, "Error!\n");
+	fprintf(outfile, "* Convergence Early Stop: epsilon = %g, window = %d\n", ADP->convergence_epsilon, ADP->convergence_window); // 3.14修改
 	fprintf(outfile, "* AWGN, BPSK, Source = %d, Seed = %d\n", SP->sourceType, 173);
 	fprintf(outfile, "******************************************************************************\n");
 
@@ -125,7 +195,7 @@ void Display(double SNR, struct StatisStruct *Statis)
 void WriteResult2File(double SNR, struct StatisStruct *Statis)
 {
 	FILE *outfile;
-	if ((outfile = fopen("Performance.txt", "a+")) == NULL)
+	if ((outfile = fopen("Performance_1_2.txt", "a+")) == NULL)
 	{
 		printf("Can not open performance file !\n");
 		getch();
@@ -179,6 +249,13 @@ void Simulation(struct SPStruct *SP, struct ADPStruct *ADP, struct AWGN *awgn, s
 	ADP->PAC_code->PolarCode = new int[ADP->N];
 	WriteLogo(SP, ADP);
 
+	// 注册信号处理函数，捕获 Ctrl+C
+	signal(SIGINT, SignalHandler);
+
+	// 记录仿真开始时间（使用全局变量，便于信号处理函数访问）
+	g_start_time = time(NULL);
+	g_program_running = 1;
+
 	//计算距离度量
 	//double maxWeight = 0;
 	//double averageWeight = 0;
@@ -199,6 +276,33 @@ void Simulation(struct SPStruct *SP, struct ADPStruct *ADP, struct AWGN *awgn, s
 		else
 			awgn->sigma = sqrt(0.5 / (pow(10.0, (awgn->snr / 10.0))));
 		SoftDeModFactor = 2.0 / ((awgn->sigma) * (awgn->sigma));
+
+		/*if (abs(currentSNR - 1.0) < 0.001) {
+			ADP->alpha_factor = 0.90;
+			ADP->beta_factor = 0.1;
+		}
+		else if (abs(currentSNR - 1.5) < 0.001) {
+			ADP->alpha_factor = 0.96;
+			ADP->beta_factor = 0.2;
+		}
+		else if (abs(currentSNR - 2.0) < 0.001) {
+			ADP->alpha_factor = 1.0;
+			ADP->beta_factor = 0.1;
+		}
+		else if (abs(currentSNR - 2.5) < 0.001) {
+			ADP->alpha_factor = 0.96;
+			ADP->beta_factor = 0.25;
+		}
+		else if (abs(currentSNR - 3.0) < 0.001) {
+			ADP->alpha_factor = 1.0;
+			ADP->beta_factor = 0.15;
+		}
+		else {
+			ADP->alpha_factor = 0.95;
+			ADP->beta_factor = 0.1;
+		}
+		printf("SNR=%.2f, alpha=%.2f, beta=%.2f\n", currentSNR, ADP->alpha_factor, ADP->beta_factor);*/
+
 		while (Statis->testFrames < SP->leastTestFrame || Statis->errorFrames < SP->leastErrorFrame)
 		{
 			Statis->testFrames += 1;
@@ -214,7 +318,15 @@ void Simulation(struct SPStruct *SP, struct ADPStruct *ADP, struct AWGN *awgn, s
 
 				for (int i = 0; i < ADP->K - ADP->CRC_len; i++)
 					InfoSeq[i] = rand() % 2;
+				//saveArrayToFile(InfoSeq, ADP->K - ADP->CRC_len, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\randInfoSeq_128.txt");
+				/*printf("InfoSeq:\n");
+				for (int i = 0; i < ADP->K - ADP->CRC_len; i++) 
+					printf("%d ", InfoSeq[i]);*/
 				CRC_ENC(InfoSeq, InfoSeq, ADP->CRC_len, ADP->K - ADP->CRC_len);
+				//saveArrayToFile(InfoSeq, ADP->K, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\CRC_ENC_128.txt");
+				/*printf("\nCRC_ENC:\n");
+				for (int i = 0; i < ADP->K; i++)
+					printf("%d ", InfoSeq[i]);*/
 
 				//cout << CRC_DEC(InfoSeq, ADP->CRC_len, ADP->K) << endl;
 				if (ADP->EncodeAdd0)
@@ -222,7 +334,7 @@ void Simulation(struct SPStruct *SP, struct ADPStruct *ADP, struct AWGN *awgn, s
 					memset(InfoSeq_add0, 0, sizeof(int)*ADP->G_K);
 					for (i = 0; i < ADP->K; i++)
 					{
-						InfoSeq_add0[ADP->A[i]] = InfoSeq[i];
+						InfoSeq_add0[ADP->A[i]] = InfoSeq[i];	// 填充冻结比特
 					}
 				}
 				else
@@ -231,11 +343,14 @@ void Simulation(struct SPStruct *SP, struct ADPStruct *ADP, struct AWGN *awgn, s
 				}
 				//Encode(InfoSeq_add0, CodeSeq, ADP->G_K, ADP->N, ADP->G);
 				//Encode(InfoSeq_add0, CodeSeq, ADP->G_K, ADP->N, ADP->PAC_code->G);
+				//saveArrayToFile(InfoSeq_add0, ADP->G_K, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\InfoSeq_add0_128.txt");
 				
 				PACEncode(InfoSeq_add0, CodeSeq, ADP->K, ADP->N, ADP->PAC_code->G, ADP->PAC_code->T0, ADP->A, InfoSeq, ADP->PAC_code->system);
+				//saveArrayToFile(CodeSeq, ADP->N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\PACEncode_128.txt");
 			}
 			memcpy(ADP->PAC_code->PolarCode, CodeSeq, sizeof(int) * ADP->N);
 			memcpy(ChannelInBit, CodeSeq, sizeof(int)*ADP->N);
+			//saveArrayToFile(ChannelInBit, ADP->N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\ChannelInBit_128.txt");
 
 			// check
 			/*
@@ -247,11 +362,13 @@ void Simulation(struct SPStruct *SP, struct ADPStruct *ADP, struct AWGN *awgn, s
 			}
 			*/
 			
-			// 过AWGN信道
+			// 过AWGN信道（BPSK调制+加噪）
 			AWGNChannel(ChannelOutBit, ChannelInBit, awgn, ADP->N);
-
+			//saveArrayDoubleToFile(ChannelOutBit, ADP->N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\ChannelOutBit_128.txt");
+			
 			// 软解调
 			SoftDemodulate(bitsoft, ChannelOutBit, SoftDeModFactor, ADP->N);
+			//saveArrayDoubleToFile(bitsoft, ADP->N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\bitsoft_128.txt");
 			/*
 			for (int i = 0; i < ADP->N; i++)
 				printf("%f ", bitsoft[i]);
@@ -292,7 +409,7 @@ void Simulation(struct SPStruct *SP, struct ADPStruct *ADP, struct AWGN *awgn, s
 			*/
 			
 			// 解码
-			Decode(bitsoft, ChannelOutBit, DecodeResult, ADP);
+			Decode(currentSNR, bitsoft, ChannelOutBit, DecodeResult, ADP);
 
 			// 计算weight
 			//if (ADP->check_flag == 1) {
@@ -385,6 +502,10 @@ void Simulation(struct SPStruct *SP, struct ADPStruct *ADP, struct AWGN *awgn, s
 
 		if (pressflag == 1)
 		{
+			// 记录结束时间和运行时长
+			WriteEndTimeAndDuration("User exit (pressed E)");
+			g_program_running = 0;
+
 			delete[] InfoSeq;
 			delete[] CodeSeq;
 			delete[] ChannelInBit;
@@ -397,6 +518,32 @@ void Simulation(struct SPStruct *SP, struct ADPStruct *ADP, struct AWGN *awgn, s
 			exit(0);
 		}
 	}
+
+	// 打印结束时间和运行时长
+	//time_t end_time = time(NULL);
+	//double elapsed_seconds = difftime(end_time, start_time);
+	//int hours = (int)(elapsed_seconds / 3600);
+	//int minutes = (int)((elapsed_seconds - hours * 3600) / 60);
+	//int seconds = (int)(elapsed_seconds - hours * 3600 - minutes * 60);
+
+	//printf("\n");
+	//printf("Program  ends    at: %s", ctime(&end_time));
+	//printf("Total running time: %d hours %d minutes %d seconds\n", hours, minutes, seconds);
+	//printf("******************************* Simulation End *******************************\n");
+
+	//// 同时写入到文件
+	//FILE* outfile;
+	//if ((outfile = fopen("Performance_1_2.txt", "a+")) != NULL)
+	//{
+	//	fprintf(outfile, "\n");
+	//	fprintf(outfile, "Program  ends    at: %s", ctime(&end_time));
+	//	fprintf(outfile, "Total running time: %d hours %d minutes %d seconds\n", hours, minutes, seconds);
+	//	fprintf(outfile, "******************************* Simulation End *******************************\n");
+	//	fclose(outfile);
+	//}
+	WriteEndTimeAndDuration("Normal completion");
+	g_program_running = 0;
+
 	delete[] InfoSeq;
 	delete[] CodeSeq;
 	delete[] ChannelInBit;

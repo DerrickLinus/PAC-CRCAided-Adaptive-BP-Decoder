@@ -2,7 +2,7 @@
 
 void main()
 {	
-
+	//srand(731);
 	struct SPStruct *SP;
 	struct AWGN *awgn;
 	struct StatisStruct *Statis;
@@ -21,6 +21,3 @@ void main()
 
 	Simulation(SP, ADP, awgn, Statis);
 }
-
-
-

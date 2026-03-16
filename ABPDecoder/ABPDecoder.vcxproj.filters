@@ -27,6 +27,9 @@
       <Filter>资源文件</Filter>
     </Text>
     <Text Include="CF.Polar.128.64.txt" />
+    <Text Include="Performance_1_1.txt" />
+    <Text Include="Performance.txt" />
+    <Text Include="Performance_1_2.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Channel.cpp">

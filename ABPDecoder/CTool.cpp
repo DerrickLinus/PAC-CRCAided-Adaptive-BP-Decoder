@@ -228,20 +228,29 @@ void FindOptimal(const double *LLR, int *codeSeq, int length, double *minSED, in
 
 
 // Deg-2 Random Connection
-void Permute(int *seq, int length)
+// 源代码，不是真正的均匀随机，但通过仿真实验，发现这种方式误码率性能好像更好？难道这个地方就是不能太随机？
+void Permute(int *seq, int length) 
 {
-	int temp;
-	int pos1, pos2;
-
-	for (int i = 0; i < length / 2; i++)
-	{
-		pos1 = rand() % length;
-		pos2 = rand() % length;
-		temp = seq[pos1];
-		seq[pos1] = seq[pos2];
-		seq[pos2] = temp;
-	}
+ 	int temp;
+ 	int pos1, pos2;
+ 	for (int i = 0; i < length / 2; i++) 
+ 	{
+ 		pos1 = rand() % length;
+ 		pos2 = rand() % length;
+ 		temp = seq[pos1];
+ 		seq[pos1] = seq[pos2];
+ 		seq[pos2] = temp;
+ 	}
 }
+// Fisher-Yates (正确的均匀随机置换) - dlh
+//void Permute(int* seq, int length) 
+//{
+//	for (int i = length - 1; i > 0; i--)
+//	{
+//		int j = rand() % (i + 1);
+//		swap(seq[i], seq[j]);
+//	}
+//}
 
 
 /*
@@ -630,4 +639,128 @@ void CRC_H_initial(int **H, int CRCLEN, int k)
 		delete[] g[i];
 	delete[] g;
 	delete[] pos;
+}
+
+// ************ 极化码生成矩阵F⊗n ************
+// 计算 2^n
+int power_of_2(int n) {
+	return 1 << n;
+}
+
+// Kronecker积：A (sizeA x sizeA) ⊗ F (2x2) -> C (sizeA*2 x sizeA*2)
+void kron_gf2(int** A, int sizeA, int** C) {
+	// 基础矩阵 F = [1,0; 1,1]
+	int F[2][2] = { {1, 0}, {1, 1} };
+
+	for (int ia = 0; ia < sizeA; ia++) {
+		for (int ja = 0; ja < sizeA; ja++) {
+			int a_val = A[ia][ja];
+			for (int ib = 0; ib < 2; ib++) {
+				for (int jb = 0; jb < 2; jb++) {
+					int ic = ia * 2 + ib;
+					int jc = ja * 2 + jb;
+					C[ic][jc] = a_val & F[ib][jb];  // GF(2)乘法
+				}
+			}
+		}
+	}
+}
+
+// 分配 size x size 的二维矩阵
+int** alloc_matrix(int size) {
+	int** mat = (int**)malloc(size * sizeof(int*));
+	for (int i = 0; i < size; i++) {
+		mat[i] = (int*)malloc(size * sizeof(int));
+	}
+	return mat;
+}
+
+// 释放矩阵
+void free_matrix(int** mat, int size) {
+	for (int i = 0; i < size; i++) {
+		free(mat[i]);
+	}
+	free(mat);
+}
+
+// 生成极化码生成矩阵，返回 N x N 的二维矩阵
+int** generate_polar_matrix(int n) {
+	int N = power_of_2(n);
+
+	// 初始化 P_n = F
+	int** P_n = alloc_matrix(2);
+	P_n[0][0] = 1; P_n[0][1] = 0;
+	P_n[1][0] = 1; P_n[1][1] = 1;
+
+	int current_size = 2;
+
+	// 迭代计算 P_n = P_n ⊗ F
+	for (int i = 1; i < n; i++) {
+		int new_size = current_size * 2;
+		int** temp = alloc_matrix(new_size);
+
+		kron_gf2(P_n, current_size, temp);
+
+		free_matrix(P_n, current_size);
+		P_n = temp;
+		current_size = new_size;
+	}
+
+	return P_n;
+}
+
+// ************ 保存二维矩阵 ************
+void saveMatrixToFile(int** G, int rows, int cols, const char* filename) {
+	FILE* fp = fopen(filename, "w");
+	if (fp == NULL) {
+		printf("无法打开文件\n");
+		return;
+	}
+
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < cols; j++) {
+			fprintf(fp, "%d", G[i][j]);
+			if (j < cols - 1) fprintf(fp, " ");
+		}
+		fprintf(fp, "\n");
+	}
+	fclose(fp);
+}
+
+// ************ 保存一维int类型矩阵 ************
+void saveArrayToFile(int* A, int len, const char* filename) {
+	FILE* fp = fopen(filename, "w");
+	if (fp == NULL) {
+		printf("无法打开文件\n");
+		return;
+	}
+
+	for (int i = 0; i < len; i++) {
+		fprintf(fp, "%d\n", A[i]);  // 每行一个元素
+	}
+	fclose(fp);
+}
+
+// ************ 保存一维double类型矩阵 ************
+void saveArrayDoubleToFile(double* A, int len, const char* filename) {
+	FILE* fp = fopen(filename, "w");
+	if (fp == NULL) {
+		printf("无法打开文件\n");
+		return;
+	}
+
+	for (int i = 0; i < len; i++) {
+		fprintf(fp, "%.15e\n", A[i]);  // %f 默认只保存到小数点后六位
+	}
+	fclose(fp);
+}
+
+// ************ 打印矩阵 ************
+void printMatrix(int** G, int rows, int cols) {
+	for(int i=0; i<rows; i++) {
+		for(int j = 0; j < cols; j++) {
+			printf("%d ", G[i][j]);
+		}
+		printf("\n");
+	}
 }
