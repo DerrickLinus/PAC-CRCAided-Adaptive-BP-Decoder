@@ -2,7 +2,7 @@
 
 void main()
 {	
-	//srand(731);
+	srand(731);
 	struct SPStruct *SP;
 	struct AWGN *awgn;
 	struct StatisStruct *Statis;

@@ -16,7 +16,7 @@ void WriteEndTimeAndDuration(const char* reason)
 	int minutes = (int)((elapsed_seconds - hours * 3600) / 60);
 	int seconds = (int)(elapsed_seconds - hours * 3600 - minutes * 60);
 
-	printf("\nMethod: Fisher-Yates+length/2, fixed damping_factor, ML metric+Convergence Rate,\n");
+	printf("\nMethod: Fisher-Yates+length/2, fixed damping_factor, ML metric, srand(main)\n");
 	printf("Program  ends    at: %s", ctime(&end_time));
 	printf("Termination reason: %s\n", reason);
 	printf("Total running time: %d hours %d minutes %d seconds\n", hours, minutes, seconds);
@@ -24,9 +24,9 @@ void WriteEndTimeAndDuration(const char* reason)
 
 	// 同时写入到文件
 	FILE* outfile;
-	if ((outfile = fopen("Performance_1_2.txt", "a+")) != NULL)
+	if ((outfile = fopen("Performance_v1.3.txt", "a+")) != NULL)
 	{
-		fprintf(outfile, "\nMethod: Fisher-Yates+length/2, fixed damping_factor, ML metric+Convergence Rate\n");
+		fprintf(outfile, "\nMethod: Fisher-Yates+length/2, fixed damping_factor, ML metric, srand(main)\n");
 		fprintf(outfile, "Program  ends    at: %s", ctime(&end_time));
 		fprintf(outfile, "Termination reason: %s\n", reason);
 		fprintf(outfile, "Total running time: %d hours %d minutes %d seconds\n", hours, minutes, seconds);
@@ -135,7 +135,7 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 		printf(" Es/No       NTF     NEF     NUF    FER         SER         BER         IT\n");
 	}
 
-	if ((outfile = fopen("Performance_1_2.txt", "a+")) == NULL)
+	if ((outfile = fopen("Performance_v1.3.txt", "a+")) == NULL)
 	{
 		printf("Can not open performance file !\n");
 		getch();
@@ -195,7 +195,7 @@ void Display(double SNR, struct StatisStruct *Statis)
 void WriteResult2File(double SNR, struct StatisStruct *Statis)
 {
 	FILE *outfile;
-	if ((outfile = fopen("Performance_1_2.txt", "a+")) == NULL)
+	if ((outfile = fopen("Performance_v1.3.txt", "a+")) == NULL)
 	{
 		printf("Can not open performance file !\n");
 		getch();
@@ -533,7 +533,7 @@ void Simulation(struct SPStruct *SP, struct ADPStruct *ADP, struct AWGN *awgn, s
 
 	//// 同时写入到文件
 	//FILE* outfile;
-	//if ((outfile = fopen("Performance_1_2.txt", "a+")) != NULL)
+	//if ((outfile = fopen("Performance_v1.3.txt", "a+")) != NULL)
 	//{
 	//	fprintf(outfile, "\n");
 	//	fprintf(outfile, "Program  ends    at: %s", ctime(&end_time));

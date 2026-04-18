@@ -10,10 +10,10 @@ Shorten:			0
 Decoding Method:	2
 
 ABP Scheme:			20 10
-ABP Damping:		0.08
+ABP Damping:		0.1
 ABP Deg-2:			1
 ABP Interchange:	1
-ABP Use CRC:		18
+ABP Use CRC:		12
 ABP Use ChannelLLR: 0
 Metric Threshold:   41
 SCLD ListSize:      32

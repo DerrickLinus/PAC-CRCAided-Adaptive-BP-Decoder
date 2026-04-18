@@ -2008,7 +2008,7 @@ void Decode_PLVA_SC(double* LLR, int N, int K, int L, int** GMatrix, int* A, int
 void Decode(double snr, double* bitsoft, double* y, int* result, struct ADPStruct* ADP)
 {
 	// C标准库 rand() 当前正在使用
-	srand(731); // srand()设置的种子是进程级别的全局变量，会影响后续的rand()调用，每帧重置
+	//srand(731); // srand()设置的种子是进程级别的全局变量，会影响后续的rand()调用，每帧重置
 
 	// C++11 default_random_engine 在第1035-1036行被注释
 	default_random_engine rng;
