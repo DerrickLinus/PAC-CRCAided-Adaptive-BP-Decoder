@@ -322,9 +322,9 @@ void List_ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq
 			for (i = 0; i < N; i++)
 			{
 				if (ADP->use_channel_LLR)
-					Iter->pLLR[i] = Iter->pLLR[i] * ADP->damping_factor + bitsoft[i];
+					Iter->pLLR[i] = Iter->pLLR[i] * ADP->damp_fixed + bitsoft[i];
 				else
-					Iter->pLLR[i] = Iter->pLLR[i] * ADP->damping_factor + p1[i];
+					Iter->pLLR[i] = Iter->pLLR[i] * ADP->damp_fixed + p1[i];
 
 				if (Iter->pLLR[i] > 0)
 				{
@@ -631,9 +631,9 @@ void ideal_ABP_MSA(double *bitsoft, double *y, int **H, int N, int M, int *outse
 			for (i = 0; i < N; i++)
 			{
 				if (ADP->use_channel_LLR)
-					Iter->pLLR[i] = Iter->pLLR[i] * ADP->damping_factor + bitsoft[i];
+					Iter->pLLR[i] = Iter->pLLR[i] * ADP->damp_fixed + bitsoft[i];
 				else
-					Iter->pLLR[i] = Iter->pLLR[i] * ADP->damping_factor + p1[i];
+					Iter->pLLR[i] = Iter->pLLR[i] * ADP->damp_fixed + p1[i];
 				
 				if (Iter->pLLR[i] > 0)
 				{
@@ -752,10 +752,6 @@ void ABP_MSA(double snr, double* bitsoft, double* y, int** H, int N, int M, int*
 	double beta_factor = ADP->beta_factor;*/
 	ADP->check_flag = 0;
 	ADP->IterTime = 0;
-
-	// 1. 定义线性衰减参数
-	double damp_start = 0.12;
-	double damp_end = 0.04;
 	double current_damping = 1;
 
 	//saveMatrixToFile(H, M+ADP->CRC_len - ADP->CRC_len_for_ABP, N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\H_128.txt");
@@ -988,37 +984,28 @@ void ABP_MSA(double snr, double* bitsoft, double* y, int** H, int N, int M, int*
 			memcpy(Iter->pLLR, adaptive_p1, sizeof(double) * N);
 
 			// 变量节点更新及硬判决（这里的变量节点更新没有排除目标校验节点的信息）
-			// 2. 计算当前迭代 k 的动态阻尼因子
 			// k 是当前内层迭代次数 (0 到 ADP->N1 - 1)
-			// 信噪比差异化线性衰减阻尼因子
-			//if (snr < 2.5){
-			//	current_damping = 0.08;
-			//}
-			//else {
-			//	if (ADP->N1 > 1) {
-			//		current_damping = damp_start - ((double)k / (double)(ADP->N1 - 1)) * (damp_start - damp_end);
-			//	}
-			//	else {
-			//		current_damping = damp_start; // 防止除以0
-			//	}
-			//}
-			// 统一线性衰减阻尼因子（不区分信噪比）
-			//if (ADP->N1 > 1) {
-			//	current_damping = damp_start - ((double)k / (double)(ADP->N1 - 1)) * (damp_start - damp_end);
-			//}
-			//else {
-			//	current_damping = damp_start; // 防止除以0
-			//}
+			if(ADP->damp_mode == 0) {
+				// 固定阻尼因子
+				current_damping = ADP->damp_fixed;
+			}
+			if (ADP->damp_mode == 1) {
+				// 线性衰减阻尼因子
+				current_damping = ADP->damp_start - ((double)k / (double)(ADP->N1 - 1)) * (ADP->damp_start - ADP->damp_end); 
+			}
+			if (ADP->damp_mode == 2) {
+				// 幂律衰减阻尼因子
+				current_damping = ADP->damp_end + (ADP->damp_start - ADP->damp_end) * pow((1 - ((double)k / (double)(ADP->N1 - 1))), ADP->damp_p);
+			}
 			for (i = 0; i < N; i++)
 			{
 				if (ADP->use_channel_LLR)
 					// 使用初始信道LLR（一般BP做法）	
-					// Iter->pLLR[i] = Iter->pLLR[i] * ADP->damping_factor + bitsoft[i]; // 源代码这里应该有问题，使用初始信道LLR时，不能使用阻尼因子，否则会无法收敛
+					// Iter->pLLR[i] = Iter->pLLR[i] * current_damping + bitsoft[i]; // 源代码这里应该有问题，使用初始信道LLR时，不能使用阻尼因子，否则会无法收敛
 					Iter->pLLR[i] = Iter->pLLR[i] + bitsoft[i];	// dlh修正
 				else
 					// 使用上次迭代得到的LLR						
-					Iter->pLLR[i] = Iter->pLLR[i] * ADP->damping_factor + p1[i]; // 固定阻尼因子
-					//Iter->pLLR[i] = Iter->pLLR[i] * current_damping + p1[i];	   // 线性衰减阻尼因子
+					Iter->pLLR[i] = Iter->pLLR[i] * current_damping + p1[i];
 
 				if (Iter->pLLR[i] > 0)
 				{
@@ -1396,7 +1383,7 @@ void SG_ABP(double* bitsoft, int** H, int N, int M, int* outseq,
 			// hard decision
 			for (i = 0; i < N; i++)
 			{
-				Iter->pLLR[i] = Iter->pLLR[i] * ADP->damping_factor + p1[i];
+				Iter->pLLR[i] = Iter->pLLR[i] * ADP->damp_fixed + p1[i];
 
 				if (Iter->pLLR[i] > 0)
 				{
@@ -1648,9 +1635,9 @@ void EC_ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
 				for (i = 0; i < N; i++)
 				{
 					if (ADP->use_channel_LLR)
-						Iter->pLLR[i] = Iter->pLLR[i] * ADP->damping_factor + bitsoft[i];
+						Iter->pLLR[i] = Iter->pLLR[i] * ADP->damp_fixed + bitsoft[i];
 					else
-						Iter->pLLR[i] = Iter->pLLR[i] * ADP->damping_factor + p1[i];
+						Iter->pLLR[i] = Iter->pLLR[i] * ADP->damp_fixed + p1[i];
 
 					if (Iter->pLLR[i] > 0)
 					{

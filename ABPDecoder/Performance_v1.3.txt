@@ -5,7 +5,7 @@
 * Interchange = 1, Use CRC = 12, Use Channel LLR = 0
 * MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.000, Alpha2 = 0.900, Beta2 = 0.000
 * Convergence Early Stop: epsilon = 0.01, window = 3
-* AWGN, BPSK, Source = 1, Seed = 173
+* AWGN, BPSK, Source = 1, Seed = 173, Performance_v1.3
 ******************************************************************************
 Program  starts  at: Wed Apr  8 14:45:47 2026
 
@@ -16,11 +16,12 @@ Program  starts  at: Wed Apr  8 14:45:47 2026
   2.50      94572    100      0    1.057e-03   0.000e+00   5.309e-04   7.758
   3.00     583910    100      0    1.713e-04   0.000e+00   8.572e-05   6.450
   3.50    3918438    100      0    2.552e-05   0.000e+00   1.268e-05   5.601
+  4.00   16993400     56      0    3.295e-06   0.000e+00   1.620e-06   4.888
 
 Method: Fisher-Yates+length/2, fixed damping_factor, ML metric
 Program  ends    at: Thu Apr  9 01:33:16 2026
 Termination reason: Normal completion
-Total running time: 10 hours 47 minutes 29 seconds
+Total running time: 39 hours 34 minutes 16 seconds
 ******************************************************************************
 
 ****************************** ABP/SCLD Decoder ******************************
@@ -30,7 +31,7 @@ Total running time: 10 hours 47 minutes 29 seconds
 * Interchange = 1, Use CRC = 12, Use Channel LLR = 0
 * MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.000, Alpha2 = 0.900, Beta2 = 0.000
 * Convergence Early Stop: epsilon = 0.01, window = 3
-* AWGN, BPSK, Source = 1, Seed = 173
+* AWGN, BPSK, Source = 1, Seed = 173, Performance_v1.3
 ******************************************************************************
 Program  starts  at: Thu Apr  9 11:13:50 2026
 
@@ -41,11 +42,12 @@ Program  starts  at: Thu Apr  9 11:13:50 2026
   2.50     113968    100      0    8.774e-04   0.000e+00   4.412e-04   7.943
   3.00     776206    100      0    1.288e-04   0.000e+00   6.331e-05   6.726
   3.50    3256095    100      0    3.071e-05   0.000e+00   1.569e-05   5.929
+  4.00   14011794     59      0    4.211e-06   0.000e+00   2.102e-06   5.255
 
 Method: Fisher-Yates+length/2, fixed damping_factor, ML metric
 Program  ends    at: Thu Apr  9 23:26:33 2026
 Termination reason: Normal completion
-Total running time: 12 hours 12 minutes 43 seconds
+Total running time: 47 hours 26 minutes 58 seconds
 ******************************************************************************
 
 ****************************** ABP/SCLD Decoder ******************************
@@ -55,7 +57,7 @@ Total running time: 12 hours 12 minutes 43 seconds
 * Interchange = 1, Use CRC = 16, Use Channel LLR = 0
 * MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.000, Alpha2 = 0.900, Beta2 = 0.000
 * Convergence Early Stop: epsilon = 0.01, window = 3
-* AWGN, BPSK, Source = 1, Seed = 173
+* AWGN, BPSK, Source = 1, Seed = 173, Performance_v1.3
 ******************************************************************************
 Program  starts  at: Fri Apr 10 11:15:59 2026
 
@@ -81,7 +83,7 @@ Total running time: 35 hours 32 minutes 3 seconds
 * Interchange = 1, Use CRC = 20, Use Channel LLR = 0
 * MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.000, Alpha2 = 0.900, Beta2 = 0.000
 * Convergence Early Stop: epsilon = 0.01, window = 3
-* AWGN, BPSK, Source = 1, Seed = 173
+* AWGN, BPSK, Source = 1, Seed = 173, Performance_v1.3
 ******************************************************************************
 Program  starts  at: Sat Apr 11 23:22:09 2026
 
@@ -107,7 +109,7 @@ Total running time: 24 hours 22 minutes 45 seconds
 * Interchange = 1, Use CRC = 16, Use Channel LLR = 0
 * MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.000, Alpha2 = 0.900, Beta2 = 0.000
 * Convergence Early Stop: epsilon = 0.01, window = 3
-* AWGN, BPSK, Source = 1, Seed = 173
+* AWGN, BPSK, Source = 1, Seed = 173, Performance_v1.3
 ******************************************************************************
 Program  starts  at: Sun Apr 12 23:47:20 2026
 
@@ -196,3 +198,292 @@ Program  starts  at: Fri Apr 17 21:48:32 2026
   2.50      19973    100      1    5.007e-03   0.000e+00   2.495e-03   7.702
   3.00     115413    100      0    8.665e-04   0.000e+00   4.292e-04   5.233
   3.50    1020242    100      0    9.802e-05   0.000e+00   4.860e-05   4.122
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.1000, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.000, Alpha2 = 0.900, Beta2 = 0.000
+* Convergence Early Stop: epsilon = 0.01, window = 3
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Sat Apr 18 18:14:26 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    206      0    2.060e-01   0.000e+00   1.029e-01   59.481
+  1.50       1339    100      0    7.468e-02   0.000e+00   3.729e-02   27.538
+  2.00       3889    100      0    2.571e-02   0.000e+00   1.245e-02   14.251
+  2.50      19145    100      0    5.223e-03   0.000e+00   2.582e-03   7.411
+  3.00     109626    100      0    9.122e-04   0.000e+00   4.603e-04   4.930
+  3.50     999763    100      0    1.000e-04   0.000e+00   5.050e-05   3.775
+  4.00   10602369    100      0    9.432e-06   0.000e+00   4.801e-06   3.054
+
+Method: Fisher-Yates+length/2, Power-law decay p = 1.2, ML metric, srand(main)
+Program  ends    at: Sun Apr 19 03:50:35 2026
+Termination reason: Normal completion
+Total running time: 9 hours 36 minutes 9 seconds
+******************************************************************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.1000, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.000, Alpha2 = 0.900, Beta2 = 0.000
+* Convergence Early Stop: epsilon = 0.01, window = 3
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Sun Apr 19 11:59:01 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  3.00     431827    300      0    6.947e-04   0.000e+00   3.517e-04   4.685
+
+Method: Fisher-Yates+length/2, Power-law decay p=0.4, ML metric, srand(main)
+Program  ends    at: Sun Apr 19 12:22:35 2026
+Termination reason: Normal completion
+Total running time: 0 hours 23 minutes 34 seconds
+******************************************************************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.1000, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.000, Alpha2 = 0.900, Beta2 = 0.000
+* Convergence Early Stop: epsilon = 0.01, window = 3
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Sun Apr 19 13:27:30 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  3.00     405582    300      1    7.397e-04   0.000e+00   3.687e-04   4.726
+
+Method: Fisher-Yates+length/2, Power-law decay p=0.55, ML metric, srand(main)
+Program  ends    at: Sun Apr 19 13:48:08 2026
+Termination reason: Normal completion
+Total running time: 0 hours 20 minutes 38 seconds
+******************************************************************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.1000, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.000, Alpha2 = 0.900, Beta2 = 0.000
+* Convergence Early Stop: epsilon = 0.01, window = 3
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Sun Apr 19 22:10:11 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  3.00     402735    300      1    7.449e-04   0.000e+00   3.725e-04   4.785
+
+Method: Fisher-Yates+length/2, Power-law decay p=0.8, ML metric, srand(main)
+Program  ends    at: Sun Apr 19 22:32:36 2026
+Termination reason: Normal completion
+Total running time: 0 hours 22 minutes 25 seconds
+******************************************************************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.1000, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.000, Alpha2 = 0.900, Beta2 = 0.000
+* Convergence Early Stop: epsilon = 0.01, window = 3
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Mon Apr 20 09:11:42 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  3.50    3521287    300      1    8.520e-05   0.000e+00   4.276e-05   3.656
+
+Method: Fisher-Yates+length/2, Power-law decay p=0.4, ML metric, srand(main)
+Program  ends    at: Mon Apr 20 12:21:46 2026
+Termination reason: Normal completion
+Total running time: 3 hours 10 minutes 4 seconds
+******************************************************************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.1000, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.000, Alpha2 = 0.900, Beta2 = 0.000
+* Convergence Early Stop: epsilon = 0.01, window = 3
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Mon Apr 20 23:37:10 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  3.50    3374035    300      1    8.891e-05   0.000e+00   4.436e-05   3.677
+
+Method: Fisher-Yates+length/2, Power-law decay p=0.55, ML metric, srand(main)
+Program  ends    at: Tue Apr 21 01:57:42 2026
+Termination reason: Normal completion
+Total running time: 2 hours 20 minutes 32 seconds
+******************************************************************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.1000, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.000, Alpha2 = 0.900, Beta2 = 0.000
+* Convergence Early Stop: epsilon = 0.01, window = 3
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Tue Apr 21 13:22:20 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  3.50    3467572    300      1    8.652e-05   0.000e+00   4.351e-05   3.698
+
+Method: Fisher-Yates+length/2, Power-law decay p=0.7, ML metric, srand(main)
+Program  ends    at: Tue Apr 21 16:34:44 2026
+Termination reason: Normal completion
+Total running time: 3 hours 12 minutes 24 seconds
+******************************************************************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Damping Factor = 0.1000, Metric Threshold = 41.000
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.000, Alpha2 = 0.900, Beta2 = 0.000
+* Convergence Early Stop: epsilon = 0.01, window = 3
+* AWGN, BPSK, Source = 1, Seed = 173
+******************************************************************************
+Program  starts  at: Tue Apr 21 18:06:35 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  4.00    7429746     50      0    6.730e-06   0.000e+00   3.424e-06   2.988
+
+Method: Fisher-Yates+length/2, Power-law decay p=0.5, ML metric, srand(main)
+Program  ends    at: Wed Apr 22 03:11:58 2026
+Termination reason: Normal completion
+Total running time: 9 hours 5 minutes 23 seconds
+******************************************************************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 56, K = 72, A = 48, shorten = 0, puncture = 0, CRC = 24, R = 72/128, R_net = 48/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Metric Threshold = 41.00
+* Interchange = 1, Use CRC = 20, Use Channel LLR = 0
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.00, Beta1 = 0.00, Alpha2 = 0.90, Beta2 = 0.00
+* Damping Mode = 0 (0:fixed,1:linear,2:Power-low), fixed = 0.08, start = 0.12, end = 0.04, p = 0.50
+* AWGN, BPSK, Source = 1, Seed = 173, Performance_v1.3, srand(main)
+******************************************************************************
+Program  starts  at: Thu Apr 23 00:38:42 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       7907    100      2    1.265e-02   0.000e+00   6.475e-03   14.845
+  1.50      26533    100      1    3.769e-03   0.000e+00   1.877e-03   10.201
+  2.00     133171    100      1    7.509e-04   0.000e+00   3.722e-04   7.891
+  2.50     680376    100      0    1.470e-04   0.000e+00   7.353e-05   6.708
+  3.00    3712642    100      0    2.693e-05   0.000e+00   1.357e-05   5.911
+  3.50   23855125    100      0    4.192e-06   0.000e+00   2.079e-06   5.240
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 56, K = 72, A = 48, shorten = 0, puncture = 0, CRC = 24, R = 72/128, R_net = 48/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Metric Threshold = 41.00
+* Interchange = 1, Use CRC = 20, Use Channel LLR = 0
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.00, Beta1 = 0.00, Alpha2 = 0.90, Beta2 = 0.00
+* Damping Mode = 0 (0:fixed,1:linear,2:Power-low), fixed = 0.08, start = 0.12, end = 0.04, p = 0.50
+* AWGN, BPSK, Source = 1, Seed = 173, Performance_v1.3, srand(main)
+******************************************************************************
+Program  starts  at: Fri Apr 24 10:51:38 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  3.50   23855125    100      0    4.192e-06   0.000e+00   2.079e-06   5.240
+
+Program  ends    at: Mon Apr 27 18:33:47 2026
+Termination reason: Normal completion
+Total running time: 79 hours 42 minutes 9 seconds
+******************************************************************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 32, K = 96, A = 72, shorten = 0, puncture = 0, CRC = 24, R = 96/128, R_net = 72/128
+* Decoding Method: SCLD L = 32,system = 0
+* AWGN, BPSK, Source = 1, Seed = 173, Performance_v1.3, srand(main)
+******************************************************************************
+Program  starts  at: Mon Apr 27 21:31:50 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1000    498      0    4.980e-01   0.000e+00   2.442e-01   0.000
+  1.50       1000    279      0    2.790e-01   0.000e+00   1.363e-01   0.000
+  2.00       1001    100      0    9.990e-02   0.000e+00   4.787e-02   0.000
+  2.50       3782    100      0    2.644e-02   0.000e+00   1.290e-02   0.000
+  3.00      15193    100      0    6.582e-03   0.000e+00   3.238e-03   0.000
+  3.50       1769      1      0    5.653e-04   0.000e+00   2.591e-04   0.000
+
+Program  ends    at: Mon Apr 27 21:36:05 2026
+Termination reason: User exit (pressed E)
+Total running time: 0 hours 4 minutes 15 seconds
+******************************************************************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 64, K = 64, A = 40, shorten = 0, puncture = 0, CRC = 24, R = 64/128, R_net = 40/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Metric Threshold = 41.00
+* Interchange = 1, Use CRC = 18, Use Channel LLR = 0
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.00, Beta1 = 0.00, Alpha2 = 0.90, Beta2 = 0.00
+* Damping Mode = 0 (0:fixed,1:linear,2:Power-low), fixed = 0.08, start = 0.12, end = 0.04, p = 0.50
+* AWGN, BPSK, Source = 1, Seed = 173, Performance_v1.3, srand(main)
+******************************************************************************
+Program  starts  at: Mon Apr 27 22:20:31 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       7525    100      0    1.329e-02   0.000e+00   6.541e-03   15.127
+  1.50       3820     13      0    3.403e-03   0.000e+00   1.669e-03   10.536
+
+Program  ends    at: Mon Apr 27 22:23:47 2026
+Termination reason: User exit (pressed E)
+Total running time: 0 hours 3 minutes 16 seconds
+******************************************************************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 64, K = 64, A = 40, shorten = 0, puncture = 0, CRC = 24, R = 64/128, R_net = 40/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Metric Threshold = 41.00
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.00, Beta1 = 0.00, Alpha2 = 0.90, Beta2 = 0.00
+* Damping Mode = 0 (0:fixed,1:linear,2:Power-low), fixed = 0.08, start = 0.12, end = 0.04, p = 0.50
+* AWGN, BPSK, Source = 1, Seed = 173, Performance_v1.3, srand(main)
+******************************************************************************
+Program  starts  at: Mon Apr 27 22:58:40 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  4.00   14011794     59      0    4.211e-06   0.000e+00   2.102e-06   5.255
+
+Program  ends    at: Wed Apr 29 10:12:55 2026
+Termination reason: User exit (pressed E)
+Total running time: 35 hours 14 minutes 15 seconds
+******************************************************************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 56, K = 72, A = 48, shorten = 0, puncture = 0, CRC = 24, R = 72/128, R_net = 48/128
+* Decoding Method: ABP/MSA(20, 5), Deg-2 = 1, Metric Threshold = 41.00
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.00, Beta1 = 0.00, Alpha2 = 0.90, Beta2 = 0.00
+* Damping Mode = 0 (0:fixed,1:linear,2:Power-low), fixed = 0.08, start = 0.12, end = 0.04, p = 0.50
+* AWGN, BPSK, Source = 1, Seed = 173, Performance_v1.3, srand(main)
+******************************************************************************
+Program  starts  at: Wed Apr 29 17:09:33 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1030    100      0    9.709e-02   0.000e+00   4.865e-02   22.237
+  1.50       3393    100      0    2.947e-02   0.000e+00   1.479e-02   13.676
+  2.00      10610    100      0    9.425e-03   0.000e+00   4.723e-03   9.643
+  2.50      46084    100      0    2.170e-03   0.000e+00   1.087e-03   7.642
+  3.00     217989    100      0    4.587e-04   0.000e+00   2.273e-04   6.424
+  3.50    1282573    100      0    7.797e-05   0.000e+00   3.884e-05   5.590
+  4.00    8730937    100      0    1.145e-05   0.000e+00   5.703e-06   4.889
+
+Program  ends    at: Thu Apr 30 15:02:17 2026
+Termination reason: Normal completion
+Total running time: 21 hours 52 minutes 44 seconds
+******************************************************************************

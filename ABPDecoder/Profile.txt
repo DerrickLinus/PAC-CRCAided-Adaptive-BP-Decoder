@@ -2,15 +2,14 @@ ABP Decoder Profile:
 
 Codefile:			CF.Polar.128.64.txt
 N:					128
-K:      			96
+K:      			72
 CRC:				24
 Add Zeros:			1
 Puncture:			0
 Shorten:			0
 Decoding Method:	2
 
-ABP Scheme:			20 10
-ABP Damping:		0.1
+ABP Scheme:			20 5
 ABP Deg-2:			1
 ABP Interchange:	1
 ABP Use CRC:		12
@@ -18,13 +17,21 @@ ABP Use ChannelLLR: 0
 Metric Threshold:   41
 SCLD ListSize:      32
 PAC	SystemCode:     0
+
 MS Type:			0
 NMS Alpha:			1
 OMS Beta:			0
 NMS Alpha2:			0.9
 OMS Beta2:			0
+
 Convergence Epsilon: 0.01
-Convergence Window:  3		
+Convergence Window:  3
+
+Damping Mode:		0
+Damping Fixed:		0.08
+Damping Start:		0.12
+Damping End:		0.04
+Damping P:			0.5
 
 SNR Type:   0
 Start SNR:  1.0
@@ -51,3 +58,4 @@ DecodingMethod:     1-ideal_ABP_MSA 2-ABP_MSA 3-SG_ABP 4-List_ABP_MSA 5-EC_ABP_M
 MS Type:            0-标准MS, 1-NMS(缩放), 2-OMS(偏移), 3-NMS+OMS(缩放+偏移)
 NMS Alpha:          NMS缩放因子，典型值0.75~0.95，1.0等价于标准MS
 OMS Beta:           OMS偏移量，典型值0.1~0.3，0.0等价于标准MS
+Damping Mode:		0-固定阻尼因子，1-线性衰减阻尼因子，2-幂律衰减阻尼因子

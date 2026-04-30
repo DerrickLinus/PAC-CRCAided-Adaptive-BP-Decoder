@@ -23,7 +23,6 @@ void ReadProfile(struct ADPStruct *ADP, struct SPStruct *SP)
 	fscanf(profile, "%*s%*s%d", &(ADP->DecodingMethod));
 
 	fscanf(profile, "%*s%*s%d%d", &(ADP->N1), &(ADP->N2));
-	fscanf(profile, "%*s%*s%lf", &(ADP->damping_factor));
 	fscanf(profile, "%*s%*s%d", &(ADP->Deg2));
 	fscanf(profile, "%*s%*s%d", &(ADP->Interchange));
 	fscanf(profile, "%*s%*s%*s%d", &(ADP->CRC_len_for_ABP));
@@ -31,13 +30,21 @@ void ReadProfile(struct ADPStruct *ADP, struct SPStruct *SP)
 	fscanf(profile, "%*s%*s%lf", &(ADP->ML_metric_th));
 	fscanf(profile, "%*s%*s%d", &(ADP->PAC_code->L));
 	fscanf(profile, "%*s%*s%d", &(ADP->PAC_code->system));
+
 	fscanf(profile, "%*s%*s%d", &(ADP->ms_type));
 	fscanf(profile, "%*s%*s%lf", &(ADP->alpha_fixed));
 	fscanf(profile, "%*s%*s%lf", &(ADP->beta_fixed));
 	fscanf(profile, "%*s%*s%lf", &(ADP->alpha_fixed2));
 	fscanf(profile, "%*s%*s%lf", &(ADP->beta_fixed2));
+
 	fscanf(profile, "%*s%*s%lf", &(ADP->convergence_epsilon));
 	fscanf(profile, "%*s%*s%d", &(ADP->convergence_window));
+
+	fscanf(profile, "%*s%*s%d", &(ADP->damp_mode));
+	fscanf(profile, "%*s%*s%lf", &(ADP->damp_fixed));
+	fscanf(profile, "%*s%*s%lf", &(ADP->damp_start));
+	fscanf(profile, "%*s%*s%lf", &(ADP->damp_end));
+	fscanf(profile, "%*s%*s%lf", &(ADP->damp_p));
 
 	fscanf(profile, "%*s%*s%d", &(SP->SNRtype));
 	fscanf(profile, "%*s%*s%lf", &(SP->startSNR));

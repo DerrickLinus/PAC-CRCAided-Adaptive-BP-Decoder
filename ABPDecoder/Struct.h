@@ -103,7 +103,6 @@ struct ADPStruct
 	int *A;						// the active positions, for Polar
 	int N1;						// inner iteration
 	int N2;						// outer iteration
-	double damping_factor;
 	int Deg2;
 	double IterTime;
 	int HDD;
@@ -141,6 +140,12 @@ struct ADPStruct
 	// 收敛速率早停参数
 	double convergence_epsilon;		// 相对变化阈值，metric变化小于此比例视为停滞 - 3.14修改
 	int convergence_window;			// 连续停滞次数阈值，达到则触发早停 - 3.14修改
+
+	int damp_mode;				// 0:固定阻尼, 1:线性变化, 2:幂函数变化
+	double damp_fixed;			// 固定阻尼因子
+	double damp_start;			// 线性/幂函数变化起始阻尼因子
+	double damp_end;			// 线性/幂函数变化结束阻尼因子
+	double damp_p;				// 幂函数变化的指数
 };
 
 

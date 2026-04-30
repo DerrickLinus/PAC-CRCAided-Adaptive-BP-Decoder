@@ -16,8 +16,7 @@ void WriteEndTimeAndDuration(const char* reason)
 	int minutes = (int)((elapsed_seconds - hours * 3600) / 60);
 	int seconds = (int)(elapsed_seconds - hours * 3600 - minutes * 60);
 
-	printf("\nMethod: Fisher-Yates+length/2, fixed damping_factor, ML metric, srand(main)\n");
-	printf("Program  ends    at: %s", ctime(&end_time));
+	printf("\nProgram  ends    at: %s", ctime(&end_time));
 	printf("Termination reason: %s\n", reason);
 	printf("Total running time: %d hours %d minutes %d seconds\n", hours, minutes, seconds);
 	printf("******************************************************************************\n");
@@ -26,8 +25,7 @@ void WriteEndTimeAndDuration(const char* reason)
 	FILE* outfile;
 	if ((outfile = fopen("Performance_v1.3.txt", "a+")) != NULL)
 	{
-		fprintf(outfile, "\nMethod: Fisher-Yates+length/2, fixed damping_factor, ML metric, srand(main)\n");
-		fprintf(outfile, "Program  ends    at: %s", ctime(&end_time));
+		fprintf(outfile, "\nProgram  ends    at: %s", ctime(&end_time));
 		fprintf(outfile, "Termination reason: %s\n", reason);
 		fprintf(outfile, "Total running time: %d hours %d minutes %d seconds\n", hours, minutes, seconds);
 		fprintf(outfile, "******************************************************************************\n");
@@ -98,30 +96,34 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 	printf("* Decoding Method: ");
 	if (ADP->DecodingMethod == 1)
 	{
-		printf("ideal-ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th);
+		printf("ideal-ABP/MSA(%d, %d), Deg-2 = %d, Metric Threshold = %.2f\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->ML_metric_th);
 		printf("* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
-		printf("* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %5.3f, Beta1 = %5.3f, Alpha2 = %5.3f, Beta2 = %5.3f\n",
+		printf("* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %.2f, Beta1 = %.2f, Alpha2 = %.2f, Beta2 = %.2f\n",
 			ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
+		printf("* Damping Mode = %d (0:fixed,1:linear,2:Power-low), fixed = %.2f, start = %.2f, end = %.2f, p = %.2f\n", 
+			ADP->damp_mode, ADP->damp_fixed, ADP->damp_start, ADP->damp_end, ADP->damp_p);
 	}
 	else if (ADP->DecodingMethod == 2)
 	{
-		printf("ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th);
+		printf("ABP/MSA(%d, %d), Deg-2 = %d, Metric Threshold = %.2f\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->ML_metric_th);
 		printf("* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
-		printf("* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %5.3f, Beta1 = %5.3f, Alpha2 = %5.3f, Beta2 = %5.3f\n",
+		printf("* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %.2f, Beta1 = %.2f, Alpha2 = %.2f, Beta2 = %.2f\n",
 			ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
+		printf("* Damping Mode = %d (0:fixed,1:linear,2:Power-low), fixed = %.2f, start = %.2f, end = %.2f, p = %.2f\n",
+			ADP->damp_mode, ADP->damp_fixed, ADP->damp_start, ADP->damp_end, ADP->damp_p);
 	}
 	else if (ADP->DecodingMethod == 3)
-		printf("SG-ABP(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th, ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
+		printf("SG-ABP(%d, %d), Deg-2 = %d, Damping Factor = %.2f, Metric Threshold = %.2f\n* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damp_fixed, ADP->ML_metric_th, ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
 	else if (ADP->DecodingMethod == 4)
-		printf("List-ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th, ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
+		printf("List-ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %.2f, Metric Threshold = %.2f\n* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damp_fixed, ADP->ML_metric_th, ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
 	else if (ADP->DecodingMethod == 5)
-		printf("EC-ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th, ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
+		printf("EC-ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %.2f, Metric Threshold = %.2f\n* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damp_fixed, ADP->ML_metric_th, ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
 	else if (ADP->DecodingMethod == 6)
 		printf("SCLD L = %d,system = %d\n", ADP->PAC_code->L,ADP->PAC_code->system);
 	else
 		printf("Error!\n");
-	printf("* Convergence Early Stop: epsilon = %g, window = %d\n", ADP->convergence_epsilon, ADP->convergence_window); // 3.14修改
-	printf("* AWGN, BPSK, Source = %d, Seed = %d\n", SP->sourceType, 173);
+	//printf("* Convergence Early Stop: epsilon = %g, window = %d\n", ADP->convergence_epsilon, ADP->convergence_window); // 3.14修改
+	printf("* AWGN, BPSK, Source = %d, Seed = %d, Performance_v1.3, srand(main)\n", SP->sourceType, 173);
 	printf("******************************************************************************\n");
 
 	start = time(NULL);
@@ -147,30 +149,34 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 	fprintf(outfile, "* Decoding Method: ");
 	if (ADP->DecodingMethod == 1)
 	{
-		fprintf(outfile, "ideal-ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th);
+		fprintf(outfile, "ideal-ABP/MSA(%d, %d), Deg-2 = %d, Metric Threshold = %.2f\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->ML_metric_th);
 		fprintf(outfile, "* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
-		fprintf(outfile, "* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %5.3f, Beta1 = %5.3f, Alpha2 = %5.3f, Beta2 = %5.3f\n",
+		fprintf(outfile, "* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %.2f, Beta1 = %.2f, Alpha2 = %.2f, Beta2 = %.2f\n",
 			ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
+		fprintf(outfile, "* Damping Mode = %d (0:fixed,1:linear,2:Power-low), fixed = %.2f, start = %.2f, end = %.2f, p = %.2f\n",
+			ADP->damp_mode, ADP->damp_fixed, ADP->damp_start, ADP->damp_end, ADP->damp_p);
 	}
 	else if (ADP->DecodingMethod == 2)
 	{
-		fprintf(outfile, "ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th);
+		fprintf(outfile, "ABP/MSA(%d, %d), Deg-2 = %d, Metric Threshold = %.2f\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->ML_metric_th);
 		fprintf(outfile, "* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
-		fprintf(outfile, "* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %5.3f, Beta1 = %5.3f, Alpha2 = %5.3f, Beta2 = %5.3f\n",
+		fprintf(outfile, "* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %.2f, Beta1 = %.2f, Alpha2 = %.2f, Beta2 = %.2f\n",
 			ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
+		fprintf(outfile, "* Damping Mode = %d (0:fixed,1:linear,2:Power-low), fixed = %.2f, start = %.2f, end = %.2f, p = %.2f\n",
+			ADP->damp_mode, ADP->damp_fixed, ADP->damp_start, ADP->damp_end, ADP->damp_p);
 	}
 	else if (ADP->DecodingMethod == 3)
-		fprintf(outfile, "SG-ABP(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th, ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
+		fprintf(outfile, "SG-ABP(%d, %d), Deg-2 = %d, Damping Factor = %.2f, Metric Threshold = %.2f\n* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damp_fixed, ADP->ML_metric_th, ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
 	else if (ADP->DecodingMethod == 4)
-		fprintf(outfile, "List-ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th, ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
+		fprintf(outfile, "List-ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %.2f, Metric Threshold = %.2f\n* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damp_fixed, ADP->ML_metric_th, ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
 	else if (ADP->DecodingMethod == 5)
-		fprintf(outfile, "EC-ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %6.4f, Metric Threshold = %5.3f\n* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damping_factor, ADP->ML_metric_th, ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
+		fprintf(outfile, "EC-ABP/MSA(%d, %d), Deg-2 = %d, Damping Factor = %.2f, Metric Threshold = %.2f\n* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->damp_fixed, ADP->ML_metric_th, ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
 	else if (ADP->DecodingMethod == 6)
 		fprintf(outfile, "SCLD L = %d,system = %d\n", ADP->PAC_code->L, ADP->PAC_code->system);
 	else
 		fprintf(outfile, "Error!\n");
-	fprintf(outfile, "* Convergence Early Stop: epsilon = %g, window = %d\n", ADP->convergence_epsilon, ADP->convergence_window); // 3.14修改
-	fprintf(outfile, "* AWGN, BPSK, Source = %d, Seed = %d\n", SP->sourceType, 173);
+	//fprintf(outfile, "* Convergence Early Stop: epsilon = %g, window = %d\n", ADP->convergence_epsilon, ADP->convergence_window); // 3.14修改
+	fprintf(outfile, "* AWGN, BPSK, Source = %d, Seed = %d, Performance_v1.3, srand(main)\n", SP->sourceType, 173);
 	fprintf(outfile, "******************************************************************************\n");
 
 

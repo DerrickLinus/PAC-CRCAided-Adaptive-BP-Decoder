@@ -456,7 +456,7 @@ Total running time: 7 hours 49 minutes 11 seconds
 * Interchange = 1, Use CRC = 12, Use Channel LLR = 0
 * MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.000, Alpha2 = 0.900, Beta2 = 0.000
 * Convergence Early Stop: epsilon = 0.01, window = 3
-* AWGN, BPSK, Source = 1, Seed = 173
+* AWGN, BPSK, Source = 1, Seed = 173, Performance_v1.2
 ******************************************************************************
 Program  starts  at: Thu Mar 26 14:10:45 2026
 
@@ -482,7 +482,7 @@ Total running time: 75 hours 36 minutes 55 seconds
 * Interchange = 1, Use CRC = 12, Use Channel LLR = 0
 * MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.000, Alpha2 = 0.900, Beta2 = 0.000
 * Convergence Early Stop: epsilon = 0.01, window = 3
-* AWGN, BPSK, Source = 1, Seed = 173
+* AWGN, BPSK, Source = 1, Seed = 173, Performance_v1.2
 ******************************************************************************
 Program  starts  at: Mon Mar 30 17:23:56 2026
 
@@ -508,7 +508,7 @@ Total running time: 56 hours 35 minutes 59 seconds
 * Interchange = 1, Use CRC = 14, Use Channel LLR = 0
 * MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.000, Beta1 = 0.000, Alpha2 = 0.900, Beta2 = 0.000
 * Convergence Early Stop: epsilon = 0.01, window = 3
-* AWGN, BPSK, Source = 1, Seed = 173
+* AWGN, BPSK, Source = 1, Seed = 173, Performance_v1.2
 ******************************************************************************
 Program  starts  at: Thu Apr  2 18:43:47 2026
 
