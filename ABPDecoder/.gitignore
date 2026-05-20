@@ -1,0 +1,33 @@
+# CMake 构建输出
+build/
+
+# Visual Studio 构建输出
+x64/
+Debug/
+Release/
+
+# Visual Studio IDE 缓存
+.vs/
+
+# 用户级 VS 项目配置
+*.vcxproj.user
+
+# 编译产物
+*.exe
+*.obj
+*.o
+*.ilk
+*.pdb
+*.recipe
+
+# 构建日志
+*.log
+*.tlog
+*.lastbuildstate
+
+# Claude Code 内部文件
+.claude/
+
+# 系统文件
+Thumbs.db
+Desktop.ini

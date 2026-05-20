@@ -1,0 +1,10 @@
+{
+    "cmake.generator": "MinGW Makefiles",
+    "cmake.configureSettings": {
+        "CMAKE_BUILD_TYPE": "Release"
+    },
+    "cmake.debugConfig": {
+        "cwd": "${workspaceFolder}"
+    },
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
+}

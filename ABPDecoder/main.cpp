@@ -1,7 +1,7 @@
 #include "define.h"
 
-void main()
-{	
+int main()
+{
 	srand(731);
 	struct SPStruct *SP;
 	struct AWGN *awgn;
@@ -20,4 +20,6 @@ void main()
 	InitialAWGN(awgn);
 
 	Simulation(SP, ADP, awgn, Statis);
+
+	return 0;
 }

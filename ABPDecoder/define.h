@@ -5,9 +5,11 @@
 #include <math.h>
 #include <string.h>
 #include <time.h>
+#include <algorithm>
 #include <random>
-#include<iostream>
+#include <iostream>
 #include <unordered_set>
+#include <omp.h>
 using namespace std;
 #include "Struct.h"
 
@@ -21,6 +23,7 @@ using namespace std;
 void Initial(struct ADPStruct *ADP, struct SPStruct *SP);
 void InitialAWGN(struct AWGN *awgn);
 void InitialIter(int M, int N, int **H, struct IterStruct *Iter);
+void MallocIter(int M, int N, struct IterStruct *Iter);
 void OSD_GE_H(int **Hi, int **Ho, int M, int N, int *K,
 	const int *ReliabilityOrder, int *ReliabilityOrderGE, int *InterGE);
 void Permute(int *seq, int length);

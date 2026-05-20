@@ -1169,9 +1169,7 @@ void StochasticGrouping(double* LLR, int N, int* ReOrder, double ReFactor,
 
 	for (i = 0; i < N; i++)
 	{
-		rand_alpha = (double)rand() / (RAND_MAX + 1E-10) * Pr_sum;   // uniform distribution [0, Pr_sum)
-		/*rand_alpha = (uniform(eng));
-		rand_alpha *= Pr_sum;*/
+			rand_alpha = uniform(eng) * Pr_sum;   // uniform distribution [0, Pr_sum)
 		for (j = N - 1; j >= 0; j--)
 		{
 			if (Pr_Table[j] <= rand_alpha)

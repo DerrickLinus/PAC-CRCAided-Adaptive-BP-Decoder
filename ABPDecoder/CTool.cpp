@@ -229,14 +229,15 @@ void FindOptimal(const double *LLR, int *codeSeq, int length, double *minSED, in
 
 // Deg-2 Random Connection
 // 源代码，不是真正的均匀随机，但通过仿真实验，发现这种方式误码率性能好像更好？难道这个地方就是不能太随机？
-void Permute(int *seq, int length) 
+void Permute(int *seq, int length)
 {
+	thread_local std::mt19937 rng(173 + omp_get_thread_num() * 10000);
  	int temp;
  	int pos1, pos2;
- 	for (int i = 0; i < length / 2; i++) 
+ 	for (int i = 0; i < length / 2; i++)
  	{
- 		pos1 = rand() % length;
- 		pos2 = rand() % length;
+ 		pos1 = rng() % length;
+ 		pos2 = rng() % length;
  		temp = seq[pos1];
  		seq[pos1] = seq[pos2];
  		seq[pos2] = temp;
