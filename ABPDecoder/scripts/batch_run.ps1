@@ -86,9 +86,12 @@ Display Step:	    $($Row.DisplayStep)
 # Auto-detect executable
 if ($ExePath -eq "") {
     $candidates = @(
-        "$rootDir\build\ABPDecoder.exe",
+        "$rootDir\out\build\x64-Release\ABPDecoder.exe",   # VS Studio CMake (VS 2022)
+        "$rootDir\out\build\x64-Debug\ABPDecoder.exe",
+        "$rootDir\build\ABPDecoder.exe",                    # CMake (VS Code / MinGW)
         "$rootDir\build\Release\ABPDecoder.exe",
-        "$rootDir\x64\Release\ABPDecoder.exe"
+        "$rootDir\x64\Release\ABPDecoder.exe",              # VS MSBuild (.sln/.vcxproj)
+        "$rootDir\x64\Debug\ABPDecoder.exe"
     )
     foreach ($c in $candidates) {
         if (Test-Path $c) { $ExePath = $c; break }
