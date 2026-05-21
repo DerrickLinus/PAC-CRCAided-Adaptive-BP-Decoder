@@ -50,3 +50,5 @@ void saveMatrixToFile(int** G, int rows, int cols, const char* filename);
 void saveArrayToFile(int* A, int len, const char* filename);
 void printMatrix(int** G, int rows, int cols);
 void saveArrayDoubleToFile(double* A, int len, const char* filename);
+
+extern const char* g_outputFilename;

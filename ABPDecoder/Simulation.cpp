@@ -6,6 +6,8 @@
 static time_t g_start_time = 0;
 static volatile sig_atomic_t g_program_running = 0;
 
+const char* g_outputFilename = "Performance_v1.3.txt";
+
 // 记录程序结束时间和运行时长（可被正常结束和信号处理共同调用）
 void WriteEndTimeAndDuration(const char* reason)
 {
@@ -24,7 +26,7 @@ void WriteEndTimeAndDuration(const char* reason)
 
 	// 同时写入到文件
 	FILE* outfile;
-	if ((outfile = fopen("Performance_v1.3.txt", "a+")) != NULL)
+	if ((outfile = fopen(g_outputFilename, "a+")) != NULL)
 	{
 		fprintf(outfile, "\nProgram  ends    at: %s", ctime(&end_time));
 		fprintf(outfile, "Termination reason: %s\n", reason);
@@ -124,7 +126,7 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 	else
 		printf("Error!\n");
 	//printf("* Convergence Early Stop: epsilon = %g, window = %d\n", ADP->convergence_epsilon, ADP->convergence_window); // 3.14修改
-	printf("* AWGN, BPSK, Source = %d, Seed = %d, Performance_v1.3, srand(main)\n", SP->sourceType, 173);
+	printf("* AWGN, BPSK, Source = %d, Seed = %d, %s, srand(main)\n", SP->sourceType, 173, g_outputFilename);
 	printf("******************************************************************************\n");
 
 	start = time(NULL);
@@ -138,7 +140,7 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 		printf(" Es/No       NTF     NEF     NUF    FER         SER         BER         IT\n");
 	}
 
-	if ((outfile = fopen("Performance_v1.3.txt", "a+")) == NULL)
+	if ((outfile = fopen(g_outputFilename, "a+")) == NULL)
 	{
 		printf("Can not open performance file !\n");
 		getch();
@@ -177,7 +179,7 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 	else
 		fprintf(outfile, "Error!\n");
 	//fprintf(outfile, "* Convergence Early Stop: epsilon = %g, window = %d\n", ADP->convergence_epsilon, ADP->convergence_window); // 3.14修改
-	fprintf(outfile, "* AWGN, BPSK, Source = %d, Seed = %d, Performance_v1.3, srand(main)\n", SP->sourceType, 173);
+	fprintf(outfile, "* AWGN, BPSK, Source = %d, Seed = %d, %s, srand(main)\n", SP->sourceType, 173, g_outputFilename);
 	fprintf(outfile, "******************************************************************************\n");
 
 
@@ -202,7 +204,7 @@ void Display(double SNR, struct StatisStruct *Statis)
 void WriteResult2File(double SNR, struct StatisStruct *Statis)
 {
 	FILE *outfile;
-	if ((outfile = fopen("Performance_v1.3.txt", "a+")) == NULL)
+	if ((outfile = fopen(g_outputFilename, "a+")) == NULL)
 	{
 		printf("Can not open performance file !\n");
 		getch();

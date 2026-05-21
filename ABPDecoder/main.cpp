@@ -1,6 +1,6 @@
 #include "define.h"
 
-int main()
+int main(int argc, char* argv[])
 {
 	srand(731);
 	struct SPStruct *SP;
@@ -15,6 +15,10 @@ int main()
 	awgn = new struct AWGN;
 	awgn->seed = new struct SEED;
 	Statis = new struct StatisStruct;
+
+	if (argc >= 2) {
+		g_outputFilename = argv[1];
+	}
 
 	Initial(ADP, SP);
 	InitialAWGN(awgn);
