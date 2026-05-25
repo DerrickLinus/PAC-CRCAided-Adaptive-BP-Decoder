@@ -323,9 +323,66 @@ $env:OMP_NUM_THREADS = 4
 
 ---
 
-## 四、待补充
+## 四、内存池优化（已实施）
 
-- [ ] 避免 malloc / new 的内存池优化（每线程预分配、减少 `PACEncode` 内动态分配）
+### 4.1 背景
+
+`PACEncode` 和 `Decode` 的 6 个译码方法在每帧处理时通过 `new[]`/`delete[]` 分配和释放所有临时缓冲区。每次仿真运行处理百万到上亿帧，在 OpenMP 多线程下造成严重的堆锁竞争。
+
+### 4.2 方案
+
+遵循现有的 `MallocIter` 模式，将所有热路径临时缓冲区**提升为每线程预分配**，在整个仿真中复用。
+
+### 4.3 新增数据结构（Struct.h）
+
+| 结构体 | 用途 |
+|--------|------|
+| `ABPPool` | ABP 译码方法（1-5）的预分配缓冲区，含 20+ 个一维/二维数组 |
+| `SCLPool` | SCL 译码方法（6）的预分配缓冲区，含 8 个二维/三维扁平数组 |
+| `DecodePool` | 顶层容器，内含 `union { ABPPool; SCLPool; }`，按 `DecodingMethod` 仅分配所需部分 |
+
+关键设计选择：
+- `adaptiveH[M][N]` 采用**扁平数组 + 行指针**（`adaptiveH_data[i*N+j]`），与 `MallocIter` 的 `CNindex` 一致
+- SCL 的 `sheet[L][n+1][N]` 采用两级行指针，保持 `sheet[l][q][pq]` 访问语义不变
+- 辅助函数（`OSD_GE_H`、`Recover_Info`、`StochasticGrouping`）保留旧签名为 wrapper，新增接收预分配缓冲区的重载
+
+### 4.4 每帧消除的分配
+
+| 译码方法 | 每帧消除的 `new[]`/`delete[]` 次数 | 主要来源 |
+|----------|-----------------------------------|----------|
+| PACEncode (`system!=0`) | 2 | `temp[K]`、`tempcode[N]` |
+| ABP 方法 (1-5) | ~168 | 顶级临时数组 + `OSD_GE_H`（每帧 N1×N2 次）+ `Recover_Info` |
+| SCL 方法 (6) | ~966 | `sheet`、`sheettemp` 的三级嵌套分配占大头 |
+
+### 4.5 额外内存开销
+
+- PACEncode：每线程 `(K + N) * 4` 字节，16 线程约 24 KB
+- ABP 池：每线程约 `(20*N + 3*M_ABP*N + K) * 4~8` 字节
+- SCL 池：每线程约 2 MB（L=32/N=256），与 IterDec 已有开销（M×N 二维数组）同量级
+
+### 4.6 修改的文件
+
+| 文件 | 改动 |
+|------|------|
+| `Struct.h` | 新增 `ABPPool`、`SCLPool`、`DecodePool` 结构体 |
+| `define.h` | 新增 `InitDecodePool`/`FreeDecodePool`、`OSD_GE_H`/`Recover_Info` 重载声明 |
+| `Initial.cpp` | `InitDecodePool`/`FreeDecodePool`：按 DecodingMethod 条件分配/释放 |
+| `CTool.cpp` | `OSD_GE_H` 新增带 `th/pos/tr` 参数的重载，旧签名保留为 wrapper |
+| `Decode.cpp` | 6 个译码方法 + `Decode` 调度器 + `Recover_Info` + `StochasticGrouping` 改用池 |
+| `Simulation.cpp` | 每线程分配 `thrDecodePools`/`thrEncodeTempK`/`thrEncodeTempN`，传入热路径，cleanup 释放 |
+
+### 4.7 预期收益
+
+| 方法 | 预期整体仿真加速 | 原因 |
+|------|-----------------|------|
+| PACEncode | < 1% | 该函数占单帧时间比例极小 |
+| ABP (1-5) | 8-15% | OSD_GE_H 每帧调用 N1×N2 次，每次 3 次分配 |
+| SCL (6) | 15-25% | sheet 3D 数组反复创建/销毁开销极大 |
+
+---
+
+## 五、待补充
+
 - [ ] 减少 I/O 频率（屏幕打印和文件写入优化，独立日志线程异步写入）
 - [ ] SIMD 向量化（利用 AVX2 指令集加速 `CheckCode`、`AWGNChannel` 等热点循环）
 - [ ] 热点函数分析（profiling 定位瓶颈）

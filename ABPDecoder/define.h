@@ -21,11 +21,16 @@ using namespace std;
 
 
 void Initial(struct ADPStruct *ADP, struct SPStruct *SP);
+void InitDecodePool(struct DecodePool* pool, struct ADPStruct* ADP);
+void FreeDecodePool(struct DecodePool* pool, struct ADPStruct* ADP);
 void InitialAWGN(struct AWGN *awgn);
 void InitialIter(int M, int N, int **H, struct IterStruct *Iter);
 void MallocIter(int M, int N, struct IterStruct *Iter);
 void OSD_GE_H(int **Hi, int **Ho, int M, int N, int *K,
 	const int *ReliabilityOrder, int *ReliabilityOrderGE, int *InterGE);
+void OSD_GE_H(int **Hi, int **Ho, int M, int N, int *K,
+	const int *ReliabilityOrder, int *ReliabilityOrderGE, int *InterGE,
+	int* th, int* pos, int* tr);
 void Permute(int *seq, int length);
 int GaussElimation_GF2(int **Hi, int **Ho, int M, int N, int *K, int *pos);
 void CRC_ENC(int* sourceseq, int* codeseq, int CRCLEN, int SRCLEN);
@@ -34,7 +39,7 @@ void CRC_H_initial(int **H, int CRCLEN, int k);
 void Encode(const int * u, int * c, int K, int N, int **G);
 void AWGNChannel(double *receiveseq, int *codeseq, struct AWGN *awgn, int length);
 void SoftDemodulate(double *bitsoft, double *receiveseq, double factor, int length);
-void Decode(double snr, double *bitsoft, double *y, int *result, struct ADPStruct *ADP);
+void Decode(double snr, double *bitsoft, double *y, int *result, struct ADPStruct *ADP, struct DecodePool* pool);
 int CheckCode(const int *codeseq, int M, struct IterStruct *Iter);
 void Simulation(struct SPStruct *SP, struct ADPStruct *ADP, struct AWGN *awgn, struct StatisStruct *Statis);
 void FindOptimal(const double* LLR, int* codeSeq, int length, double* minSED, int* result);
@@ -42,6 +47,7 @@ void SortLLR(const double* bitsoft, int N, int* ReliabilityOrder);
 void Calculate__Inverse_Matrix(int** T, int** T_1, int N);
 void Joint_H_Initial(struct ADPStruct* ADP);
 void Recover_Info(const int* codeword, int* info, struct ADPStruct* ADP);
+void Recover_Info(const int* codeword, int* info, struct ADPStruct* ADP, int* temp, int* temp_code);
 void getPunctureIndex(struct ADPStruct* ADP);
 void proposedPuncture(struct ADPStruct* ADP);
 void getShortenIndex(struct ADPStruct* ADP);

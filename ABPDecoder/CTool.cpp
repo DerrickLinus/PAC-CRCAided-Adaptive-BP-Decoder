@@ -72,8 +72,9 @@ ReliabilityOrder: 根据LLR可靠度排序后的bit顺序
 ReliabilityOrderGE: GE过程中发生列交换，交换后的ReliabilityOrder。文献中表示为2次交织后的顺序
 InterGE: ReliabilityOrder和ReliabilityOrderGE的交织关系
 */
-void OSD_GE_H(int **Hi, int **Ho, int M, int N, int *K, 
-	const int *ReliabilityOrder, int *ReliabilityOrderGE, int *InterGE)
+void OSD_GE_H(int **Hi, int **Ho, int M, int N, int *K,
+	const int *ReliabilityOrder, int *ReliabilityOrderGE, int *InterGE,
+	int* th, int* pos, int* tr)
 {
 	int i = 0;
 	int j = 0;
@@ -81,36 +82,25 @@ void OSD_GE_H(int **Hi, int **Ho, int M, int N, int *K,
 	int temp = 0;
 	int scp = 0;
 	int rp = 0;
-	int fs = 0;//GE过程中发生列交换的标志
-	int *th;
-	int *pos;//GE过程中发生列交换，记录位置
-	int *tr;//临时存放reliability order的数组
+	int fs = 0;
 
 	*K = N - M;
-	th = new int[M*N];
-	pos = new int[N];
-	tr = new int[N];
 
 	for (i = 0; i < N; i++) pos[i] = i;
 
-	// 根据ReliabilityOrder调整H矩阵
 	for (i = 0; i < M; i++)
 		for (j = 0; j < N; j++)
 			Ho[i][j] = Hi[i][ReliabilityOrder[j]];
 
-	// 把调整过的H赋值给临时变量th
 	for (i = 0; i < M; i++)
 		for (j = 0; j < N; j++)
 			th[i*N + j] = Ho[i][j];
 
-	// 高斯消元
-	//do Gauss Elimation from bottom line up
 	for (i = 0; i<M; i++)
 	{
 		temp = N * M - (i * N) - i - 1;
 		rp = M - i - 1;
 
-		//seek the line that currrent column bit is 1
 		for (j = 0; j<M - i; j++)
 		{
 			if ((*(th + temp)) == 1)
@@ -124,19 +114,17 @@ void OSD_GE_H(int **Hi, int **Ho, int M, int N, int *K,
 			}
 		}
 
-		if (rp == -1)	//can not find '1' in this column
+		if (rp == -1)
 		{
 			rp = SeekColumn(th, &scp, i, M, N);
 
-			//can not find any other columns with one '1' in it
-			if (rp == -1)//不满秩
+			if (rp == -1)
 			{
 				*K = N - i;
 				break;
 			}
 
-			//switch this two column
-			SwitchColumn(th, N, M, N - i - 1, scp);//从后往前找，与H矩阵按可靠度降序排列一致
+			SwitchColumn(th, N, M, N - i - 1, scp);
 			fs += 1;
 
 			temp = *(pos + N - i - 1);
@@ -144,16 +132,14 @@ void OSD_GE_H(int **Hi, int **Ho, int M, int N, int *K,
 			*(pos + scp) = temp;
 		}
 
-		if (rp != M - i - 1)	//current column position not equal to '1'
+		if (rp != M - i - 1)
 		{
-			//add the rp row to current row to make currunt column position equal to '1'
 			for (j = 0; j<N; j++)
 			{
 				(*(th + N * (M - i - 1) + j)) ^= (*(th + N * rp + j));
 			}
 		}
 
-		//elimate the other '1's in current column
 		for (j = 0; j<M; j++)
 		{
 			if ((j != M - i - 1) && ((*(th + N * j + N - i - 1)) == 1))
@@ -164,11 +150,9 @@ void OSD_GE_H(int **Hi, int **Ho, int M, int N, int *K,
 				}
 			}
 		}
-		//printf("\r Gauss Elimination: %d", (i + 1));
 	}
 
 	memcpy(InterGE, pos, sizeof(int)*N);
-	// 如果GE过程中发生了列交换，更新ReliabilityOrder
 	if (fs != 0)
 	{
 		for (i = 0; i < N; i++) tr[i] = ReliabilityOrder[pos[i]];
@@ -181,7 +165,16 @@ void OSD_GE_H(int **Hi, int **Ho, int M, int N, int *K,
 	for (i = 0; i < M; i++)
 		for (j = 0; j < N; j++)
 			Ho[i][j] = th[i*N + j];
+}
 
+void OSD_GE_H(int **Hi, int **Ho, int M, int N, int *K,
+	const int *ReliabilityOrder, int *ReliabilityOrderGE, int *InterGE)
+{
+	int* th  = new int[M * N];
+	int* pos = new int[N];
+	int* tr  = new int[N];
+	OSD_GE_H(Hi, Ho, M, N, K, ReliabilityOrder, ReliabilityOrderGE, InterGE,
+	         th, pos, tr);
 	delete[] th;
 	delete[] tr;
 	delete[] pos;

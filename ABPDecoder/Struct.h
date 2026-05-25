@@ -59,6 +59,74 @@ struct IterStruct
 	double** R;
 };
 
+// ABP 译码方法每线程预分配缓冲池（方法 1-5）
+struct ABPPool
+{
+	// 所有 ABP 方法通用
+	int* codeword;             // [N]
+	int* y_H;                  // [N]
+	int* alpha;                // [N]
+	double* p1;                // [N]
+	double* adaptive_p1;       // [N]
+	int* ReliabilityOrder;     // [N]
+	int* ReliabilityOrderGE;   // [N]
+	int* InterGE;              // [N]
+	int** adaptiveH;           // [M_ABP][N] 行指针
+	int* adaptiveH_data;       // [M_ABP * N] 扁平数据
+	int* Interchange_Buf;      // [Interchange]
+
+	// 方法特定（统一预分配）
+	double* tanhq;             // [N] — SG_ABP
+	double* MRB_LLR;           // [N-M] — SG_ABP
+	int* MRB_Order;            // [N-M] — SG_ABP
+	int* temp_code;            // [N] — List_ABP
+	double* TempLLR;           // [N] — EC_ABP
+
+	// OSD_GE_H 辅助（每帧调用 N1×N2 次）
+	int* th;                   // [M_ABP * N]
+	int* pos;                  // [N]
+	int* tr;                   // [N]
+
+	// Recover_Info 辅助
+	int* rec_temp;             // [K]
+	int* rec_temp_code;        // [N]
+
+	// StochasticGrouping 辅助
+	double* Pr;                // [N]
+	double* Pr_Table;          // [N]
+};
+
+// SCL 译码方法每线程预分配缓冲池（方法 6）
+struct SCLPool
+{
+	int** list;                // [L][N]
+	int* list_data;            // [L * N]
+	int** olist;               // [L][N]
+	int* olist_data;           // [L * N]
+	double*** sheet;           // [L][n+1][N]
+	double* sheet_data;        // [L * (n+1) * N]
+	double** sheet_rows;       // [L * (n+1)] 中间指针
+	int** listtemp;            // [2L][N]
+	int* listtemp_data;        // [2L * N]
+	int** olisttemp;           // [2L][N]
+	int* olisttemp_data;       // [2L * N]
+	double*** sheettemp;       // [2L][n+1][N]
+	double* sheettemp_data;    // [2L * (n+1) * N]
+	double** sheettemp_rows;   // [2L * (n+1)] 中间指针
+	int* SCL_result;           // [N]
+	int* Inter_result;         // [N]
+};
+
+// 每线程译码缓冲池（仅分配当前 DecodingMethod 所需部分）
+struct DecodePool
+{
+	int DecodingMethod;
+	union {
+		ABPPool abp;           // DecodingMethod 1-5
+		SCLPool scl;           // DecodingMethod 6
+	};
+};
+
 
 struct PACStruct 
 {
