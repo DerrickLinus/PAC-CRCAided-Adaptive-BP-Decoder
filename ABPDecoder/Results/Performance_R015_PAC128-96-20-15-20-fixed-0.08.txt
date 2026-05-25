@@ -6,7 +6,7 @@
 * Interchange = 1, Use CRC = 20, Use Channel LLR = 0
 * MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.00, Beta1 = 0.00, Alpha2 = 0.90, Beta2 = 0.00
 * Damping Mode = 0 (0:fixed,1:linear,2:Power-low), fixed = 0.08, start = 0.12, end = 0.04, p = 0.50
-* AWGN, BPSK, Source = 1, Seed = 173, D:\D_SCI_Research\PAC Code\Code\ABP_and_SCL_for_PAC_vs\ABPDecoder\Results\Performance_R015_PAC128-96-20-15-20-fixed-0.08.txt, srand(main)
+* AWGN, BPSK, Source = 1, Seed = 173, Performance_R015_PAC128-96-20-15-20-fixed-0.08.txt, srand(main)
 ******************************************************************************
 Program  starts  at: Fri May 22 19:15:59 2026
 
