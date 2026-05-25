@@ -5,12 +5,12 @@
 ```
 GitHub (远程仓库)
   ├── master              ← 共享代码 + 脚本（所有机器同步）
-  ├── results/machine-01  ← PC1 实验结果
-  ├── results/machine-02  ← PC2 实验结果
-  ├── results/machine-03  ← PC3 实验结果
-  ├── results/machine-04  ← PC4 实验结果
-  ├── results/machine-05  ← PC5 实验结果
-  └── results/machine-06  ← PC6 实验结果
+  ├── results/machine-01  ← PC1(dlh1) 实验结果
+  ├── results/machine-02  ← PC2(dlh2) 实验结果
+  ├── results/machine-03  ← PC3(djx)  实验结果
+  ├── results/machine-04  ← PC4(yh)   实验结果
+  ├── results/machine-05  ← PC5(ylj)  实验结果
+  └── results/machine-06  ← PC6(swj)  实验结果
 
 每台机器本地：
   ├── master 分支代码（共享）
@@ -35,7 +35,44 @@ GitHub (远程仓库)
 
 已有 GitHub 仓库：`https://github.com/DerrickLinus/PAC-CRCAided-Adaptive-BP-Decoder.git`
 
-> 国内网络访问 GitHub 不稳定时，建议在 Gitee（码云）上创建镜像仓库，各机器通过 Gitee 访问。
+国内访问 GitHub 可能不稳定。有两种方案，根据你的网络情况选择。
+
+### 方案 A：Gitee 做主仓库（推荐，最省事）
+
+在 Gitee（码云）上创建一个独立仓库（非镜像），所有机器都用 Gitee，完全不用 GitHub。
+
+```powershell
+# 主机：将 origin 改为 Gitee
+git remote set-url origin https://gitee.com/<用户名>/PAC-CRCAided-Adaptive-BP-Decoder.git
+git push -u origin master
+```
+
+其他机器直接从 Gitee 克隆即可，pull/push 都走 Gitee，全程不受 GitHub 网络限制。
+
+### 方案 B：GitHub 为主 + Gitee 镜像加速
+
+在 Gitee 上创建 GitHub 仓库的镜像，利用 Gitee 加速 pull（下载量大），push 仍走 GitHub（数据量小）。
+
+每台机器配置双远程：
+
+```powershell
+# 从 GitHub 克隆（或已有仓库直接添加 Gitee 远程）
+git remote add gitee https://gitee.com/<用户名>/PAC-CRCAided-Adaptive-BP-Decoder.git
+
+# 日常操作：
+git pull gitee master           # pull 从 Gitee（快，拉取所有代码）
+git push origin master          # push 到 GitHub（慢但数据量小，几个 KB 的结果文件）
+```
+
+> **为什么 push GitHub 通常够用**：pull 要下载全部源文件、码字文件、索引文件，数据量大；push 只上传 Performance 文本结果，每次几 KB 到几 MB。实际使用中 pull 是主要瓶颈，Gitee 已经解决了。
+
+### 方案 C：纯 GitHub + SSH
+
+如果只是偶尔慢，换成 SSH 协议比 HTTPS 更稳定：
+
+```powershell
+git remote set-url origin git@github.com:DerrickLinus/PAC-CRCAided-Adaptive-BP-Decoder.git
+```
 
 ---
 
@@ -84,21 +121,28 @@ git checkout master
 以 PC2 为例，其余类推（把 `02` 换成对应编号）：
 
 ```powershell
-# 1. 克隆仓库
+# 1. 克隆仓库（根据第 2 节选定的方案选择地址）
+#    方案 A（Gitee 主仓库）：
+git clone https://gitee.com/<用户名>/PAC-CRCAided-Adaptive-BP-Decoder.git
+#    方案 B/C（GitHub 主仓库）：
 git clone https://github.com/DerrickLinus/PAC-CRCAided-Adaptive-BP-Decoder.git
+
 cd PAC-CRCAided-Adaptive-BP-Decoder
 
 # 2. 创建本机 results 分支（基于 master）
 git checkout -b results/machine-02 master
 git push -u origin results/machine-02
 
-# 3. 创建本机参数 CSV
+# 3. （仅方案 B）添加 Gitee 远程用于加速拉取
+git remote add gitee https://gitee.com/<用户名>/PAC-CRCAided-Adaptive-BP-Decoder.git
+
+# 4. 创建本机参数 CSV
 copy scripts\batch_config_template.csv scripts\machine_02_config.csv
 # 编辑 machine_02_config.csv，填入本机要跑的多组参数
 
-# 4. 编译项目（VS Studio 或 CMake）
+# 5. 编译项目（VS Studio 或 CMake）
 
-# 5. 切回 results/machine-02 分支，准备运行
+# 6. 切回 results/machine-02 分支，准备运行
 git checkout results/machine-02
 ```
 
@@ -199,12 +243,12 @@ git push origin master
 # === 在 PC2 ~ PC6 上 ===
 
 # 方式 A：命令行
-git stash
-git checkout master
-git pull origin master
-git checkout results/machine-02
-git merge master                      # 将最新代码合并到本机分支
-git stash pop
+git stash # 将未写完、未提交的代码临时隐藏，防止切换分支时冲突、丢失修改
+git checkout master # 切换到主分支
+git pull origin master  # 从远程仓库拉取最新的 master 代码
+git checkout results/machine-02 # 切回工作分支
+git merge master  # 将最新代码合并到本机分支
+git stash pop # 将前面隐藏的代码取回来
 
 # 方式 B：VS Studio 图形界面
 # 1. "Git 更改" → 切换到 master

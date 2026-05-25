@@ -1,5 +1,5 @@
 RunID,Label,Codefile,N,K,CRC_len,EncodeAdd0,Puncture,Shorten,DecodingMethod,N1,N2,Deg2,Interchange,CRC_len_for_ABP,UseChannelLLR,ML_metric_th,ListSize,SystemCode,ms_type,Alpha,Beta,Alpha2,Beta2,ConvEpsilon,ConvWindow,DampMode,DampFixed,DampStart,DampEnd,DampP,SNRtype,StartSNR,EndSNR,StepSNR,LeastTestFrame,LeastErrorFrame,SourceType,DisplayStep
-1,PAC128-72-CRC24,CF.Polar.128.64.txt,128,72,24,1,0,0,2,20,10,1,1,12,0,41,32,0,0,1,0,0.9,0,0.01,3,1,0.08,0.12,0.04,0.5,0,1,4,0.5,1000,100,1,100
+# 1,PAC128-72-CRC24,CF.Polar.128.64.txt,128,72,24,1,0,0,2,20,10,1,1,12,0,41,32,0,0,1,0,0.9,0,0.01,3,1,0.08,0.12,0.04,0.5,0,1,4,0.5,1000,100,1,100
 # === 用法说明 ===
 # 每行对应一次完整的仿真运行。修改下面各行中的参数即可。
 # RunID: 运行序号（递增）

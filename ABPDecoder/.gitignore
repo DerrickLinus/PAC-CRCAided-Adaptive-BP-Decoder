@@ -27,6 +27,7 @@ Release/
 
 # 机器专属配置（每台机器独立维护，不提交）
 Profile*.txt
+machine_01_config.csv
 
 # Claude Code 内部文件
 .claude/

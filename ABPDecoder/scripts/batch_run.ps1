@@ -86,12 +86,24 @@ Display Step:	    $($Row.DisplayStep)
 # Auto-detect executable
 if ($ExePath -eq "") {
     $candidates = @(
-        "$rootDir\build\ABPDecoder.exe",
+        "$rootDir\x64\Release\ABPDecoder.exe",              # VS MSBuild (exe inside project dir)
+        "$rootDir\x64\Debug\ABPDecoder.exe",
+        "$rootDir\out\build\x64-Release\ABPDecoder.exe",   # VS Studio CMake
+        "$rootDir\out\build\x64-Debug\ABPDecoder.exe",
+        "$rootDir\build\ABPDecoder.exe",                    # CMake (VS Code / MinGW)
         "$rootDir\build\Release\ABPDecoder.exe",
-        "$rootDir\x64\Release\ABPDecoder.exe"
+        "$rootDir\..\x64\Release\ABPDecoder.exe",           # VS MSBuild (exe above project dir)
+        "$rootDir\..\x64\Debug\ABPDecoder.exe"
     )
     foreach ($c in $candidates) {
         if (Test-Path $c) { $ExePath = $c; break }
+    }
+    # Fallback: recursive search from repo root (covers exe in parent dir, VS MSBuild quirk)
+    if ($ExePath -eq "") {
+        Write-Host "Scanning for ABPDecoder.exe..." -ForegroundColor Yellow
+        $searchRoot = if (Test-Path "$rootDir\..\.git") { (Resolve-Path "$rootDir\..") } else { $rootDir }
+        $found = Get-ChildItem -Path $searchRoot -Recurse -Filter "ABPDecoder.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($found) { $ExePath = $found.FullName }
     }
     if ($ExePath -eq "") {
         Write-Error "Cannot find ABPDecoder.exe. Please build first."
