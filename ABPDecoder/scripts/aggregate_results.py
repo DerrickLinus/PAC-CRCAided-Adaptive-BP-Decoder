@@ -31,13 +31,22 @@ def run_git(cmd: list[str]) -> str:
 
 def list_performance_files(branch: str) -> list[str]:
     """列出某分支下所有 Performance 文件（支持根目录和 Results/ 目录）"""
-    output = run_git(["ls-tree", "--name-only", "-r", branch, "--", "Performance*.txt", "Results/Performance*.txt"])
-    return [line.strip() for line in output.splitlines() if line.strip()]
+    output = run_git(["ls-tree", "--name-only", "-r", branch])
+    files = []
+    for line in output.splitlines():
+        name = line.strip()
+        if not name:
+            continue
+        # 匹配 Performance*.txt 或 Results/Performance*.txt
+        base = name.split("/")[-1] if "/" in name else name
+        if base.startswith("Performance") and base.endswith(".txt"):
+            files.append(name)
+    return files
 
 
 def read_file_from_branch(branch: str, filepath: str) -> str:
     """从指定分支读取文件内容"""
-    return run_git(["show", f"{branch}:{filepath}"])
+    return run_git(["show", f"{branch}:./{filepath}"])
 
 
 def parse_performance(content: str) -> list[dict]:
@@ -61,6 +70,7 @@ def parse_performance(content: str) -> list[dict]:
                 "R": f"{r_num}/{r_den}",
                 "data_rows": []
             }
+            records.append(current)
             continue
 
         # 检测表头行
