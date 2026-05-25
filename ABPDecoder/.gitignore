@@ -26,8 +26,17 @@ Release/
 *.lastbuildstate
 
 # 机器专属配置（每台机器独立维护，不提交）
-Profile*.txt
+Profile.txt
 machine_01_config.csv
+
+# 旧结果文件
+Performance_v1.0.txt
+Performance_v1.1.txt
+Performance_v1.2.txt
+Performance_v1.3.txt
+
+# 汇总文件
+results_summary.csv
 
 # Claude Code 内部文件
 .claude/

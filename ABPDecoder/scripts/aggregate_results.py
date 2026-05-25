@@ -58,11 +58,36 @@ def read_file_from_branch(branch: str, filepath: str) -> str:
     return run_git(["show", f"{branch}:./{filepath}"])
 
 
-def parse_performance(content: str) -> list[dict]:
+def parse_filename_params(filename: str) -> dict:
+    """
+    从文件名中提取 PAC 后的参数: N-K-N1-N2-UseCRC-Damping
+    例: Performance_R001_PAC128-96-20-5-12-power-0.5.txt
+      → {"N1": 20, "N2": 5, "UseCRC": 12, "Damping": "power-0.5"}
+    例: Performance_R005_PAC128-96-20-5-20-linear-0.12-0.04.txt
+      → {"N1": 20, "N2": 5, "UseCRC": 20, "Damping": "linear-0.12-0.04"}
+    """
+    import re as _re
+    m = _re.search(r"PAC(\d+-\d+-\d+-\d+-\d+-.+)\.txt", filename)
+    if not m:
+        return {}
+    parts = m.group(1).split("-")
+    return {
+        "N1": int(parts[2]),
+        "N2": int(parts[3]),
+        "UseCRC": int(parts[4]),
+        "Damping": "-".join(parts[5:])
+    }
+
+
+def parse_performance(content: str, source: str = "",
+                       last_run_only: bool = True) -> list[dict]:
     """
     解析 Performance 文件，提取每次仿真的关键数据。
     返回列表，每个元素是一次仿真运行的记录。
+    last_run_only=True 时只返回最后一次运行（默认，配合追加写入模式）。
     """
+    file_params = parse_filename_params(source)
+
     records = []
     current = None
 
@@ -77,7 +102,8 @@ def parse_performance(content: str) -> list[dict]:
             current = {
                 "N": int(n), "M": int(m), "K": int(k),
                 "R": f"{r_num}/{r_den}",
-                "data_rows": []
+                "data_rows": [],
+                **file_params
             }
             records.append(current)
             continue
@@ -102,7 +128,8 @@ def parse_performance(content: str) -> list[dict]:
                 "BER": float(ber),
                 "IT": float(it)
             })
-
+    if last_run_only and records:
+        return [records[-1]]
     return records
 
 
@@ -153,7 +180,7 @@ def main():
         for f in files:
             content = read_file_from_branch(origin, f)
             if content:
-                records = parse_performance(content)
+                records = parse_performance(content, f)
                 all_records.extend(records)
                 print(f"  {machine_name}: {f} → {len(records)} 组仿真")
         all_data[machine_name] = all_records
@@ -169,19 +196,20 @@ def main():
                 all_snrs.add(row["SNR"])
     sorted_snrs = sorted(all_snrs)
 
-    # 收集所有 (N,K) 配置
+    # 收集所有参数配置
     configs = set()
     for records in all_data.values():
         for rec in records:
-            configs.add((rec["N"], rec["K"]))
+            configs.add((rec["N"], rec["K"], rec.get("N1",""), rec.get("N2",""),
+                         rec.get("UseCRC",""), rec.get("Damping","")))
 
     # ---- Markdown 表格 (飞书兼容) ----
     print("\n" + "=" * 70)
     print("  汇总表格（可直接粘贴到飞书文档）")
     print("=" * 70)
 
-    for n, k in sorted(configs):
-        print(f"\n### N={n}, K={k}\n")
+    for n, k, n1, n2, ucrc, damp in sorted(configs):
+        print(f"\n### N={n}, K={k}, N1={n1}, N2={n2}, UseCRC={ucrc}, Damping={damp}\n")
         # 表头
         header = "| SNR (dB) |"
         sep = "|----------|"
@@ -197,7 +225,9 @@ def main():
             for branch, machine_name, _ in available_machines:
                 best = None
                 for rec in all_data.get(machine_name, []):
-                    if rec["N"] == n and rec["K"] == k:
+                    if (rec["N"] == n and rec["K"] == k
+                            and rec.get("N1","") == n1 and rec.get("N2","") == n2
+                            and rec.get("UseCRC","") == ucrc and rec.get("Damping","") == damp):
                         for d in rec["data_rows"]:
                             if abs(d["SNR"] - snr) < 0.01:
                                 if best is None or d["FER"] < best["FER"]:
@@ -211,12 +241,14 @@ def main():
     # ---- CSV 导出 ----
     csv_path = REPO_ROOT / "results_summary.csv"
     with open(csv_path, "w", encoding="utf-8-sig") as f:
-        f.write("Machine,N,K,SNR,NTF,NEF,NUF,FER,BER,IT\n")
+        f.write("Machine,N,K,N1,N2,UseCRC,Damping,SNR,NTF,NEF,NUF,FER,BER,IT\n")
         for machine_name, records in all_data.items():
             short = machine_name.replace("results/", "")
             for rec in records:
                 for row in rec["data_rows"]:
-                    f.write(f"{short},{rec['N']},{rec['K']},{row['SNR']},"
+                    f.write(f"{short},{rec['N']},{rec['K']},"
+                            f"{rec.get('N1','')},{rec.get('N2','')},{rec.get('UseCRC','')},{rec.get('Damping','')},"
+                            f"{row['SNR']},"
                             f"{row['NTF']},{row['NEF']},{row['NUF']},"
                             f"{row['FER']:.3e},{row['BER']:.3e},{row['IT']}\n")
     print(f"\nCSV 已导出: {csv_path}")
