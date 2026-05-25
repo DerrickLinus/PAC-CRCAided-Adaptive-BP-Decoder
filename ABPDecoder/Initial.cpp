@@ -183,6 +183,141 @@ void InitialIter(int M, int N, int** H, struct IterStruct* Iter) // 性能优化
 	}
 }
 
+void InitDecodePool(struct DecodePool* pool, struct ADPStruct* ADP)
+{
+	int N = ADP->N, K = ADP->K, M_ABP = ADP->M + ADP->CRC_len_for_ABP;
+	pool->DecodingMethod = ADP->DecodingMethod;
+
+	if (ADP->DecodingMethod >= 1 && ADP->DecodingMethod <= 5) {
+		ABPPool* p = &pool->abp;
+		p->codeword          = new int[N];
+		p->y_H               = new int[N];
+		p->alpha             = new int[N];
+		p->p1                = new double[N];
+		p->adaptive_p1       = new double[N];
+		p->ReliabilityOrder  = new int[N];
+		p->ReliabilityOrderGE = new int[N];
+		p->InterGE           = new int[N];
+		p->Interchange_Buf   = new int[ADP->Interchange];
+
+		p->adaptiveH_data = new int[M_ABP * N];
+		p->adaptiveH = new int*[M_ABP];
+		for (int i = 0; i < M_ABP; i++)
+			p->adaptiveH[i] = p->adaptiveH_data + i * N;
+
+		p->th  = new int[M_ABP * N];
+		p->pos = new int[N];
+		p->tr  = new int[N];
+
+		p->rec_temp      = new int[K];
+		p->rec_temp_code = new int[N];
+
+		p->tanhq     = new double[N];
+		p->MRB_LLR   = new double[N - ADP->M];
+		p->MRB_Order = new int[N - ADP->M];
+		p->temp_code = new int[N];
+		p->TempLLR   = new double[N];
+
+		p->Pr       = new double[N];
+		p->Pr_Table = new double[N];
+	}
+	else if (ADP->DecodingMethod == 6) {
+		SCLPool* p = &pool->scl;
+		int L = ADP->PAC_code->L;
+		int n = (int)log2((double)N);
+
+		p->list_data = new int[L * N];
+		p->list = new int*[L];
+		for (int i = 0; i < L; i++)
+			p->list[i] = p->list_data + i * N;
+
+		p->olist_data = new int[L * N];
+		p->olist = new int*[L];
+		for (int i = 0; i < L; i++)
+			p->olist[i] = p->olist_data + i * N;
+
+		p->sheet_data = new double[L * (n + 1) * N];
+		p->sheet_rows = new double*[L * (n + 1)];
+		p->sheet = new double**[L];
+		for (int i = 0; i < L; i++) {
+			p->sheet[i] = p->sheet_rows + i * (n + 1);
+			for (int j = 0; j < n + 1; j++)
+				p->sheet[i][j] = p->sheet_data + (i * (n + 1) + j) * N;
+		}
+
+		p->listtemp_data = new int[2 * L * N];
+		p->listtemp = new int*[2 * L];
+		for (int i = 0; i < 2 * L; i++)
+			p->listtemp[i] = p->listtemp_data + i * N;
+
+		p->olisttemp_data = new int[2 * L * N];
+		p->olisttemp = new int*[2 * L];
+		for (int i = 0; i < 2 * L; i++)
+			p->olisttemp[i] = p->olisttemp_data + i * N;
+
+		p->sheettemp_data = new double[2 * L * (n + 1) * N];
+		p->sheettemp_rows = new double*[2 * L * (n + 1)];
+		p->sheettemp = new double**[2 * L];
+		for (int i = 0; i < 2 * L; i++) {
+			p->sheettemp[i] = p->sheettemp_rows + i * (n + 1);
+			for (int j = 0; j < n + 1; j++)
+				p->sheettemp[i][j] = p->sheettemp_data + (i * (n + 1) + j) * N;
+		}
+
+		p->SCL_result  = new int[N];
+		p->Inter_result = new int[N];
+	}
+}
+
+void FreeDecodePool(struct DecodePool* pool, struct ADPStruct* ADP)
+{
+	if (pool->DecodingMethod >= 1 && pool->DecodingMethod <= 5) {
+		ABPPool* p = &pool->abp;
+		delete[] p->codeword;
+		delete[] p->y_H;
+		delete[] p->alpha;
+		delete[] p->p1;
+		delete[] p->adaptive_p1;
+		delete[] p->ReliabilityOrder;
+		delete[] p->ReliabilityOrderGE;
+		delete[] p->InterGE;
+		delete[] p->adaptiveH_data;
+		delete[] p->adaptiveH;
+		delete[] p->Interchange_Buf;
+		delete[] p->th;
+		delete[] p->pos;
+		delete[] p->tr;
+		delete[] p->rec_temp;
+		delete[] p->rec_temp_code;
+		delete[] p->tanhq;
+		delete[] p->MRB_LLR;
+		delete[] p->MRB_Order;
+		delete[] p->temp_code;
+		delete[] p->TempLLR;
+		delete[] p->Pr;
+		delete[] p->Pr_Table;
+	}
+	else if (pool->DecodingMethod == 6) {
+		SCLPool* p = &pool->scl;
+		delete[] p->list_data;
+		delete[] p->list;
+		delete[] p->olist_data;
+		delete[] p->olist;
+		delete[] p->sheet_data;
+		delete[] p->sheet_rows;
+		delete[] p->sheet;
+		delete[] p->listtemp_data;
+		delete[] p->listtemp;
+		delete[] p->olisttemp_data;
+		delete[] p->olisttemp;
+		delete[] p->sheettemp_data;
+		delete[] p->sheettemp_rows;
+		delete[] p->sheettemp;
+		delete[] p->SCL_result;
+		delete[] p->Inter_result;
+	}
+}
+
 // calculate Matrix inverse
 void Calculate__Inverse_Matrix(int **T, int **T_1,int N) {
 	//Augmented matrix

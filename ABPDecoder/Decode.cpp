@@ -99,14 +99,12 @@ double FaiFunction(double x)
 Recover the information bits from a non-systematic codeword
 uP^-1 * PG = c, PG = G_sys = [I|P], so uP^-1 = the information bits of c and then u = the information bits of c * P
 */
-void Recover_Info(const int *codeword, int *info, struct ADPStruct *ADP)
+void Recover_Info(const int *codeword, int *info, struct ADPStruct *ADP,
+                 int *temp, int* temp_code)
 {
 	int i, j;
-	int *temp = new int[ADP->K];
-	int* temp_code = new int[ADP->N];
-	//Encode(codeword, info, ADP->G_K, ADP->G_K, ADP->P);
 	Encode(codeword, temp_code, ADP->G_K, ADP->G_K, ADP->G);
-	Encode(temp_code,info , ADP->G_K, ADP->G_K, ADP->PAC_code->T_1);
+	Encode(temp_code, info , ADP->G_K, ADP->G_K, ADP->PAC_code->T_1);
 	if (ADP->EncodeAdd0)
 	{
 		for (i = 0; i < ADP->K; i++)
@@ -117,8 +115,15 @@ void Recover_Info(const int *codeword, int *info, struct ADPStruct *ADP)
 	}
 	else
 	{
-		// assume the first K bits are information btis, and do nothing	
+		// assume the first K bits are information btis, and do nothing
 	}
+}
+
+void Recover_Info(const int *codeword, int *info, struct ADPStruct *ADP)
+{
+	int *temp = new int[ADP->K];
+	int* temp_code = new int[ADP->N];
+	Recover_Info(codeword, info, ADP, temp, temp_code);
 	delete[] temp_code;
 	delete[] temp;
 }
@@ -163,7 +168,7 @@ int Fake_Check(int* r, int* result, struct ADPStruct* ADP, int* PolarCode)
 
 
 void List_ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
-	struct IterStruct* Iter, struct IterStruct* Tanner, struct ADPStruct* ADP)
+	struct IterStruct* Iter, struct IterStruct* Tanner, struct ADPStruct* ADP, struct DecodePool* pool)
 {
 	int i = 0;
 	int j = 0;
@@ -192,9 +197,10 @@ void List_ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq
 	ADP->IterTime = 0;
 	int Inner_index = 0;
 	int Outer_index = 0;
-	int* temp_code = new int[N];
-	//hard decision
-	codeword = new int[N];
+
+	ABPPool* p = &pool->abp;
+	int* temp_code = p->temp_code;
+	codeword = p->codeword;
 	for (i = 0; i < N; i++)
 	{
 		if (*(bitsoft + i) > 0)
@@ -212,22 +218,21 @@ void List_ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq
 		//memcpy(ADP->Result_List_Outer[Outer_index], codeword, sizeof(int) * N);
 		//Outer_index++;
 		memcpy(temp_code, codeword, sizeof(int) * N);
-		Recover_Info(codeword, outseq, ADP);
+		Recover_Info(codeword, outseq, ADP, p->rec_temp, p->rec_temp_code);
 		ADP->check_flag = 1;
 		//delete[] codeword;
 		//return;
 		//if (CRC_DEC(outseq, ADP->CRC_len, ADP->K) == 0)
 	}
-	y_H = new int[N];
-	alpha = new int[N];
-	p1 = new double[N];
-	adaptive_p1 = new double[N];
-	ReliabilityOrder = new int[N];
-	ReliabilityOrderGE = new int[N];
-	adaptiveH = new int* [M];
-	for (i = 0; i < M; i++) adaptiveH[i] = new int[N];
-	InterGE = new int[N];
-	Interchange_Buf = new int[ADP->Interchange];
+	y_H = p->y_H;
+	alpha = p->alpha;
+	p1 = p->p1;
+	adaptive_p1 = p->adaptive_p1;
+	ReliabilityOrder = p->ReliabilityOrder;
+	ReliabilityOrderGE = p->ReliabilityOrderGE;
+	adaptiveH = p->adaptiveH;
+	InterGE = p->InterGE;
+	Interchange_Buf = p->Interchange_Buf;
 
 	memcpy(y_H, codeword, sizeof(int) * N);
 	for (outer_it = 0; outer_it < ADP->N2; outer_it++)
@@ -251,7 +256,7 @@ void List_ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq
 				memcpy(ReliabilityOrder + N - M - outer_it * ADP->Interchange, ReliabilityOrder + N - M - (outer_it - 1) * ADP->Interchange, sizeof(int) * (M + (outer_it - 1) * ADP->Interchange));
 				memcpy(ReliabilityOrder + N - ADP->Interchange, Interchange_Buf, sizeof(int) * ADP->Interchange);
 			}
-			OSD_GE_H(H, adaptiveH, M, N, &K, ReliabilityOrder, ReliabilityOrderGE, InterGE);
+			OSD_GE_H(H, adaptiveH, M, N, &K, ReliabilityOrder, ReliabilityOrderGE, InterGE, p->th, p->pos, p->tr);
 			if (ADP->Deg2 == 1)
 			{
 				Permute(ADP->Deg2RandSeq, M);
@@ -342,7 +347,7 @@ void List_ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq
 				FindOptimal(bitsoft, codeword, N, &minSED, temp_code);
 				//memcpy(ADP->Result_List_Inner[Inner_index], codeword, sizeof(int) * N);
 				//Inner_index++;
-				Recover_Info(codeword, outseq, ADP);
+				Recover_Info(codeword, outseq, ADP, p->rec_temp, p->rec_temp_code);
 				//if (CRC_DEC(outseq, ADP->CRC_len, ADP->K) == 0 && JudgeCodeword(y_H, codeword, y, N, ADP->ML_metric_th) == 1)
 				ADP->check_flag = 1;
 				//break;	
@@ -379,7 +384,7 @@ void List_ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq
 	{
 		FindOptimal(bitsoft, ADP->Result_List_Outer[i], N, &minSED, codeword);
 	}
-	Recover_Info(codeword, outseq, ADP);
+	Recover_Info(codeword, outseq, ADP, p->rec_temp, p->rec_temp_code);
 	//memcpy(codeword, ADP->Result_List_Outer[Outer_index],  sizeof(int) * N);
 	*/
 	Recover_Info(temp_code, outseq, ADP);
@@ -396,22 +401,10 @@ void List_ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq
 				*(codeword + i) = 1;
 			}
 		}
-		Recover_Info(codeword, outseq, ADP);
+		Recover_Info(codeword, outseq, ADP, p->rec_temp, p->rec_temp_code);
 	}
 
-	delete[] y_H;
-	delete[] alpha;
-	delete[] p1;
-	delete[] adaptive_p1;
-	delete[] InterGE;
-	delete[] ReliabilityOrder;
-	delete[] ReliabilityOrderGE;
-	for (i = 0; i < M; i++)
-		delete[] adaptiveH[i];
-	delete[] adaptiveH;
-	delete[] Interchange_Buf;
-	delete[] codeword;
-	delete[] temp_code;
+	// ABP scratch pool-managed
 }
 /*
 ABP/MSA(N1, N2)
@@ -425,7 +418,7 @@ outseq:			decoder-output, only first K information bits are valid, the last (N-K
 系统的PAC只适用于ABP-MSA，SCLD，其它算法暂时未修改
 */
 void ideal_ABP_MSA(double *bitsoft, double *y, int **H, int N, int M, int *outseq,
-	struct IterStruct *Iter, struct IterStruct *Tanner, struct ADPStruct *ADP)
+	struct IterStruct *Iter, struct IterStruct *Tanner, struct ADPStruct *ADP, struct DecodePool* pool)
 {
 	int i = 0;
 	int j = 0;
@@ -441,15 +434,15 @@ void ideal_ABP_MSA(double *bitsoft, double *y, int **H, int N, int M, int *outse
 	double *adaptive_p1;
 	int *ReliabilityOrder;
 	int *ReliabilityOrderGE;
-	int **adaptiveH;				//H after Gaussian Elimination
+	int **adaptiveH;
 	int *InterGE;
 	int *codeword;
 	int *y_H;
-	int K; 
+	int K;
 	int outer_it = 0;
 	int *Interchange_Buf;
 	double R;
-	double minSED = MAXVALUE;//minimum squared Euclidean distance
+	double minSED = MAXVALUE;
 	double min_val = 0.0;
 	int vn_index = 0;
 	bool is_reliable = false;
@@ -458,8 +451,9 @@ void ideal_ABP_MSA(double *bitsoft, double *y, int **H, int N, int M, int *outse
 	ADP->check_flag = 0;
 	ADP->IterTime = 0;
 
-	//hard decision
-	codeword = new int[N];
+	ABPPool* p = &pool->abp;
+
+	codeword = p->codeword;
 	for (i = 0; i < N; i++)
 	{
 		if (*(bitsoft + i) > 0)
@@ -475,27 +469,24 @@ void ideal_ABP_MSA(double *bitsoft, double *y, int **H, int N, int M, int *outse
 	if(Fake_Check(codeword, outseq, ADP, ADP->PAC_code->PolarCode))
 	{
 		if (ADP->PAC_code->system == 0) {
-			Recover_Info(codeword, outseq, ADP);
+			Recover_Info(codeword, outseq, ADP, p->rec_temp, p->rec_temp_code);
 		}
 		else {
 			for (int i = 0; i < ADP->K; i++)
 				outseq[i] = codeword[ADP->A[i]];
 		}
 		ADP->check_flag = 1;
-		delete[] codeword;
 		return;
-		//if (CRC_DEC(outseq, ADP->CRC_len, ADP->K) == 0)
 	}
-	y_H = new int[N];
-	alpha = new int[N];
-	p1 = new double[N];
-	adaptive_p1 = new double[N];
-	ReliabilityOrder = new int[N];
-	ReliabilityOrderGE = new int[N];
-	adaptiveH = new int*[M];
-	for (i = 0; i < M; i++) adaptiveH[i] = new int[N];
-	InterGE = new int[N];
-	Interchange_Buf = new int[ADP->Interchange];
+	y_H = p->y_H;
+	alpha = p->alpha;
+	p1 = p->p1;
+	adaptive_p1 = p->adaptive_p1;
+	ReliabilityOrder = p->ReliabilityOrder;
+	ReliabilityOrderGE = p->ReliabilityOrderGE;
+	adaptiveH = p->adaptiveH;
+	InterGE = p->InterGE;
+	Interchange_Buf = p->Interchange_Buf;
 
 	memcpy(y_H, codeword, sizeof(int)*N);
 	for (outer_it = 0; outer_it < ADP->N2; outer_it++)
@@ -531,7 +522,7 @@ void ideal_ABP_MSA(double *bitsoft, double *y, int **H, int N, int M, int *outse
 				
 			}
 			
-			OSD_GE_H(H, adaptiveH, M, N, &K, ReliabilityOrder, ReliabilityOrderGE, InterGE);
+			OSD_GE_H(H, adaptiveH, M, N, &K, ReliabilityOrder, ReliabilityOrderGE, InterGE, p->th, p->pos, p->tr);
 			if (ADP->Deg2 == 1)
 			{
 				Permute(ADP->Deg2RandSeq, M);
@@ -648,9 +639,9 @@ void ideal_ABP_MSA(double *bitsoft, double *y, int **H, int N, int M, int *outse
 			//if (CheckCode(codeword, M, Tanner) == 0)
 			if (Fake_Check(codeword, outseq, ADP, ADP->PAC_code->PolarCode))
 			{
-				//Recover_Info(codeword, outseq, ADP);
+				//Recover_Info(codeword, outseq, ADP, p->rec_temp, p->rec_temp_code);
 				if (ADP->PAC_code->system == 0) {
-					Recover_Info(codeword, outseq, ADP);
+					Recover_Info(codeword, outseq, ADP, p->rec_temp, p->rec_temp_code);
 				}
 				else {
 					for (int i = 0; i < ADP->K; i++)
@@ -691,34 +682,24 @@ void ideal_ABP_MSA(double *bitsoft, double *y, int **H, int N, int M, int *outse
 				*(codeword + i) = 1;
 			}
 		}
-		//Recover_Info(codeword, outseq, ADP);
+		//Recover_Info(codeword, outseq, ADP, p->rec_temp, p->rec_temp_code);
 		if (ADP->PAC_code->system == 0) {
-			Recover_Info(codeword, outseq, ADP);
+			Recover_Info(codeword, outseq, ADP, p->rec_temp, p->rec_temp_code);
 		}
 		else {
 			for (int i = 0; i < ADP->K; i++)
 				outseq[i] = codeword[ADP->A[i]];
 		}
 	}
-	delete[] y_H;
-	delete[] alpha;
-	delete[] p1;
-	delete[] adaptive_p1;
-	delete[] InterGE;
-	delete[] ReliabilityOrder;
-	delete[] ReliabilityOrderGE;
-	for (i = 0; i < M; i++)
-		delete[] adaptiveH[i];
-	delete[] adaptiveH;
-	delete[] Interchange_Buf;
-	delete[] codeword;
+	// ABP scratch pool-managed
+	// pool-managed
 }
 
 /*
 ABP/MSA
 */
 void ABP_MSA(double snr, double* bitsoft, double* y, int** H, int N, int M, int* outseq,
-	struct IterStruct* Iter, struct IterStruct* Tanner, struct ADPStruct* ADP)
+	struct IterStruct* Iter, struct IterStruct* Tanner, struct ADPStruct* ADP, struct DecodePool* pool)
 {
 	int i = 0;
 	int j = 0;
@@ -754,10 +735,10 @@ void ABP_MSA(double snr, double* bitsoft, double* y, int** H, int N, int M, int*
 	ADP->IterTime = 0;
 	double current_damping = 1;
 
-	//saveMatrixToFile(H, M+ADP->CRC_len - ADP->CRC_len_for_ABP, N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\H_128.txt");
+	ABPPool* p = &pool->abp;
 
 	//hard decision
-	codeword = new int[N];
+	codeword = p->codeword;
 	for (i = 0; i < N; i++)
 	{
 		if (bitsoft[i] > 0)
@@ -777,7 +758,7 @@ void ABP_MSA(double snr, double* bitsoft, double* y, int** H, int N, int M, int*
 	//if (CheckCode(codeword, M , Tanner) == 0)
 	{
 		if (ADP->PAC_code->system == 0) {
-			Recover_Info(codeword, outseq, ADP);
+			Recover_Info(codeword, outseq, ADP, p->rec_temp, p->rec_temp_code);
 			//if (CRC_DEC(outseq, ADP->CRC_len, ADP->K) == 0)
 				//ADP->check_flag = 1;
 		}
@@ -786,21 +767,20 @@ void ABP_MSA(double snr, double* bitsoft, double* y, int** H, int N, int M, int*
 				outseq[i] = codeword[ADP->A[i]];
 		}
 		ADP->check_flag = 1;
-		delete[] codeword;
+		// pool-managed
 		return;
 		//if (CRC_DEC(outseq, ADP->CRC_len, ADP->K) == 0)
 	}
 
-	y_H = new int[N];
-	alpha = new int[N];
-	p1 = new double[N];
-	adaptive_p1 = new double[N];
-	ReliabilityOrder = new int[N];
-	ReliabilityOrderGE = new int[N];
-	adaptiveH = new int* [M];
-	for (i = 0; i < M; i++) adaptiveH[i] = new int[N];
-	InterGE = new int[N];
-	Interchange_Buf = new int[ADP->Interchange];
+	y_H = p->y_H;
+	alpha = p->alpha;
+	p1 = p->p1;
+	adaptive_p1 = p->adaptive_p1;
+	ReliabilityOrder = p->ReliabilityOrder;
+	ReliabilityOrderGE = p->ReliabilityOrderGE;
+	adaptiveH = p->adaptiveH;
+	InterGE = p->InterGE;
+	Interchange_Buf = p->Interchange_Buf;
 
 	memcpy(y_H, codeword, sizeof(int) * N);
 	double Min_ML_metric = 10000.0;
@@ -842,7 +822,7 @@ void ABP_MSA(double snr, double* bitsoft, double* y, int** H, int N, int M, int*
 				//saveArrayToFile(ReliabilityOrder, ADP->N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\ReliabilityOrder_Interchange_128.txt");
 			}
 			
-			OSD_GE_H(H, adaptiveH, M, N, &K, ReliabilityOrder, ReliabilityOrderGE, InterGE);
+			OSD_GE_H(H, adaptiveH, M, N, &K, ReliabilityOrder, ReliabilityOrderGE, InterGE, p->th, p->pos, p->tr);
 			//saveMatrixToFile(adaptiveH, M, N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\adaptiveH_128.txt");
 			//saveArrayToFile(ReliabilityOrderGE, ADP->N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\ReliabilityOrderGE_128.txt");
 			//saveArrayToFile(InterGE, ADP->N, "D:\\D_SCI_Research\\PAC Code\\Code\\pac-dlh\\ABPDecoder_MATLAB\\c_result\\InterGE_128.txt");
@@ -1041,9 +1021,9 @@ void ABP_MSA(double snr, double* bitsoft, double* y, int** H, int N, int M, int*
 			//if (CheckCode(codeword, M, Tanner) == 0)
 			{
 				Min_ML_metric = metric; // dlh test 注释掉
-				//Recover_Info(codeword, outseq, ADP);
+				//Recover_Info(codeword, outseq, ADP, p->rec_temp, p->rec_temp_code);
 				if (ADP->PAC_code->system == 0) {
-					Recover_Info(codeword, outseq, ADP);
+					Recover_Info(codeword, outseq, ADP, p->rec_temp, p->rec_temp_code);
 					//if (CRC_DEC(outseq, ADP->CRC_len, ADP->K) == 0)
 					//	ADP->check_flag = 1;
 				}
@@ -1096,9 +1076,9 @@ void ABP_MSA(double snr, double* bitsoft, double* y, int** H, int N, int M, int*
 				codeword[i] = 1;
 			}
 		}
-		//Recover_Info(codeword, outseq, ADP);
+		//Recover_Info(codeword, outseq, ADP, p->rec_temp, p->rec_temp_code);
 		if (ADP->PAC_code->system == 0) {
-			Recover_Info(codeword, outseq, ADP);
+			Recover_Info(codeword, outseq, ADP, p->rec_temp, p->rec_temp_code);
 		}
 		else {
 			for (int i = 0; i < ADP->K; i++)
@@ -1106,42 +1086,19 @@ void ABP_MSA(double snr, double* bitsoft, double* y, int** H, int N, int M, int*
 		}
 	}
 
-	delete[] y_H;
-	delete[] alpha;
-	delete[] p1;
-	delete[] adaptive_p1;
-	delete[] InterGE;
-	delete[] ReliabilityOrder;
-	delete[] ReliabilityOrderGE;
-	for (i = 0; i < M; i++)
-		delete[] adaptiveH[i];
-	delete[] adaptiveH;
-	delete[] Interchange_Buf;
-	delete[] codeword;
+	// ABP scratch pool-managed
+	// pool-managed
 }
 
 
 
 void StochasticGrouping(double* LLR, int N, int* ReOrder, double ReFactor,
-	default_random_engine& eng, uniform_real_distribution<double>& uniform)
+	default_random_engine& eng, uniform_real_distribution<double>& uniform,
+	double* Pr, double* Pr_Table)
 {
 	int i, j;
-	double* Pr = new double[N];
-	double* Pr_Table = new double[N];
 	double Pr_sum = 0;
 	double rand_alpha;
-
-	//for (i = 0; i < N; i++)
-	//{
-	//	printf("%5.2f ", LLR[i]);
-	//}
-	//printf("\n");
-
-	/*for (i = 0; i < N; i++)
-	{
-		Pr[i] = 1.0 / pow(fabs(LLR[i]), ReFactor);
-		Pr_sum += Pr[i];
-	}*/
 
 	for (i = 0; i < N; i++)
 	{
@@ -1151,16 +1108,6 @@ void StochasticGrouping(double* LLR, int N, int* ReOrder, double ReFactor,
 		Pr_sum += Pr[i];
 	}
 
-	/*printf("Pr: ");
-	for (i = 0; i < N; i++)
-	{
-		printf("%5.4f ", Pr[i]);
-	}
-	printf("\n");
-	printf("Pr_sum = %7.5e\n", Pr_sum);
-	getch();*/
-
-
 	Pr_Table[0] = 0;
 	for (i = 1; i < N; i++)
 	{
@@ -1169,7 +1116,7 @@ void StochasticGrouping(double* LLR, int N, int* ReOrder, double ReFactor,
 
 	for (i = 0; i < N; i++)
 	{
-			rand_alpha = uniform(eng) * Pr_sum;   // uniform distribution [0, Pr_sum)
+			rand_alpha = uniform(eng) * Pr_sum;
 		for (j = N - 1; j >= 0; j--)
 		{
 			if (Pr_Table[j] <= rand_alpha)
@@ -1188,36 +1135,23 @@ void StochasticGrouping(double* LLR, int N, int* ReOrder, double ReFactor,
 		Pr_sum -= Pr[ReOrder[N - 1 - i]];
 		if (Pr_sum < 0)
 			Pr_sum = 0;
-
-		/*printf("%.8f\n", Pr_sum);
-		if (Pr_sum < 0)
-		{
-			for (int i = 0; i < N; i++)
-			{
-				printf("%d ", ReOrder[i]);
-			}
-			printf("\n\n");
-			getch();
-		}*/
 	}
+}
 
+void StochasticGrouping(double* LLR, int N, int* ReOrder, double ReFactor,
+	default_random_engine& eng, uniform_real_distribution<double>& uniform)
+{
+	double* Pr = new double[N];
+	double* Pr_Table = new double[N];
+	StochasticGrouping(LLR, N, ReOrder, ReFactor, eng, uniform, Pr, Pr_Table);
 	delete[] Pr;
 	delete[] Pr_Table;
-
-
-	/*for (i = 0; i < N; i++)
-	{
-		printf("%d ", ReOrder[i]);
-	}
-	printf("\n\n");
-	getch();*/
-	//getch();
 }
 /*
 ABP with stochastic grouping
 */
 void SG_ABP(double* bitsoft, int** H, int N, int M, int* outseq,
-	struct IterStruct* Iter, struct IterStruct* Tanner, struct ADPStruct* ADP, default_random_engine& rng, uniform_real_distribution<double>& URD)
+	struct IterStruct* Iter, struct IterStruct* Tanner, struct ADPStruct* ADP, default_random_engine& rng, uniform_real_distribution<double>& URD, struct DecodePool* pool)
 {
 	int i = 0;
 	int j = 0;
@@ -1242,7 +1176,8 @@ void SG_ABP(double* bitsoft, int** H, int N, int M, int* outseq,
 	int* Interchange_Buf;
 	double* MRB_LLR;
 	int* MRB_Order;
-	int* codeword=new int[N];
+	ABPPool* p = &pool->abp;
+	int* codeword = p->codeword;
 
 	ADP->check_flag = 0;
 	ADP->IterTime = 0;
@@ -1260,26 +1195,25 @@ void SG_ABP(double* bitsoft, int** H, int N, int M, int* outseq,
 	}
 	if (Fake_Check(codeword, outseq, ADP, ADP->PAC_code->PolarCode))
 	{
-		Recover_Info(codeword, outseq, ADP);
+		Recover_Info(codeword, outseq, ADP, p->rec_temp, p->rec_temp_code);
 		ADP->check_flag = 1;
-		delete[] codeword;
+		// pool-managed
 		return;
 		//if (CRC_DEC(outseq, ADP->CRC_len, ADP->K) == 0)
 	}
 
-	tanhq = new double[N];
-	alpha = new int[N];
-	p1 = new double[N];
-	adaptive_p1 = new double[N];
-	ReliabilityOrder = new int[N];
-	ReliabilityOrderGE = new int[N];
-	adaptiveH = new int* [M];
-	for (i = 0; i < M; i++) adaptiveH[i] = new int[N];
-	InterGE = new int[N];
+	tanhq = p->tanhq;
+	alpha = p->alpha;
+	p1 = p->p1;
+	adaptive_p1 = p->adaptive_p1;
+	ReliabilityOrder = p->ReliabilityOrder;
+	ReliabilityOrderGE = p->ReliabilityOrderGE;
+	adaptiveH = p->adaptiveH;
+	InterGE = p->InterGE;
 
-	Interchange_Buf = new int[ADP->Interchange];
-	MRB_LLR = new double[N - M];
-	MRB_Order = new int[N - M];
+	Interchange_Buf = p->Interchange_Buf;
+	MRB_LLR = p->MRB_LLR;
+	MRB_Order = p->MRB_Order;
 	for (outer_it = 0; outer_it < ADP->N2; outer_it++)
 	{
 		for (i = 0; i < M; i++)
@@ -1295,18 +1229,18 @@ void SG_ABP(double* bitsoft, int** H, int N, int M, int* outseq,
 
 			// adaptive the PCM
 			if (ADP->SG_Scheme == 0)		// SG作用于全局
-				StochasticGrouping(p1, N, ReliabilityOrder, ADP->ReliableFactor, rng, URD);
+				StochasticGrouping(p1, N, ReliabilityOrder, ADP->ReliableFactor, rng, URD, p->Pr, p->Pr_Table);
 			else if (ADP->SG_Scheme == 1)	// SG作用于除第一次外迭代
 			{
 				if (outer_it > 0)
-					StochasticGrouping(p1, N, ReliabilityOrder, ADP->ReliableFactor, rng, URD);
+					StochasticGrouping(p1, N, ReliabilityOrder, ADP->ReliableFactor, rng, URD, p->Pr, p->Pr_Table);
 				else
 					SortLLR(p1, N, ReliabilityOrder);
 			}
 			else if (ADP->SG_Scheme == 2)	// SG作用于除第一次外迭代之后的每第一次BP迭代
 			{
 				if (k == 0 && outer_it > 0)
-					StochasticGrouping(p1, N, ReliabilityOrder, ADP->ReliableFactor, rng, URD);
+					StochasticGrouping(p1, N, ReliabilityOrder, ADP->ReliableFactor, rng, URD, p->Pr, p->Pr_Table);
 				else
 					SortLLR(p1, N, ReliabilityOrder);
 			}
@@ -1320,7 +1254,7 @@ void SG_ABP(double* bitsoft, int** H, int N, int M, int* outseq,
 					{
 						MRB_LLR[i] = p1[ReliabilityOrder[i]];
 					}
-					StochasticGrouping(MRB_LLR, N - M, MRB_Order, ADP->ReliableFactor, rng, URD);
+					StochasticGrouping(MRB_LLR, N - M, MRB_Order, ADP->ReliableFactor, rng, URD, p->Pr, p->Pr_Table);
 					for (i = 0; i < N - M; i++)
 					{
 						ReliabilityOrder[i] = ReliabilityOrder[MRB_Order[i]];
@@ -1333,7 +1267,7 @@ void SG_ABP(double* bitsoft, int** H, int N, int M, int* outseq,
 					memcpy(ReliabilityOrder + N - ADP->Interchange, Interchange_Buf, sizeof(int) * ADP->Interchange);
 				}
 			}
-			OSD_GE_H(H, adaptiveH, M, N, &K, ReliabilityOrder, ReliabilityOrderGE, InterGE);
+			OSD_GE_H(H, adaptiveH, M, N, &K, ReliabilityOrder, ReliabilityOrderGE, InterGE, p->th, p->pos, p->tr);
 			if (ADP->Deg2 == 1)
 			{
 				Permute(ADP->Deg2RandSeq, M);
@@ -1395,7 +1329,7 @@ void SG_ABP(double* bitsoft, int** H, int N, int M, int* outseq,
 
 			if (Fake_Check(codeword, outseq, ADP, ADP->PAC_code->PolarCode))
 			{
-				Recover_Info(codeword, outseq, ADP);
+				Recover_Info(codeword, outseq, ADP, p->rec_temp, p->rec_temp_code);
 				ADP->check_flag = 1;
 				flag = 1;
 				break;
@@ -1423,20 +1357,7 @@ void SG_ABP(double* bitsoft, int** H, int N, int M, int* outseq,
 		}
 	}
 
-	delete[] alpha;
-	delete[] p1;
-	delete[] adaptive_p1;
-	delete[] InterGE;
-	delete[] ReliabilityOrder;
-	delete[] ReliabilityOrderGE;
-	for (i = 0; i < M; i++)
-		delete[] adaptiveH[i];
-	delete[] adaptiveH;
-
-	delete[] Interchange_Buf;
-	delete[] tanhq;
-	delete[] MRB_LLR;
-	delete[] MRB_Order;
+	// SG_ABP scratch pool-managed
 }
 /*
 翻转似然比最小的比特
@@ -1449,7 +1370,7 @@ M:				the number of check nodes
 outseq:			decoder-output, only first K information bits are valid, the last (N-K) bits are meaningless
 */
 void EC_ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
-	struct IterStruct* Iter, struct IterStruct* Tanner, struct ADPStruct* ADP)
+	struct IterStruct* Iter, struct IterStruct* Tanner, struct ADPStruct* ADP, struct DecodePool* pool)
 {
 	int i = 0;
 	int j = 0;
@@ -1473,12 +1394,13 @@ void EC_ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
 	int outer_it = 0;
 	int* Interchange_Buf;
 	double R;
-	double minSED = MAXVALUE;//minimum squared Euclidean distance
+	double minSED = MAXVALUE;
 	ADP->check_flag = 0;
 	ADP->IterTime = 0;
 
-	//hard decision
-	codeword = new int[N];
+	ABPPool* p = &pool->abp;
+
+	codeword = p->codeword;
 	for (i = 0; i < N; i++)
 	{
 		if (*(bitsoft + i) > 0)
@@ -1493,24 +1415,23 @@ void EC_ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
 	//if (CheckCode(codeword, M, Tanner) == 0)
 	if (Fake_Check(codeword, outseq, ADP, ADP->PAC_code->PolarCode))
 	{
-		Recover_Info(codeword, outseq, ADP);
+		Recover_Info(codeword, outseq, ADP, p->rec_temp, p->rec_temp_code);
 		ADP->check_flag = 1;
-		delete[] codeword;
+		// pool-managed
 		return;
 		//if (CRC_DEC(outseq, ADP->CRC_len, ADP->K) == 0)
 	}
-	y_H = new int[N];
-	alpha = new int[N];
-	p1 = new double[N];
-	adaptive_p1 = new double[N];
-	ReliabilityOrder = new int[N];
-	ReliabilityOrderGE = new int[N];
-	adaptiveH = new int* [M];
-	for (i = 0; i < M; i++) adaptiveH[i] = new int[N];
-	InterGE = new int[N];
-	Interchange_Buf = new int[ADP->Interchange];
+	y_H = p->y_H;
+	alpha = p->alpha;
+	p1 = p->p1;
+	adaptive_p1 = p->adaptive_p1;
+	ReliabilityOrder = p->ReliabilityOrder;
+	ReliabilityOrderGE = p->ReliabilityOrderGE;
+	adaptiveH = p->adaptiveH;
+	InterGE = p->InterGE;
+	Interchange_Buf = p->Interchange_Buf;
 
-	double* TempLLR = new double[N];
+	double* TempLLR = p->TempLLR;
 	memcpy(y_H, codeword, sizeof(int) * N);
 	for (outer_it = 0; outer_it < ADP->N2; outer_it++)
 	{
@@ -1544,7 +1465,7 @@ void EC_ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
 				memcpy(ReliabilityOrder + N - ADP->Interchange, Interchange_Buf, sizeof(int) * ADP->Interchange);
 
 			}
-			OSD_GE_H(H, adaptiveH, M, N, &K, ReliabilityOrder, ReliabilityOrderGE, InterGE);
+			OSD_GE_H(H, adaptiveH, M, N, &K, ReliabilityOrder, ReliabilityOrderGE, InterGE, p->th, p->pos, p->tr);
 			if (ADP->Deg2 == 1)
 			{
 				Permute(ADP->Deg2RandSeq, M);
@@ -1650,7 +1571,7 @@ void EC_ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
 				//if (CheckCode(codeword, M, Tanner) == 0)
 				if (Fake_Check(codeword, outseq, ADP, ADP->PAC_code->PolarCode))
 				{
-					Recover_Info(codeword, outseq, ADP);
+					Recover_Info(codeword, outseq, ADP, p->rec_temp, p->rec_temp_code);
 					//if (CRC_DEC(outseq, ADP->CRC_len, ADP->K) == 0 && JudgeCodeword(y_H, codeword, y, N, ADP->ML_metric_th) == 1)
 					ADP->check_flag = 1;
 					break;
@@ -1693,21 +1614,11 @@ void EC_ABP_MSA(double* bitsoft, double* y, int** H, int N, int M, int* outseq,
 				*(codeword + i) = 1;
 			}
 		}
-		Recover_Info(codeword, outseq, ADP);
+		Recover_Info(codeword, outseq, ADP, p->rec_temp, p->rec_temp_code);
 	}
 
-	delete[] y_H;
-	delete[] alpha;
-	delete[] p1;
-	delete[] adaptive_p1;
-	delete[] InterGE;
-	delete[] ReliabilityOrder;
-	delete[] ReliabilityOrderGE;
-	for (i = 0; i < M; i++)
-		delete[] adaptiveH[i];
-	delete[] adaptiveH;
-	delete[] Interchange_Buf;
-	delete[] codeword;
+	// ABP scratch pool-managed
+	// pool-managed
 }
 //PAC 译码辅助函数
 int cal2(int** T,int* v, int index) {
@@ -1721,33 +1632,27 @@ int cal2(int** T,int* v, int index) {
 }
 //PAC: codeword=u*T*G
 //output: u*T
-void Decode_PLVA_SC(double* LLR, int N, int K, int L, int** GMatrix, int* A, int** T, int* DecodingSeq, struct ADPStruct* ADP) {
+void Decode_PLVA_SC(double* LLR, int N, int K, int L, int** GMatrix, int* A, int** T, int* DecodingSeq, struct ADPStruct* ADP, struct DecodePool* pool) {
 	ADP->IterTime = 0;
 	ADP->check_flag = 0;
 	int n = (int)log2(N);
-	//cout << n;
-	int** list = new int* [L];
-	for (int i = 0; i < L; i++) {
-		list[i] = new int[N];
-		memset(list[i], 0, sizeof(int) * N);
-	}
 
-	int** olist = new int* [L];
-	for (int i = 0; i < L; i++) {
-		olist[i] = new int[N];
+	SCLPool* sp = &pool->scl;
+	int** list = sp->list;
+	for (int i = 0; i < L; i++)
+		memset(list[i], 0, sizeof(int) * N);
+
+	int** olist = sp->olist;
+	for (int i = 0; i < L; i++)
 		memset(olist[i], 0, sizeof(int) * N);
-	}
 	//BinMatrix list(L, N);
 	//BinMatrix olist(L, N);
 
-	double*** sheet = new double** [L];
+	double*** sheet = sp->sheet;
 	for (int i = 0; i < L; i++) {
-		sheet[i] = new double* [n + 1];
-		for (int j = 0; j < n + 1; j++) {
-			sheet[i][j] = new double[N];
+		for (int j = 0; j < n + 1; j++)
 			memset(sheet[i][j], 0, sizeof(double) * N);
-		}
-		for (int k = 0; k < N; k++)//初始化最右侧软值
+		for (int k = 0; k < N; k++)
 			sheet[i][n][k] = LLR[k];
 	}
 	vector<double> PM(L);//路径度量
@@ -1759,30 +1664,14 @@ void Decode_PLVA_SC(double* LLR, int N, int K, int L, int** GMatrix, int* A, int
 	vector<int> p(n + 1);//行序号
 	p[n] = N;
 
-	int** listtemp = new int* [2 * L];
-	for (int i = 0; i < 2 * L; i++) {
-		listtemp[i] = new int[N];
-		memset(listtemp[i], 0, sizeof(int) * N);
-	}
-
-	int** olisttemp = new int* [2 * L];
-	for (int i = 0; i < 2 * L; i++) {
-		olisttemp[i] = new int[N];
-		memset(olisttemp[i], 0, sizeof(int) * N);
-	}
-	double*** sheettemp = new double** [2 * L];
-	for (int i = 0; i < 2 * L; i++) {
-		sheettemp[i] = new double* [n + 1];
-		for (int j = 0; j < n + 1; j++) {
-			sheettemp[i][j] = new double[N];
-			memset(sheettemp[i][j], 0, sizeof(double) * N);
-		}
-	}
+	int** listtemp = sp->listtemp;
+	int** olisttemp = sp->olisttemp;
+	double*** sheettemp = sp->sheettemp;
 	//double* PMtemp=new double[2 * L];
 	vector<double> PMtemp(2 * L);
-	int validL = 1;//有效List大小
-	int* SCL_result = new int[N];
-	int* Inter_result = new int[N];
+	int validL = 1;
+	int* SCL_result = sp->SCL_result;
+	int* Inter_result = sp->Inter_result;
 	
 	while (q < n) {
 		while (q >= 0) {
@@ -1958,70 +1847,37 @@ void Decode_PLVA_SC(double* LLR, int N, int K, int L, int** GMatrix, int* A, int
 		}
 	}
 	*/
-	//release room
-	for (int i = 0; i < L; i++)
-		delete[] list[i];
-	delete[] list;
-	for (int i = 0; i < L; i++)
-		delete[] olist[i];
-	delete[] olist;
-
-	for (int i = 0; i < L; i++){
-		for (int j = 0; j < n + 1; j++) {
-			delete[] sheet[i][j];
-		}
-		delete[] sheet[i];
-	}	
-	delete[] sheet;
-	for (int i = 0; i < 2*L; i++)
-		delete[] listtemp[i];
-	delete[] listtemp;
-	for (int i = 0; i < 2*L; i++)
-		delete[] olisttemp[i];
-	delete[] olisttemp;
-	for (int i = 0; i < 2*L; i++) {
-		for (int j = 0; j < n + 1; j++) {
-			delete[] sheettemp[i][j];
-		}
-		delete[] sheettemp[i];
-	}
-	delete[] sheettemp;
-	delete[] SCL_result;
-	delete[] Inter_result;
+	// SCL scratch pool-managed
 }
 
-void Decode(double snr, double* bitsoft, double* y, int* result, struct ADPStruct* ADP)
+void Decode(double snr, double* bitsoft, double* y, int* result, struct ADPStruct* ADP, struct DecodePool* pool)
 {
-	// C标准库 rand() 当前正在使用
-	//srand(731); // srand()设置的种子是进程级别的全局变量，会影响后续的rand()调用，每帧重置
-
-	// C++11 default_random_engine 在第1035-1036行被注释
 	default_random_engine rng;
 	uniform_real_distribution<double> URD(0, 1);
 	rng.seed(173);
 
 	if (ADP->DecodingMethod == 1)
 	{
-		ideal_ABP_MSA(bitsoft, y, ADP->Joint_check_matrix, ADP->N, ADP->M+ADP->CRC_len_for_ABP, result, ADP->IterDec, ADP->Tanner, ADP);
+		ideal_ABP_MSA(bitsoft, y, ADP->Joint_check_matrix, ADP->N, ADP->M+ADP->CRC_len_for_ABP, result, ADP->IterDec, ADP->Tanner, ADP, pool);
 	}
 	else if (ADP->DecodingMethod == 2)
 	{
-		ABP_MSA(snr, bitsoft, y, ADP->Joint_check_matrix, ADP->N, ADP->M + ADP->CRC_len_for_ABP, result, ADP->IterDec, ADP->Tanner, ADP);
+		ABP_MSA(snr, bitsoft, y, ADP->Joint_check_matrix, ADP->N, ADP->M + ADP->CRC_len_for_ABP, result, ADP->IterDec, ADP->Tanner, ADP, pool);
 	}
 	else if (ADP->DecodingMethod == 3)
 	{
-		SG_ABP(bitsoft, ADP->PAC_code->H, ADP->N, ADP->M, result, ADP->IterDec, ADP->Tanner, ADP, rng, URD);
+		SG_ABP(bitsoft, ADP->PAC_code->H, ADP->N, ADP->M, result, ADP->IterDec, ADP->Tanner, ADP, rng, URD, pool);
 	}
 	else if (ADP->DecodingMethod == 4)
 	{
-		List_ABP_MSA(bitsoft, y, ADP->PAC_code->H, ADP->N, ADP->M, result, ADP->IterDec, ADP->Tanner, ADP);
+		List_ABP_MSA(bitsoft, y, ADP->PAC_code->H, ADP->N, ADP->M, result, ADP->IterDec, ADP->Tanner, ADP, pool);
 	}
 	if (ADP->DecodingMethod == 5)
 	{
-		EC_ABP_MSA(bitsoft, y, ADP->PAC_code->H, ADP->N, ADP->M, result, ADP->IterDec, ADP->Tanner, ADP);
+		EC_ABP_MSA(bitsoft, y, ADP->PAC_code->H, ADP->N, ADP->M, result, ADP->IterDec, ADP->Tanner, ADP, pool);
 	}
 	if (ADP->DecodingMethod == 6)
 	{
-		Decode_PLVA_SC(bitsoft, ADP->N, ADP->K, ADP->PAC_code->L, ADP->G, ADP->A, ADP->PAC_code->T, result,ADP);
+		Decode_PLVA_SC(bitsoft, ADP->N, ADP->K, ADP->PAC_code->L, ADP->G, ADP->A, ADP->PAC_code->T, result, ADP, pool);
 	}
 }

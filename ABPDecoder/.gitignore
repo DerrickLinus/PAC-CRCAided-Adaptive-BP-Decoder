@@ -35,6 +35,9 @@ Performance_v1.1.txt
 Performance_v1.2.txt
 Performance_v1.3.txt
 
+# 汇总文件
+results_summary.csv
+
 # Claude Code 内部文件
 .claude/
 
