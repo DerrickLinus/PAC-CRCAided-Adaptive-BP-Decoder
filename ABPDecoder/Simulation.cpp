@@ -126,7 +126,7 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 	else
 		printf("Error!\n");
 	//printf("* Convergence Early Stop: epsilon = %g, window = %d\n", ADP->convergence_epsilon, ADP->convergence_window); // 3.14修改
-	printf("* AWGN, BPSK, Source = %d, Seed = %d, %s, srand(main)\n", SP->sourceType, 173, g_outputFilename);
+	printf("* AWGN, BPSK, Source = %d, Seed = %d, %s, srand(main)\n", SP->sourceType, 173, strrchr(g_outputFilename, '\\') ? strrchr(g_outputFilename, '\\') + 1 : (strrchr(g_outputFilename, '/') ? strrchr(g_outputFilename, '/') + 1 : g_outputFilename));
 	printf("******************************************************************************\n");
 
 	start = time(NULL);
@@ -179,7 +179,7 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 	else
 		fprintf(outfile, "Error!\n");
 	//fprintf(outfile, "* Convergence Early Stop: epsilon = %g, window = %d\n", ADP->convergence_epsilon, ADP->convergence_window); // 3.14修改
-	fprintf(outfile, "* AWGN, BPSK, Source = %d, Seed = %d, %s, srand(main)\n", SP->sourceType, 173, g_outputFilename);
+	fprintf(outfile, "* AWGN, BPSK, Source = %d, Seed = %d, %s, srand(main)\n", SP->sourceType, 173, strrchr(g_outputFilename, '\\') ? strrchr(g_outputFilename, '\\') + 1 : (strrchr(g_outputFilename, '/') ? strrchr(g_outputFilename, '/') + 1 : g_outputFilename));
 	fprintf(outfile, "******************************************************************************\n");
 
 
