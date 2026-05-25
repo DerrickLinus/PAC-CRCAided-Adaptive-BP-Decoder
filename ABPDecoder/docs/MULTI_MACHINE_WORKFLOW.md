@@ -213,7 +213,9 @@ Desktop.ini
 | `CF.*.txt`, `H_PAC_*.txt` 等 | 是 | master | 码字文件、索引文件 |
 | `scripts/batch_run.ps1` | 是 | master | 批量运行脚本（所有机器共用） |
 | `scripts/batch_config_template.csv` | 是 | master | 参数表模板 |
-| `scripts/aggregate_results.py` | 是 | master | 汇总脚本 |
+| `scripts/aggregate_results.py` | 是 | master | 汇总脚本，生成 results_summary.csv |
+| `scripts/plot_fer.m` | 是 | master | MATLAB FER 画图脚本 |
+| `results_summary.csv` | **否** | — | 汇总输出，由 aggregate_results.py 生成 |
 | `Profile*.txt` | **否** | — | 运行时的临时配置，脚本自动生成 |
 | `scripts/machine_*.csv` | **否** | — | 每台机器专属的参数表 |
 | `logs/` | **否** | — | 本地运行日志 |
@@ -301,13 +303,14 @@ git push origin results/machine-02
 # 1. 拉取所有机器的结果分支
 git fetch --all
 
-# 2. 查看某台机器的最新结果
+# 2. （可选）查看某台机器的最新结果
 git show results/machine-02:Results/Performance_R001_xxx.txt
 
-# 3. 运行汇总脚本，生成统一汇总表
+# 3. 运行汇总脚本，生成 results_summary.csv
 python scripts/aggregate_results.py
 
-# 4. 汇总脚本输出可直接粘贴到飞书文档的表格 + CSV 文件
+# 4. 用 Excel 打开 results_summary.csv 筛选查看，或
+#    编辑 scripts/plot_fer.m 的配置区后运行 MATLAB 画 FER 曲线对比
 ```
 
 ---
@@ -329,31 +332,38 @@ python scripts/aggregate_results.py
 .\batch_run.ps1 -ConfigCsv "machine_02_config.csv" -ContinueOnError:$false
 ```
 
-**断点续跑**：脚本不记录断点。如需从中间续跑，删除 CSV 中已完成的行后重新运行即可。已有的 `Results/Performance_R*.txt` 不会被覆盖（exe 以 append 模式写入，所以**同名文件会追加而非覆盖**，需注意文件名不要重复）。
+**断点续跑**：脚本不记录断点。如需从中间续跑，删除 CSV 中已完成的行后重新运行即可。重跑同一 RunID 时新结果追加在旧文件末尾，汇总脚本自动取最后一次运行，无需手动清理。
 
 ### 7.2 `scripts/batch_config_template.csv` — 参数表模板
 
 每台机器从模板复制一份，如 `machine_02_config.csv`，按需填入多组参数。每行对应一次完整的仿真运行。
 
-列名与 `Profile.txt` 字段一一对应，详见模板中的注释和 `batch_config_examples.csv` 中的扫描示例。
+列名与 `Profile.txt` 字段一一对应，参数扫描示例见 `machine_01_config.csv` 中的注释行。
 
 ### 7.3 批量运行后的文件结构
 
 ```
 ABPDecoder/
   Results/                                 ← 提交到本机 results 分支
-    Performance_R001_PAC128-72-CRC24.txt
-    Performance_R002_PAC128-96-N2-10.txt
-    Performance_R003_PAC128-96-N2-15.txt
+    Performance_R001_PAC128-96-20-5-12-power-0.5.txt
+    Performance_R002_PAC128-96-20-5-16-linear-0.12-0.04.txt
+    Performance_R003_PAC128-96-20-5-20-fixed-0.08.txt
     failed_configs/                        ← 仅在出错时创建
       Profile_R003_bad_params.txt
   logs/                                    ← 不提交
     batch_run_20260522_003000.log
 ```
 
+> **文件命名规则**：`Performance_R{RunID:03D}_{Label}.txt`
+> - RunID：CSV 中的行号，唯一标识一组参数，永不重用
+> - Label：参数编码，格式 `PAC{N}-{K}-{N1}-{N2}-{UseCRC}-{Damping}`
+> - 重跑同一 RunID 时 exe 以 append 模式写入，结果追加在旧文件末尾（不覆盖）。汇总脚本自动取最后一次运行结果，无需手动删除旧文件。
+
 ---
 
-## 8. 飞书文档汇总流程
+## 8. 结果汇总与 MATLAB 画图流程
+
+### 8.1 汇总 CSV 生成
 
 ```
 ┌────────────────┐    ┌────────────────┐    ┌──────────┐
@@ -362,8 +372,8 @@ ABPDecoder/
 │ → Results/     │    │ → Results/     │    │          │
 └───────┬────────┘    └───────┬────────┘    └────┬─────┘
         │                     │                  │
-        │ git add Results/    │                  │
         │ git push            │                  │
+        │ results/machine-XX  │                  │
         └─────────────────────┬──────────────────┘
                               │
                               ▼
@@ -374,17 +384,65 @@ ABPDecoder/
                        └──────┬──────┘
                               │
                               ▼
-                       ┌──────────────────┐
-                       │ aggregate_results │
-                       │ .py 汇总脚本      │
-                       └──────┬───────────┘
+                       ┌──────────────────────┐
+                       │ aggregate_results.py │
+                       │ → results_summary.csv │
+                       └──────┬───────────────┘
                               │
-                              ▼
-                       ┌──────────────────┐
-                       │ 飞书文档 / Excel  │
-                       │ 统一汇总表格      │
-                       └──────────────────┘
+              ┌───────────────┼───────────────┐
+              ▼               ▼               ▼
+        ┌──────────┐   ┌──────────┐   ┌──────────┐
+        │  Excel   │   │ MATLAB   │   │  Markdown │
+        │ 筛选透视  │   │ FER 画图  │   │ 飞书粘贴  │
+        └──────────┘   └──────────┘   └──────────┘
 ```
+
+### 8.2 CSV 列说明
+
+| 列名 | 来源 | 说明 |
+|------|------|------|
+| `Machine` | 分支名 | `machine-01` ~ `machine-06` |
+| `N`, `K` | 文件内容 | 码长、信息位 |
+| `N1`, `N2` | 文件名 | ABP 最大迭代次数、内部迭代次数 |
+| `UseCRC` | 文件名 | 译码中使用的 CRC 长度 |
+| `Damping` | 文件名 | 阻尼策略，如 `power-0.5`、`linear-0.12-0.04`、`fixed-0.08` |
+| `SNR` ~ `IT` | 文件内容 | 仿真数据点（信噪比、帧数、FER/BER、迭代次数） |
+
+### 8.3 MATLAB 画图
+
+使用 `scripts/plot_fer.m`，修改顶部配置区即可：
+
+```matlab
+%% ==================== 配置区 ====================
+
+% 筛选条件（为空 = 不限制）
+FILTER = struct(...
+    'N',        128, ...       % 码长
+    'K',        [], ...        % 信息位（不限制）
+    'N1',       [], ...
+    'N2',       5, ...         % ABP 内部迭代
+    'UseCRC',   [], ...
+    'Damping',  '', ...        % 阻尼策略
+    'Machine',  ''  ...        % 机器编号
+);
+
+% 分组变量（每条曲线对应一组）
+GROUP_BY = {'Damping'};        % 对比不同阻尼策略
+% GROUP_BY = {'UseCRC'};       % 对比不同 CRC 配置
+% GROUP_BY = {'Machine'};      % 对比不同机器
+% GROUP_BY = {'N', 'K'};       % 对比不同码率
+```
+
+**常用对比场景**（脚本末尾附有示例）：
+
+| 研究目标 | FILTER 固定 | GROUP_BY |
+|---------|------------|----------|
+| 阻尼策略对比 | N, K, N2, UseCRC | `{'Damping'}` |
+| CRC 长度影响 | N, K, Damping | `{'UseCRC'}` |
+| 多机器一致性 | N, K, N2, UseCRC, Damping | `{'Machine'}` |
+| 码率对比 | Damping, N2 | `{'N', 'K'}` |
+
+**Excel 精细筛选**：`results_summary.csv` 可直接用 Excel 打开，按 `N1`/`N2`/`UseCRC`/`Damping` 列透视或筛选后复制到 MATLAB。两个工具可混合使用。
 
 ---
 
@@ -404,9 +462,9 @@ ABPDecoder/
 
 ### 9.3 结果文件
 
-- 结果文件由脚本自动命名：`Performance_R{行号:D3}_{标签}.txt`
-- **文件名中不能有重复的 RunID**，否则新结果会 append 到旧文件后面（exe 使用 `"a+"` 模式）。
-- 如需重跑某组参数，先删除旧的 `Performance_R*.txt` 文件。
+- 结果文件由脚本自动命名：`Performance_R{RunID:03D}_{Label}.txt`
+- RunID 永不重用，一组参数对应一个 RunID，保证 Excel/MATLAB 中无重复数据。
+- **重跑机制**：exe 以 append 模式写入，重跑同一 RunID 时新结果追加在旧文件末尾（不覆盖）。`aggregate_results.py` 默认只取每个文件最后一次运行结果（`last_run_only=True`），因此重跑后直接 push + 汇总即可，无需删除旧文件。
 - 结果文件较大时（>10MB），建议用 `git lfs` 管理：
   ```powershell
   git lfs track "Results/**"
@@ -446,10 +504,12 @@ ABPDecoder/
 | 配置本机参数 | 任意机器 | 编辑 `scripts/machine_XX_config.csv` |
 | 批量运行仿真 | 任意机器 | `cd scripts` → `.\batch_run.ps1 -ConfigCsv "machine_XX_config.csv"` |
 | 提交实验结果 | 任意机器 | `git add Results/` → `git commit -m "..."` → `git push origin results/machine-XX` |
-| 查看它机进度 | PC1(主机) | `git fetch --all && git show results/machine-XX:Results/` |
-| 汇总所有结果 | PC1(主机) | `python scripts/aggregate_results.py` |
+| 查看各机器进度 | PC1(主机) | `.\scripts\check_status.ps1`（加 `-Detail` 查看详情） |
+| 汇总所有结果 | PC1(主机) | `python scripts/aggregate_results.py` → `results_summary.csv` |
+| Excel 筛选分析 | PC1(主机) | 用 Excel 打开 `results_summary.csv`，按 `N1`/`N2`/`UseCRC`/`Damping` 列透视 |
+| MATLAB 画 FER 曲线 | PC1(主机) | 编辑 `scripts/plot_fer.m` 配置区 → 运行 |
 | 新机器加入 | 新机器 | 按第 4.2 节初始化 |
-| 新增一组参数 | 任意机器 | 在 CSV 末尾追加一行 → 重新运行 `batch_run.ps1` |
+| 新增一组参数 | 任意机器 | 在 CSV 末尾追加一行（新 RunID） → 重新运行 `batch_run.ps1` |
 
 ---
 
