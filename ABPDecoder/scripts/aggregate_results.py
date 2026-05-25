@@ -30,17 +30,26 @@ def run_git(cmd: list[str]) -> str:
 
 
 def list_performance_files(branch: str) -> list[str]:
-    """列出某分支下所有 Performance 文件（支持根目录和 Results/ 目录）"""
+    """列出某分支下 Results/ 目录中的 Performance 文件"""
     output = run_git(["ls-tree", "--name-only", "-r", branch])
     files = []
     for line in output.splitlines():
         name = line.strip()
         if not name:
             continue
-        # 匹配 Performance*.txt 或 Results/Performance*.txt
-        base = name.split("/")[-1] if "/" in name else name
-        if base.startswith("Performance") and base.endswith(".txt"):
+        # 只汇总 Results/ 目录下的 Performance 文件
+        if name.startswith("Results/") and "Performance" in name and name.endswith(".txt"):
             files.append(name)
+
+        # 如果要汇总其他自定义目录：在 line 41 下面加新的 if 条件，比如汇总 custom_results/ 目录：
+        # if name.startswith("custom_results/") and "Performance" in name and name.endswith(".txt"):
+        #     files.append(name)
+
+        # ---- 如需同时汇总根目录下的旧 Performance_v*.txt，取消下面注释 ----
+        # base = name.split("/")[-1] if "/" in name else name
+        # if "/" not in name and base.startswith("Performance") and base.endswith(".txt"):
+        #     files.append(name)
+
     return files
 
 
@@ -194,7 +203,7 @@ def main():
                                 if best is None or d["FER"] < best["FER"]:
                                     best = d
                 if best:
-                    row += f" {best['FER']:.2e} | {best['BER']:.2e} |"
+                    row += f" {best['FER']:.3e} | {best['BER']:.3e} |"
                 else:
                     row += " — | — |"
             print(row)
@@ -209,7 +218,7 @@ def main():
                 for row in rec["data_rows"]:
                     f.write(f"{short},{rec['N']},{rec['K']},{row['SNR']},"
                             f"{row['NTF']},{row['NEF']},{row['NUF']},"
-                            f"{row['FER']},{row['BER']},{row['IT']}\n")
+                            f"{row['FER']:.3e},{row['BER']:.3e},{row['IT']}\n")
     print(f"\nCSV 已导出: {csv_path}")
 
     print("\n" + "=" * 70)
