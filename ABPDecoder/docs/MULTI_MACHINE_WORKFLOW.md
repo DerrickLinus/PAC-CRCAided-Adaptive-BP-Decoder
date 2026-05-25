@@ -5,12 +5,12 @@
 ```
 GitHub (远程仓库)
   ├── master              ← 共享代码 + 脚本（所有机器同步）
-  ├── results/machine-01  ← PC1 实验结果
-  ├── results/machine-02  ← PC2 实验结果
-  ├── results/machine-03  ← PC3 实验结果
-  ├── results/machine-04  ← PC4 实验结果
-  ├── results/machine-05  ← PC5 实验结果
-  └── results/machine-06  ← PC6 实验结果
+  ├── results/machine-01  ← PC1(dlh1) 实验结果
+  ├── results/machine-02  ← PC2(dlh2) 实验结果
+  ├── results/machine-03  ← PC3(djx)  实验结果
+  ├── results/machine-04  ← PC4(yh)   实验结果
+  ├── results/machine-05  ← PC5(ylj)  实验结果
+  └── results/machine-06  ← PC6(swj)  实验结果
 
 每台机器本地：
   ├── master 分支代码（共享）
