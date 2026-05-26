@@ -1,5 +1,5 @@
-%% plot_fer_9figs.m
-% 单图 FER vs SNR，一张图包含 3 组 CRC (12,16,20) × 3 种阻尼策略 = 最多 9 条线。
+%% plot_it.m
+% 单图 平均迭代次数 (IT) vs SNR，一张图包含 3 组 CRC (12,16,20) × 3 种阻尼策略 = 最多 9 条线。
 % 视觉编码：颜色 → CRC 长度，线型/标记 → 阻尼策略
 %
 % 用法：修改下方配置区参数，直接运行。
@@ -56,7 +56,7 @@ end
 
 % --- 自动生成文件名和标题 ---
 if isempty(FIG_NAME)
-    FIG_NAME = sprintf('FER_%d_%d_N2_%d', N, K, N2);
+    FIG_NAME = sprintf('IT_%d_%d_N2_%d', N, K, N2);
 end
 titleStr = sprintf('PAC(%d,%d), N_2=%d', N, K, N2);
 
@@ -84,9 +84,9 @@ for c_idx = 1:length(CRC_VALS)
         end
 
         [snrSorted, sortIdx] = sort(data.SNR);
-        ferSorted = data.FER(sortIdx);
+        itSorted = data.IT(sortIdx);
 
-        h = semilogy(snrSorted, ferSorted, style, ...
+        h = plot(snrSorted, itSorted, style, ...
             'Color', color, ...
             'LineWidth', LINE_WIDTH, ...
             'MarkerSize', MARKER_SIZE, ...
@@ -101,13 +101,13 @@ end
 hold off;
 
 xlabel('SNR (dB)', 'FontSize', FONT_SIZE);
-ylabel('FER', 'FontSize', FONT_SIZE);
+ylabel('Average Iterations', 'FontSize', FONT_SIZE);
 title(titleStr, 'FontSize', FONT_SIZE + 2);
 grid on; box on;
-set(gca, 'FontSize', FONT_SIZE, 'YScale', 'log');
+set(gca, 'FontSize', FONT_SIZE);
 xlim([1, 4]);
 
-legend(hAll, legAll, 'Location', 'southwest', 'FontSize', 7);
+legend(hAll, legAll, 'Location', 'northeast', 'FontSize', 7);
 
 % --- 保存 ---
 if SAVE_FIG
