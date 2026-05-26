@@ -214,14 +214,13 @@ void WriteResult2File(double SNR, struct StatisStruct *Statis)
 	fprintf(outfile, " %5.2f %10d %6d %6d    %5.3e   %5.3e   %5.3e   %5.3f\n", SNR, Statis->testFrames, Statis->errorFrames, Statis->undetectedErrorFrames, Statis->FER, Statis->SER, Statis->BER, Statis->avgIterTime);
 	fclose(outfile);
 }
-void PACEncode(const int* u, int* c, int K, int N, int** G, int** T0,int* A,int* infoseq,int system) {
+void PACEncode(const int* u, int* c, int K, int N, int** G, int** T0,int* A,int* infoseq,int system,
+               int* temp, int* tempcode) {
 	if (system == 0) {
 		Encode(u, c, N, N, G);
 	}
 	else {
-		int* temp = new int[K];
 		memset(temp, 0, sizeof(int)*K);
-		int* tempcode = new int[N];
 		memset(tempcode,0,sizeof(int)*N);
 
 		for (int i = 0; i < K; i++)
@@ -234,8 +233,6 @@ void PACEncode(const int* u, int* c, int K, int N, int** G, int** T0,int* A,int*
 		for (int i = 0; i < K; i++)
 			tempcode[A[i]] = temp[i];
 		Encode(tempcode, c, N, N, G);
-		delete[] temp;
-		delete[] tempcode;
 	}
 }
 
@@ -269,6 +266,9 @@ void Simulation(struct SPStruct *SP, struct ADPStruct *ADP, struct AWGN *awgn, s
 	vector<int*>       thrDecodeResult(numThreads);
 	vector<int*>       thrDeg2RandSeq(numThreads);
 	vector<int*>       thrPolarCode(numThreads);
+	vector<int*>       thrEncodeTempK(numThreads);  // PACEncode scratch: size K
+	vector<int*>       thrEncodeTempN(numThreads);  // PACEncode scratch: size N
+	vector<DecodePool> thrDecodePools(numThreads);  // Decode scratch pool
 	vector<SEED>       thrSeeds(numThreads);
 	vector<AWGN>       thrAWGNs(numThreads);
 	vector<mt19937>    thrRNGs(numThreads);
@@ -309,6 +309,10 @@ void Simulation(struct SPStruct *SP, struct ADPStruct *ADP, struct AWGN *awgn, s
 		// PolarCode 副本
 		thrPolarCode[t] = new int[N];
 
+		// PACEncode 临时缓冲区（避免每帧 new/delete）
+		thrEncodeTempK[t] = new int[K];
+		thrEncodeTempN[t] = new int[N];
+
 		// 克隆 ADP：浅拷贝 + 重定向可变字段
 		thrADPs[t] = *ADP;
 		MallocIter(M_ABP, N, &thrIterDecs[t]);
@@ -319,6 +323,8 @@ void Simulation(struct SPStruct *SP, struct ADPStruct *ADP, struct AWGN *awgn, s
 		thrPACCodes[t] = *ADP->PAC_code;
 		thrPACCodes[t].PolarCode = thrPolarCode[t];
 		thrADPs[t].PAC_code = &thrPACCodes[t];
+
+		InitDecodePool(&thrDecodePools[t], ADP);
 
 		memset(&thrStats[t], 0, sizeof(StatisStruct));
 	}
@@ -387,7 +393,8 @@ void Simulation(struct SPStruct *SP, struct ADPStruct *ADP, struct AWGN *awgn, s
 						}
 
 						PACEncode(thrInfoSeq_add0[tid], thrCodeSeq[tid], K, N,
-							ADP->PAC_code->G, ADP->PAC_code->T0, ADP->A, thrInfoSeq[tid], ADP->PAC_code->system);
+							ADP->PAC_code->G, ADP->PAC_code->T0, ADP->A, thrInfoSeq[tid], ADP->PAC_code->system,
+							thrEncodeTempK[tid], thrEncodeTempN[tid]);
 					}
 
 					memcpy(thrPolarCode[tid], thrCodeSeq[tid], sizeof(int) * N);
@@ -414,7 +421,7 @@ void Simulation(struct SPStruct *SP, struct ADPStruct *ADP, struct AWGN *awgn, s
 					}
 
 					// ---- 译码 ----
-					Decode(currentSNR, thrBitsoft[tid], thrChannelOutBit[tid], thrDecodeResult[tid], localADP);
+					Decode(currentSNR, thrBitsoft[tid], thrChannelOutBit[tid], thrDecodeResult[tid], localADP, &thrDecodePools[tid]);
 
 					// ---- 误码统计 ----
 					int errorNum = 0;
@@ -495,6 +502,8 @@ cleanup:
 		delete[] thrChannelOutBit[t];  delete[] thrBitsoft[t];
 		delete[] thrDecodeResult[t];  delete[] thrDeg2RandSeq[t];
 		delete[] thrPolarCode[t];
+		delete[] thrEncodeTempK[t];    delete[] thrEncodeTempN[t];
+		FreeDecodePool(&thrDecodePools[t], ADP);
 
 		// 释放 IterDec
 		delete[] thrIterDecs[t].CNdegree;
