@@ -27,6 +27,7 @@ Release/
 
 # 机器专属配置（每台机器独立维护，不提交）
 Profile.txt
+machine_01_config.csv
 
 # 旧结果文件
 Performance_v1.0.txt
