@@ -23,3 +23,28 @@ Program  ends    at: Fri May 22 07:56:50 2026
 Termination reason: Normal completion
 Total running time: 1 hours 14 minutes 21 seconds
 ******************************************************************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 56, K = 72, A = 48, shorten = 0, puncture = 0, CRC = 24, R = 72/128, R_net = 48/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Metric Threshold = 41.00
+* Interchange = 1, Use CRC = 12, Use Channel LLR = 0
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.00, Beta1 = 0.00, Alpha2 = 0.90, Beta2 = 0.00
+* Damping Mode = 2 (0:fixed,1:linear,2:Power-low), fixed = 0.08, start = 0.12, end = 0.04, p = 0.50
+* AWGN, BPSK, Source = 1, Seed = 173, Performance_R005_PAC128-72-20-10-12-power-0.5.txt, srand(main)
+******************************************************************************
+Program  starts  at: Wed May 27 03:01:17 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       1800    101      0    5.611e-02   0.000e+00   2.850e-02   25.655
+  1.50       6000    101      0    1.683e-02   0.000e+00   8.493e-03   13.964
+  2.00      25400    100      0    3.937e-03   0.000e+00   1.934e-03   8.332
+  2.50     115800    100      0    8.636e-04   0.000e+00   4.317e-04   6.060
+  3.00     883800    100      0    1.131e-04   0.000e+00   5.771e-05   4.888
+  3.50    5601800    100      0    1.785e-05   0.000e+00   9.017e-06   4.193
+  4.00   44526100    100      0    2.246e-06   0.000e+00   1.099e-06   3.651
+
+Program  ends    at: Wed May 27 04:20:29 2026
+Termination reason: Normal completion
+Total running time: 1 hours 19 minutes 12 seconds
+******************************************************************************
