@@ -1,0 +1,25 @@
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 64, K = 64, A = 40, shorten = 0, puncture = 0, CRC = 24, R = 64/128, R_net = 40/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Metric Threshold = 41.00
+* Interchange = 1, Use CRC = 16, Use Channel LLR = 0
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.00, Beta1 = 0.00, Alpha2 = 0.90, Beta2 = 0.00
+* Damping Mode = 1 (0:fixed,1:linear,2:Power-low), fixed = 0.08, start = 0.12, end = 0.04, p = 0.50
+* AWGN, BPSK, Source = 1, Seed = 173, Performance_R027_PAC128-64-20-10-16-linear-0.12-0.04.txt, srand(main)
+******************************************************************************
+Program  starts  at: Wed May 27 03:11:43 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  1.00       4400    103      0    2.341e-02   0.000e+00   1.158e-02   17.417
+  1.50      16800    100      0    5.952e-03   0.000e+00   2.987e-03   10.403
+  2.00      72700    100      0    1.376e-03   0.000e+00   7.069e-04   7.239
+  2.50     324300    100      0    3.084e-04   0.000e+00   1.530e-04   5.830
+  3.00    1564400    100      0    6.392e-05   0.000e+00   3.154e-05   4.982
+  3.50    6918700    100      0    1.445e-05   0.000e+00   7.457e-06   4.389
+  4.00   31058800    100      0    3.220e-06   0.000e+00   1.636e-06   3.887
+
+Program  ends    at: Wed May 27 04:17:39 2026
+Termination reason: Normal completion
+Total running time: 1 hours 5 minutes 56 seconds
+******************************************************************************
