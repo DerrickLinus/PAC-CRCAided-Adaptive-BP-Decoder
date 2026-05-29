@@ -40,6 +40,24 @@ LINE_WIDTH  = 1.2;
 MARKER_SIZE = 7;
 FONT_SIZE   = 10;
 
+% ---------- CA-SCL 对比基线 (L=32) ----------
+% 格式: SCL_BASELINE(N, K).snr / .fer 为等长向量
+% 注意：用最大值预分配结构体数组，保证 snr/fer 字段一致
+SCL_BASELINE(128, 96) = struct('snr', [], 'fer', []);
+
+SCL_BASELINE(128, 96).snr = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0];
+SCL_BASELINE(128, 96).fer = [4.770e-01, 2.710e-01, 1.020e-01, 3.051e-02, 6.304e-03, 6.392e-04, 4.210e-05];
+
+SCL_BASELINE(128, 72).snr = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5];
+SCL_BASELINE(128, 72).fer = [8.881e-02, 2.107e-02, 3.965e-03, 5.661e-04, 4.925e-05, 2.363e-06];
+
+SCL_BASELINE(128, 64).snr = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0];
+SCL_BASELINE(128, 64).fer = [1.390e-01, 5.767e-02, 2.035e-02, 3.600e-03, 5.165e-04, 5.226e-05, 2.348e-06];
+
+SCL_LINE_SPEC = '-^k';       % 黑色带三角标记
+SCL_LINE_WIDTH = 1.5;
+SCL_MARKER_SIZE = 8;
+
 %% ==================== 主程序 ====================
 
 T = readtable(CSV_PATH, 'TextType', 'string');
@@ -96,6 +114,20 @@ for c_idx = 1:length(CRC_VALS)
         dName = DAMPING_NAMES(dmode);
         legAll{end+1} = sprintf('CRC=%d, %s', crc, dName);
     end
+end
+
+% --- CA-SCL 对比基线 (L=32) ---
+if N <= size(SCL_BASELINE, 1) && K <= size(SCL_BASELINE, 2) ...
+        && ~isempty(SCL_BASELINE(N, K).snr)
+    scl = SCL_BASELINE(N, K);
+    hScl = semilogy(scl.snr, scl.fer, SCL_LINE_SPEC, ...
+        'LineWidth', SCL_LINE_WIDTH, ...
+        'MarkerSize', SCL_MARKER_SIZE, ...
+        'MarkerFaceColor', 'k');
+    hAll(end+1) = hScl;
+    legAll{end+1} = 'CA-SCL L=32';
+else
+    fprintf('  未找到 CA-SCL 基线数据 (N=%d, K=%d)\n', N, K);
 end
 
 hold off;
