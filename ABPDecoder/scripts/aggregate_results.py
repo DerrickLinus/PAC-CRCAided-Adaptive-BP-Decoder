@@ -15,7 +15,12 @@ from pathlib import Path
 from collections import defaultdict
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-MACHINES = [f"results/machine-{i:02d}" for i in range(1, 7)]
+# MACHINES = [f"results/machine-{i:02d}" for i in range(1, 7)]
+MACHINES = [
+    "results/machine-01",
+    "results/machine-03",
+    "results/machine-04",
+]
 
 
 def run_git(cmd: list[str]) -> str:
