@@ -5,12 +5,13 @@
 ```
 GitHub (远程仓库)
   ├── master              ← 共享代码 + 脚本（所有机器同步）
-  ├── results/machine-01  ← PC1(dlh1、swj) 实验结果
+  ├── results/machine-01  ← PC1(dlh1、swj) 实验结果（N=128,K=96,d=0.08,d1=0.12,d2=0.04,p=0.5）
   ├── results/machine-02  ← PC2(dlh2) 实验结果
-  ├── results/machine-03  ← PC3(djx)  实验结果
-  ├── results/machine-04  ← PC4(yh)   实验结果
+  ├── results/machine-03  ← PC3(djx)  实验结果（N=128,K=72,d=0.08,d1=0.12,d2=0.04,p=0.5）
+  ├── results/machine-04  ← PC4(yh)   实验结果（N=128,k=64,d=0.08,d1=0.12,d2=0.04,p=0.5）
   ├── results/machine-05  ← PC5(ylj)  实验结果（暂未配置）
-  └── results/machine-06  ← PC6(swj)  实验结果（暂未配置）
+  ├── results/machine-06  ← PC6(swj)  实验结果（暂未配置）
+  └── results/machine-07  ← PC1(dlh1)  实验结果（N=128,K=96,扫描不同固定阻尼因子）
 
 每台机器本地：
   ├── master 分支代码（共享）
@@ -276,6 +277,7 @@ git branch    # 应显示 * results/machine-XX
 # 4. 运行批量仿真
 cd scripts
 .\batch_run.ps1 -ConfigCsv "machine_02_config.csv"
+``可加参数 -Results my_Results 指定结果生成目录``
 
 # 5. 脚本自动完成：
 #    - 依次读取 CSV 每行 → 生成 Profile.txt → 运行仿真
