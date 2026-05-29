@@ -277,6 +277,7 @@ git branch    # 应显示 * results/machine-XX
 # 4. 运行批量仿真
 cd scripts
 .\batch_run.ps1 -ConfigCsv "machine_02_config.csv"
+``可加参数 -Results my_Results 指定结果生成目录``
 
 # 5. 脚本自动完成：
 #    - 依次读取 CSV 每行 → 生成 Profile.txt → 运行仿真
