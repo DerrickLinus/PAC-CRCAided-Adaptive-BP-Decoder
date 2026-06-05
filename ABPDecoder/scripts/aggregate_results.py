@@ -6,21 +6,76 @@
   - 终端表格（方便快速查看）
   - CSV 文件（可导入飞书/Excel）
   - Markdown 表格（可直接粘贴到飞书文档）
+
+用法：
+  # 默认行为：汇总 results/machine-01/03/04 的 Results/ 目录，输出 results_summary.csv
+  python scripts/aggregate_results.py
+
+  # 指定要汇总的机器分支
+  python scripts/aggregate_results.py -m results/machine-01,results/machine-02,results/machine-03
+
+  # 指定结果目录（默认 Results/）
+  python scripts/aggregate_results.py -r MyResults
+
+  # 指定输出 CSV 路径
+  python scripts/aggregate_results.py -o summary_damping_scan.csv
+
+  # 组合使用
+  python scripts/aggregate_results.py -m results/machine-01,results/machine-03 -r Results1 -o scan1_summary.csv
 """
 
 import subprocess
 import re
 import sys
+import argparse
 from pathlib import Path
 from collections import defaultdict
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-# MACHINES = [f"results/machine-{i:02d}" for i in range(1, 7)]
-MACHINES = [
+
+# ---- 默认配置（可通过命令行参数覆盖） ----
+DEFAULT_MACHINES = [
     "results/machine-01",
     "results/machine-03",
     "results/machine-04",
 ]
+DEFAULT_RESULTS_DIR = "Results"         # 在各分支中查找的结果目录名
+DEFAULT_OUTPUT_CSV = "results_summary.csv"  # 输出 CSV 文件名（相对于仓库根目录）
+
+
+def parse_args() -> argparse.Namespace:
+    """解析命令行参数"""
+    parser = argparse.ArgumentParser(
+        description="汇总多机器 Performance 实验结果，生成统一表格和 CSV",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+示例：
+  %(prog)s
+  %(prog)s -m results/machine-01,results/machine-02
+  %(prog)s -m results/machine-01,results/machine-03 -r Results1
+  %(prog)s -m results/machine-04 -r Results2 -o damping_scan.csv
+        """.strip()
+    )
+    parser.add_argument(
+        "-m", "--machines",
+        default=None,
+        help="要汇总的机器分支列表，逗号分隔。"
+             "默认: results/machine-01,results/machine-03,results/machine-04"
+             "（可通过修改脚本顶部 DEFAULT_MACHINES 永久更改）"
+    )
+    parser.add_argument(
+        "-r", "--results-dir",
+        default=DEFAULT_RESULTS_DIR,
+        help="各分支中存放结果文件的目录名。"
+             "如果你的结果文件在 Results1/、Results2/ 等其他目录，可通过此参数切换。"
+             "默认: %(default)s"
+    )
+    parser.add_argument(
+        "-o", "--output",
+        default=DEFAULT_OUTPUT_CSV,
+        help="输出 CSV 文件的路径（相对于仓库根目录）。默认: %(default)s"
+    )
+    return parser.parse_args()
 
 
 def run_git(cmd: list[str]) -> str:
@@ -34,19 +89,26 @@ def run_git(cmd: list[str]) -> str:
     return result.stdout
 
 
-def list_performance_files(branch: str) -> list[str]:
-    """列出某分支下 Results/ 目录中的 Performance 文件"""
+def list_performance_files(branch: str, results_dir: str) -> list[str]:
+    """
+    列出某分支下指定结果目录中的 Performance 文件。
+
+    参数:
+        branch: 远程分支名，如 origin/results/machine-01
+        results_dir: 结果目录名，如 "Results"、"Results1"、"Results2"
+    """
     output = run_git(["ls-tree", "--name-only", "-r", branch])
     files = []
+    dir_prefix = f"{results_dir}/"
     for line in output.splitlines():
         name = line.strip()
         if not name:
             continue
-        # 只汇总 Results/ 目录下的 Performance 文件
-        if name.startswith("Results/") and "Performance" in name and name.endswith(".txt"):
+        # 只汇总指定结果目录下的 Performance 文件
+        if name.startswith(dir_prefix) and "Performance" in name and name.endswith(".txt"):
             files.append(name)
 
-        # 如果要汇总其他自定义目录：在 line 41 下面加新的 if 条件，比如汇总 custom_results/ 目录：
+        # 如果要汇总其他自定义目录：在 line 90 下面加新的 if 条件，比如汇总 custom_results/ 目录：
         # if name.startswith("custom_results/") and "Performance" in name and name.endswith(".txt"):
         #     files.append(name)
 
@@ -150,9 +212,23 @@ def find_best_fer(records: list[dict], snr: float) -> dict:
 
 
 def main():
+    args = parse_args()
+
+    # 解析要汇总的机器列表
+    if args.machines:
+        MACHINES = [m.strip() for m in args.machines.split(",") if m.strip()]
+    else:
+        MACHINES = DEFAULT_MACHINES
+
+    results_dir = args.results_dir
+    output_csv = REPO_ROOT / args.output
+
     print("=" * 70)
     print("  多机器 Performance 汇总工具")
     print("=" * 70)
+    print(f"  结果目录: {results_dir}/")
+    print(f"  目标分支: {', '.join(MACHINES)}")
+    print(f"  输出文件: {args.output}")
 
     # Step 1: 检查远程分支是否可访问
     print("\n[1/3] 检查各机器结果分支...")
@@ -163,17 +239,20 @@ def main():
     for m in MACHINES:
         origin_m = f"origin/{m}"
         if any(origin_m in b for b in remote_branches):
-            files = list_performance_files(origin_m)
+            files = list_performance_files(origin_m, results_dir)
             if files:
                 available_machines.append((m, origin_m, files))
-                print(f"  {m}: {len(files)} 个结果文件")
+                print(f"  {m}: {len(files)} 个结果文件 (来自 {results_dir}/)")
             else:
-                print(f"  {m}: 分支存在但无结果文件")
+                print(f"  {m}: 分支存在但 {results_dir}/ 中无结果文件")
         else:
             print(f"  {m}: 尚未创建")
 
     if not available_machines:
-        print("\n未找到任何结果文件。请先在各机器上运行仿真并 push 结果。")
+        print(f"\n未找到任何结果文件。请确认：")
+        print(f"  1. 已执行 git fetch --all")
+        print(f"  2. 指定的机器分支已推送结果")
+        print(f"  3. 结果目录名 '{results_dir}/' 正确（可通过 -r 参数切换）")
         return
 
     # Step 2: 提取数据
@@ -244,8 +323,7 @@ def main():
             print(row)
 
     # ---- CSV 导出 ----
-    csv_path = REPO_ROOT / "results_summary.csv"
-    with open(csv_path, "w", encoding="utf-8-sig") as f:
+    with open(output_csv, "w", encoding="utf-8-sig") as f:
         f.write("Machine,N,K,N1,N2,UseCRC,Damping,SNR,NTF,NEF,NUF,FER,BER,IT\n")
         for machine_name, records in all_data.items():
             short = machine_name.replace("results/", "")
@@ -256,7 +334,7 @@ def main():
                             f"{row['SNR']},"
                             f"{row['NTF']},{row['NEF']},{row['NUF']},"
                             f"{row['FER']:.3e},{row['BER']:.3e},{row['IT']}\n")
-    print(f"\nCSV 已导出: {csv_path}")
+    print(f"\nCSV 已导出: {output_csv}")
 
     print("\n" + "=" * 70)
     print(f"  汇总完成: {len(available_machines)} 台机器, {sum(len(v) for v in all_data.values())} 组仿真")
