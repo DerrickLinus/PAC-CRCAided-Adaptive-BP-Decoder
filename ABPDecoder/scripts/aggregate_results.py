@@ -127,23 +127,40 @@ def read_file_from_branch(branch: str, filepath: str) -> str:
 
 def parse_filename_params(filename: str) -> dict:
     """
-    从文件名中提取 PAC 后的参数: N-K-N1-N2-UseCRC-Damping
-    例: Performance_R001_PAC128-96-20-5-12-power-0.5.txt
+    从文件名中提取 PAC 后的参数，支持两种命名格式：
+
+    格式1 (全数字位置参数):
+      Performance_R001_PAC128-96-20-5-12-power-0.5.txt
       → {"N1": 20, "N2": 5, "UseCRC": 12, "Damping": "power-0.5"}
-    例: Performance_R005_PAC128-96-20-5-20-linear-0.12-0.04.txt
-      → {"N1": 20, "N2": 5, "UseCRC": 20, "Damping": "linear-0.12-0.04"}
+
+    格式2 (带文字前缀的命名参数, 旧版 generate_config_power.py 生成):
+      Performance_R001_PAC128-96-N2-5-CRC12-power-0.1.txt
+      → {"N1": "", "N2": 5, "UseCRC": 12, "Damping": "power-0.1"}
     """
     import re as _re
+
+    # 格式1: PAC{N}-{K}-{N1}-{N2}-{UseCRC}-{Damping}.txt  (全数字)
     m = _re.search(r"PAC(\d+-\d+-\d+-\d+-\d+-.+)\.txt", filename)
-    if not m:
-        return {}
-    parts = m.group(1).split("-")
-    return {
-        "N1": int(parts[2]),
-        "N2": int(parts[3]),
-        "UseCRC": int(parts[4]),
-        "Damping": "-".join(parts[5:])
-    }
+    if m:
+        parts = m.group(1).split("-")
+        return {
+            "N1": int(parts[2]),
+            "N2": int(parts[3]),
+            "UseCRC": int(parts[4]),
+            "Damping": "-".join(parts[5:])
+        }
+
+    # 格式2: PAC{N}-{K}-N2-{N2}-CRC{UseCRC}-{Damping}.txt  (带前缀, 无N1)
+    m = _re.search(r"PAC(\d+-\d+)-N2-(\d+)-CRC(\d+)-(.+)\.txt", filename)
+    if m:
+        return {
+            "N1": "",           # 此格式不含 N1
+            "N2": int(m.group(2)),
+            "UseCRC": int(m.group(3)),
+            "Damping": m.group(4)
+        }
+
+    return {}
 
 
 def parse_performance(content: str, source: str = "",
