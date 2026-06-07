@@ -30,7 +30,7 @@ Profile*.txt
 scripts/machine_*.csv
 
 # 旧结果文件
-Performance_*.txt
+Performance_v1.3.txt
 
 # 汇总文件
 results_*.csv
@@ -41,3 +41,18 @@ results_*.csv
 # 系统文件
 Thumbs.db
 Desktop.ini
+
+# pdf分析包
+tmp/
+
+# 分析
+docs/dynamic_damping_assessment_assets/
+figures/
+results_power_analysis/
+scripts/build_research_assessment_assets.py
+scripts/build_research_assessment_docx.py
+scripts/plot_damping_curve.m
+scripts/analyze_p_trend.m
+
+# 文档
+docs/Dynamic_Damping_CA_ABP_Research_Assessment_CN.md
