@@ -21,10 +21,17 @@
   python generate_config.py -d 1 --damp-start-values 0.12 --damp-end-values 0.04
 
   # ---- 严格等平均幂律扫描 (DampMode=2, 默认) ----
-  python generate_config.py -d 2 --damp-amplitude-values 0.02 0.04 0.08 --damp-values 0.1 0.5 1.0
+  # DampFixed=mu（平均阻尼），DampStart=A（动态变化幅度），DampP=p（衰减形状）
+  python generate_config.py -d 2 \
+      --damp-mean-values 0.14 \
+      --damp-amplitude-values 0.02 0.04 0.08 \
+      --damp-values 0.1 0.5 1.0
 
-  # ---- 自定义其他扫描维度 ----
-  python generate_config.py -d 0 --damp-values 0.05 0.08 0.10 \
+  # ---- 严格等平均调度 + 自定义其他扫描维度 ----
+  python generate_config.py -d 2 \
+      --damp-mean-values 0.08 0.10 0.12 0.14 \
+      --damp-amplitude-values 0.00 0.02 0.04 0.08 \
+      --damp-values 0.1 0.5 1.0 \
       --rates 128-96 128-72 \
       --n1-values 20 --n2-values 5 10 15 \
       --usecrc-values 12 16 20
