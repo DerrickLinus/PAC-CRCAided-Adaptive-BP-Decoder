@@ -103,7 +103,7 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 		printf("* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
 		printf("* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %.2f, Beta1 = %.2f, Alpha2 = %.2f, Beta2 = %.2f\n",
 			ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
-		printf("* Damping Mode = %d (0:fixed,1:equal-mean-linear,2:equal-mean-power), mean/fixed = %.4f, amplitude = %.4f, legacy-end = %.4f, p = %.4f\n",
+		printf("* Damping Mode = %d (0:fixed,1:linear,2:Power-low), fixed = %.2f, start = %.2f, end = %.2f, p = %.2f\n",
 			ADP->damp_mode, ADP->damp_fixed, ADP->damp_start, ADP->damp_end, ADP->damp_p);
 	}
 	else if (ADP->DecodingMethod == 2)
@@ -112,7 +112,7 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 		printf("* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
 		printf("* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %.2f, Beta1 = %.2f, Alpha2 = %.2f, Beta2 = %.2f\n",
 			ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
-		printf("* Damping Mode = %d (0:fixed,1:equal-mean-linear,2:equal-mean-power), mean/fixed = %.4f, amplitude = %.4f, legacy-end = %.4f, p = %.4f\n",
+		printf("* Damping Mode = %d (0:fixed,1:linear,2:Power-low), fixed = %.2f, start = %.2f, end = %.2f, p = %.2f\n",
 			ADP->damp_mode, ADP->damp_fixed, ADP->damp_start, ADP->damp_end, ADP->damp_p);
 	}
 	else if (ADP->DecodingMethod == 3)
@@ -156,7 +156,7 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 		fprintf(outfile, "* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
 		fprintf(outfile, "* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %.2f, Beta1 = %.2f, Alpha2 = %.2f, Beta2 = %.2f\n",
 			ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
-		fprintf(outfile, "* Damping Mode = %d (0:fixed,1:equal-mean-linear,2:equal-mean-power), mean/fixed = %.4f, amplitude = %.4f, legacy-end = %.4f, p = %.4f\n",
+		fprintf(outfile, "* Damping Mode = %d (0:fixed,1:linear,2:Power-low), fixed = %.2f, start = %.2f, end = %.2f, p = %.2f\n",
 			ADP->damp_mode, ADP->damp_fixed, ADP->damp_start, ADP->damp_end, ADP->damp_p);
 	}
 	else if (ADP->DecodingMethod == 2)
@@ -165,7 +165,7 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 		fprintf(outfile, "* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
 		fprintf(outfile, "* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %.2f, Beta1 = %.2f, Alpha2 = %.2f, Beta2 = %.2f\n",
 			ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
-		fprintf(outfile, "* Damping Mode = %d (0:fixed,1:equal-mean-linear,2:equal-mean-power), mean/fixed = %.4f, amplitude = %.4f, legacy-end = %.4f, p = %.4f\n",
+		fprintf(outfile, "* Damping Mode = %d (0:fixed,1:linear,2:Power-low), fixed = %.2f, start = %.2f, end = %.2f, p = %.2f\n",
 			ADP->damp_mode, ADP->damp_fixed, ADP->damp_start, ADP->damp_end, ADP->damp_p);
 	}
 	else if (ADP->DecodingMethod == 3)

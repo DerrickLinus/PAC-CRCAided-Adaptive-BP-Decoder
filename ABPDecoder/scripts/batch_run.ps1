@@ -66,8 +66,8 @@ Convergence Window: $($Row.ConvWindow)
 
 Damping Mode:       $($Row.DampMode)
 Damping Fixed:      $($Row.DampFixed)
-Damping Amplitude:  $($Row.DampStart)
-Damping LegacyEnd:  $($Row.DampEnd)
+Damping Start:      $($Row.DampStart)
+Damping End:        $($Row.DampEnd)
 Damping P:          $($Row.DampP)
 
 SNR Type:   $($Row.SNRtype)
