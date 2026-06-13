@@ -11,7 +11,7 @@ param(
     [string]$ConfigCsv,
     [string]$ExePath = "",
     [string]$ResultsDir = "Results",
-    [switch]$ContinueOnError = $true                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+    [bool]$ContinueOnError = $true                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 )
 
 $ErrorActionPreference = "Stop"

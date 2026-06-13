@@ -29,7 +29,7 @@ DAMPING_NAMES = containers.Map(...
 
 % ---------- 颜色 & 线型 ----------
 CRC_COLORS     = {[0.00 0.45 0.74], [0.85 0.33 0.10], [0.47 0.67 0.19]};
-DAMPING_STYLES = {'-o', '--s', ':d'};   % fixed, linear, power
+DAMPING_STYLES = {'-o', '--s', ':d', '-.^', '--v'};
 
 % ---------- 图表设置 ----------
 SAVE_FIG    = true;            % 是否保存文件
