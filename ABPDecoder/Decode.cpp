@@ -3,6 +3,31 @@
 #include <numeric>
 // #include <iostream>
 using namespace std;
+
+static double DampingShapeMean(int iteration_count, double exponent)
+{
+	if (iteration_count <= 1)
+		return 0.0;
+
+	double sum = 0.0;
+	for (int k = 0; k < iteration_count; k++)
+	{
+		const double position = 1.0 - static_cast<double>(k) / static_cast<double>(iteration_count - 1);
+		sum += pow(position, exponent);
+	}
+	return sum / static_cast<double>(iteration_count);
+}
+
+static double StrictEqualMeanDamping(int iteration, int iteration_count, double mean,
+	double amplitude, double exponent, double shape_mean)
+{
+	if (iteration_count <= 1 || amplitude == 0.0)
+		return mean;
+
+	const double position = 1.0 - static_cast<double>(iteration) / static_cast<double>(iteration_count - 1);
+	const double shape = pow(position, exponent);
+	return mean + amplitude * (shape - shape_mean);
+}
 /*
 Check the code if it satisfies the parity-check matrix
 return 0:		is satisfied
@@ -734,6 +759,11 @@ void ABP_MSA(double snr, double* bitsoft, double* y, int** H, int N, int M, int*
 	ADP->check_flag = 0;
 	ADP->IterTime = 0;
 	double current_damping = 1;
+	const double damping_exponent = (ADP->damp_mode == 1) ? 1.0 : ADP->damp_p;
+	const double damping_shape_mean =
+		(ADP->damp_mode == 1 || ADP->damp_mode == 2)
+		? DampingShapeMean(ADP->N1, damping_exponent)
+		: 0.0;
 
 	ABPPool* p = &pool->abp;
 
@@ -965,17 +995,16 @@ void ABP_MSA(double snr, double* bitsoft, double* y, int** H, int N, int M, int*
 
 			// 变量节点更新及硬判决（这里的变量节点更新没有排除目标校验节点的信息）
 			// k 是当前内层迭代次数 (0 到 ADP->N1 - 1)
-			if(ADP->damp_mode == 0) {
+			if (ADP->damp_mode == 0) {
 				// 固定阻尼因子
 				current_damping = ADP->damp_fixed;
 			}
-			if (ADP->damp_mode == 1) {
-				// 线性衰减阻尼因子
-				current_damping = ADP->damp_start - ((double)k / (double)(ADP->N1 - 1)) * (ADP->damp_start - ADP->damp_end); 
-			}
-			if (ADP->damp_mode == 2) {
-				// 幂律衰减阻尼因子
-				current_damping = ADP->damp_end + (ADP->damp_start - ADP->damp_end) * pow((1 - ((double)k / (double)(ADP->N1 - 1))), ADP->damp_p);
+			else if (ADP->damp_mode == 1 || ADP->damp_mode == 2) {
+				// 严格等平均调度:
+				// d(k) = mu + A * (g_p(k) - mean(g_p)), mode 1 uses p = 1.
+				// DampFixed stores mu and DampStart stores A; DampEnd is legacy/unused.
+				current_damping = StrictEqualMeanDamping(k, ADP->N1, ADP->damp_fixed,
+					ADP->damp_start, damping_exponent, damping_shape_mean);
 			}
 			for (i = 0; i < N; i++)
 			{
