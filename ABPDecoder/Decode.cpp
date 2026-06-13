@@ -734,6 +734,14 @@ void ABP_MSA(double snr, double* bitsoft, double* y, int** H, int N, int M, int*
 	ADP->check_flag = 0;
 	ADP->IterTime = 0;
 	double current_damping = 1;
+	double damping_shape_mean = 1.0;
+	if (ADP->damp_mode == 2 && ADP->N1 > 1)
+	{
+		damping_shape_mean = 0.0;
+		for (int damping_k = 0; damping_k < ADP->N1; damping_k++)
+			damping_shape_mean += pow(1.0 - (double)damping_k / (ADP->N1 - 1), ADP->damp_p);
+		damping_shape_mean /= ADP->N1;
+	}
 
 	ABPPool* p = &pool->abp;
 
@@ -965,17 +973,22 @@ void ABP_MSA(double snr, double* bitsoft, double* y, int** H, int N, int M, int*
 
 			// 变量节点更新及硬判决（这里的变量节点更新没有排除目标校验节点的信息）
 			// k 是当前内层迭代次数 (0 到 ADP->N1 - 1)
-			if(ADP->damp_mode == 0) {
+			switch (ADP->damp_mode) {
+			case 0:
 				// 固定阻尼因子
 				current_damping = ADP->damp_fixed;
-			}
-			if (ADP->damp_mode == 1) {
+				break;
+			case 1:
 				// 线性衰减阻尼因子
 				current_damping = ADP->damp_start - ((double)k / (double)(ADP->N1 - 1)) * (ADP->damp_start - ADP->damp_end); 
-			}
-			if (ADP->damp_mode == 2) {
+				break;
+			case 2:
 				// 幂律衰减阻尼因子
-				current_damping = ADP->damp_end + (ADP->damp_start - ADP->damp_end) * pow((1 - ((double)k / (double)(ADP->N1 - 1))), ADP->damp_p);
+				// Strict equal-mean power-law damping: fixed = mean, start = amplitude.
+				current_damping = ADP->damp_fixed + ADP->damp_start *
+					((ADP->N1 > 1 ? pow(1.0 - (double)k / (ADP->N1 - 1), ADP->damp_p) : 1.0)
+						- damping_shape_mean);
+				break;
 			}
 			for (i = 0; i < N; i++)
 			{
