@@ -11,7 +11,7 @@
 阻尼模式与对应的扫描参数:
   DampMode=0 (固定衰减): 扫描 DampFixed 值
   DampMode=1 (线性衰减): 扫描 DampStart × DampEnd 组合
-  DampMode=2 (幂律衰减): 扫描 DampP (幂指数) 值
+  DampMode=2 (严格等平均幂律): 扫描 DampFixed(mu) × DampStart(A) × DampP
 
 用法:
   # ---- 固定阻尼因子扫描 (DampMode=0) ----
@@ -20,8 +20,8 @@
   # ---- 线性衰减扫描 (DampMode=1) ----
   python generate_config.py -d 1 --damp-start-values 0.12 --damp-end-values 0.04
 
-  # ---- 幂律衰减扫描 (DampMode=2, 默认) ----
-  python generate_config.py -d 2 --damp-values 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
+  # ---- 严格等平均幂律扫描 (DampMode=2, 默认) ----
+  python generate_config.py -d 2 --damp-amplitude-values 0.02 0.04 0.08 --damp-values 0.1 0.5 1.0
 
   # ---- 自定义其他扫描维度 ----
   python generate_config.py -d 0 --damp-values 0.05 0.08 0.10 \
@@ -108,7 +108,8 @@ def build_rows(damp_mode, damp_scan_values, rates, n1_values, n2_values, usecrc_
         damp_scan_values: list of tuples, each tuple is the damping scan param(s)
             - Mode 0: [(d,), ...]  where d = DampFixed
             - Mode 1: [(s, e), ...]  where s = DampStart, e = DampEnd
-            - Mode 2: [(p,), ...]  where p = DampP
+            - Mode 2: [(mu, a, p), ...] where mu = DampFixed,
+              a = DampStart (amplitude), p = DampP
         rates: list of "N-K" strings
         n1_values: list of N1 values
         n2_values: list of N2 values
@@ -139,11 +140,11 @@ def build_rows(damp_mode, damp_scan_values, rates, n1_values, n2_values, usecrc_
             damp_p = BASE["DampP"]
             damp_label = f"{DAMP_MODE_NAMES[damp_mode]}-{damp_start}-{damp_end}"
         elif damp_mode == 2:  # 幂律衰减
-            damp_fixed = BASE["DampFixed"]
-            damp_start = BASE["DampStart"]
+            damp_fixed = damp_tuple[0]
+            damp_start = damp_tuple[1]
             damp_end = BASE["DampEnd"]
-            damp_p = damp_tuple[0]
-            damp_label = f"{DAMP_MODE_NAMES[damp_mode]}-{damp_p}"
+            damp_p = damp_tuple[2]
+            damp_label = f"{DAMP_MODE_NAMES[damp_mode]}-mu{damp_fixed}-A{damp_start}-p{damp_p}"
         else:
             raise ValueError(f"不支持的阻尼模式: {damp_mode}（有效值: 0/1/2）")
 
@@ -200,8 +201,8 @@ def main():
   # 固定阻尼因子扫描
   %(prog)s -d 0 --damp-values 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12
 
-  # 幂律衰减扫描 (原 generate_config_power.py 功能)
-  %(prog)s -d 2 --damp-values 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
+  # 严格等平均幂律扫描: mu × A × p
+  %(prog)s -d 2 --damp-mean-values 0.08 --damp-amplitude-values 0.02 0.04 0.08 --damp-values 0.1 0.5 1.0
 
   # 线性衰减扫描（固定 start=0.12, end=0.04）
   %(prog)s -d 1 --damp-start-values 0.12 --damp-end-values 0.04
@@ -233,6 +234,15 @@ def main():
     )
 
     # ---- 通用扫描维度 ----
+    parser.add_argument(
+        "--damp-mean-values", type=float, nargs="+", default=None,
+        help="Strict equal-mean power-law (Mode 2) mean values mu (DampFixed)"
+    )
+    parser.add_argument(
+        "--damp-amplitude-values", type=float, nargs="+", default=None,
+        help="Strict equal-mean power-law (Mode 2) amplitude values A (DampStart)"
+    )
+
     parser.add_argument(
         "--rates", nargs="+", default=["128-96", "128-72", "128-64"],
         help="码率列表，格式 N-K。默认: 128-96 128-72 128-64"
@@ -280,8 +290,16 @@ def main():
     elif damp_mode == 2:  # 幂律衰减
         if args.damp_values is None:
             args.damp_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-        damp_scan_values = [(v,) for v in args.damp_values]
-        damp_desc = f"DampP: {args.damp_values}"
+        if args.damp_mean_values is None:
+            args.damp_mean_values = [BASE["DampFixed"]]
+        if args.damp_amplitude_values is None:
+            args.damp_amplitude_values = [BASE["DampStart"]]
+        damp_scan_values = list(product(
+            args.damp_mean_values, args.damp_amplitude_values, args.damp_values
+        ))
+        damp_desc = (f"DampFixed/mu: {args.damp_mean_values}, "
+                     f"DampStart/A: {args.damp_amplitude_values}, "
+                     f"DampP: {args.damp_values}")
 
     # ---- 生成配置 ----
     rows = build_rows(
@@ -298,7 +316,7 @@ def main():
     damp_mode_explanation = {
         0: "固定衰减: damp = DampFixed (常数)",
         1: "线性衰减: damp = damp_end + (damp_start - damp_end) * (1 - k/N1)",
-        2: "幂律衰减: damp = damp_end + (damp_start - damp_end) * (1 - k/(N1-1))^p",
+        2: "Strict equal-mean power-law: damp = mu + A * ((1 - k/(N1-1))^p - shape_mean)",
     }
 
     with open(output_path, "w", newline="", encoding="utf-8") as f:
@@ -323,7 +341,7 @@ def main():
 
     print(f"Generated {len(rows)} configs → {output_path}")
     print(f"  阻尼模式 : {damp_mode} ({mode_name})")
-    print(f"  {damp_desc.split(':')[0]:12s}: {n_damp} 组")
+    print(f"  阻尼参数组合: {n_damp} 组")
     print(f"  码率     : {n_rates} 组  {args.rates}")
     print(f"  N1       : {n_n1} 组  {args.n1_values}")
     print(f"  N2       : {n_n2} 组  {args.n2_values}")
