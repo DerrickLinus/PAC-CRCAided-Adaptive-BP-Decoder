@@ -209,11 +209,11 @@ struct ADPStruct
 	double convergence_epsilon;		// 相对变化阈值，metric变化小于此比例视为停滞 - 3.14修改
 	int convergence_window;			// 连续停滞次数阈值，达到则触发早停 - 3.14修改
 
-	int damp_mode;				// 0:固定阻尼, 1:严格等平均线性调度, 2:严格等平均幂律调度
-	double damp_fixed;			// mode 0:固定阻尼; mode 1/2:目标离散平均阻尼 mu
-	double damp_start;			// mode 1/2:调度幅度 A = d(0)-d(N1-1)
-	double damp_end;			// 旧配置兼容字段，严格等平均调度中不使用
-	double damp_p;				// mode 2:幂律指数 p; mode 1 固定使用 p=1
+	int damp_mode;				// 0:固定阻尼, 1:线性变化, 2:幂函数变化
+	double damp_fixed;			// 固定阻尼因子
+	double damp_start;			// 线性/幂函数变化起始阻尼因子
+	double damp_end;			// 线性/幂函数变化结束阻尼因子
+	double damp_p;				// 幂函数变化的指数
 };
 
 

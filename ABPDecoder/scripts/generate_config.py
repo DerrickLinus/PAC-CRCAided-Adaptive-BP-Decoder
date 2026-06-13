@@ -1,5 +1,5 @@
 """
-生成参数扫描配置CSV，支持固定阻尼和严格等平均动态阻尼。
+生成参数扫描配置CSV，支持所有阻尼模式（固定/线性/幂律衰减）。
 
 扫描维度（所有维度的笛卡尔积）:
   - 码率 (N,K)
@@ -10,18 +10,18 @@
 
 阻尼模式与对应的扫描参数:
   DampMode=0 (固定衰减): 扫描 DampFixed 值
-  DampMode=1 (严格等平均线性): 扫描 mu × A
-  DampMode=2 (严格等平均幂律): 扫描 mu × A × p
+  DampMode=1 (线性衰减): 扫描 DampStart × DampEnd 组合
+  DampMode=2 (幂律衰减): 扫描 DampP (幂指数) 值
 
 用法:
   # ---- 固定阻尼因子扫描 (DampMode=0) ----
   python generate_config.py -d 0 --damp-values 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12
 
-  # ---- 严格等平均线性调度扫描 (DampMode=1) ----
-  python generate_config.py -d 1 --damp-mean-values 0.14 --damp-amplitude-values 0.02 0.04 0.08
+  # ---- 线性衰减扫描 (DampMode=1) ----
+  python generate_config.py -d 1 --damp-start-values 0.12 --damp-end-values 0.04
 
-  # ---- 严格等平均幂律扫描 (DampMode=2, 默认) ----
-  python generate_config.py -d 2 --damp-mean-values 0.14 --damp-amplitude-values 0.02 0.04 0.08 --damp-values 0.1 0.5 1.0
+  # ---- 幂律衰减扫描 (DampMode=2, 默认) ----
+  python generate_config.py -d 2 --damp-values 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
 
   # ---- 自定义其他扫描维度 ----
   python generate_config.py -d 0 --damp-values 0.05 0.08 0.10 \
@@ -60,9 +60,9 @@ BASE = {
     "ConvEpsilon": 0.01,
     "ConvWindow": 3,
     # DampMode-dependent defaults (overridden per mode)
-    "DampFixed": 0.14,
-    "DampStart": 0.02,
-    "DampEnd": 0.0,
+    "DampFixed": 0.08,
+    "DampStart": 0.12,
+    "DampEnd": 0.04,
     "DampP": 0.5,
     # SNR
     "SNRtype": 0,
@@ -107,8 +107,8 @@ def build_rows(damp_mode, damp_scan_values, rates, n1_values, n2_values, usecrc_
         damp_mode: 0=fixed, 1=linear, 2=power-law
         damp_scan_values: list of tuples, each tuple is the damping scan param(s)
             - Mode 0: [(d,), ...]  where d = DampFixed
-            - Mode 1: [(mu, A), ...]
-            - Mode 2: [(mu, A, p), ...]
+            - Mode 1: [(s, e), ...]  where s = DampStart, e = DampEnd
+            - Mode 2: [(p,), ...]  where p = DampP
         rates: list of "N-K" strings
         n1_values: list of N1 values
         n2_values: list of N2 values
@@ -132,18 +132,18 @@ def build_rows(damp_mode, damp_scan_values, rates, n1_values, n2_values, usecrc_
             damp_end = BASE["DampEnd"]
             damp_p = BASE["DampP"]
             damp_label = f"{DAMP_MODE_NAMES[damp_mode]}-{damp_fixed}"
-        elif damp_mode == 1:  # 严格等平均线性调度
-            damp_fixed = damp_tuple[0]  # mu
-            damp_start = damp_tuple[1]  # A
-            damp_end = 0.0              # legacy/unused
-            damp_p = 1.0
-            damp_label = f"{DAMP_MODE_NAMES[damp_mode]}-mu{damp_fixed}-A{damp_start}"
-        elif damp_mode == 2:  # 严格等平均幂律调度
-            damp_fixed = damp_tuple[0]  # mu
-            damp_start = damp_tuple[1]  # A
-            damp_end = 0.0              # legacy/unused
-            damp_p = damp_tuple[2]
-            damp_label = f"{DAMP_MODE_NAMES[damp_mode]}-mu{damp_fixed}-A{damp_start}-p{damp_p}"
+        elif damp_mode == 1:  # 线性衰减
+            damp_fixed = BASE["DampFixed"]
+            damp_start = damp_tuple[0]
+            damp_end = damp_tuple[1]
+            damp_p = BASE["DampP"]
+            damp_label = f"{DAMP_MODE_NAMES[damp_mode]}-{damp_start}-{damp_end}"
+        elif damp_mode == 2:  # 幂律衰减
+            damp_fixed = BASE["DampFixed"]
+            damp_start = BASE["DampStart"]
+            damp_end = BASE["DampEnd"]
+            damp_p = damp_tuple[0]
+            damp_label = f"{DAMP_MODE_NAMES[damp_mode]}-{damp_p}"
         else:
             raise ValueError(f"不支持的阻尼模式: {damp_mode}（有效值: 0/1/2）")
 
@@ -193,18 +193,18 @@ def build_rows(damp_mode, damp_scan_values, rates, n1_values, n2_values, usecrc_
 
 def main():
     parser = argparse.ArgumentParser(
-        description="生成参数扫描配置CSV — 支持固定/严格等平均线性/幂律调度",
+        description="生成参数扫描配置CSV — 支持固定/线性/幂律衰减",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例:
   # 固定阻尼因子扫描
   %(prog)s -d 0 --damp-values 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12
 
-  # 严格等平均幂律调度扫描
-  %(prog)s -d 2 --damp-mean-values 0.14 --damp-amplitude-values 0.02 0.04 0.08 --damp-values 0.1 0.5 1.0
+  # 幂律衰减扫描 (原 generate_config_power.py 功能)
+  %(prog)s -d 2 --damp-values 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
 
-  # 严格等平均线性调度扫描
-  %(prog)s -d 1 --damp-mean-values 0.14 --damp-amplitude-values 0.02 0.04 0.08
+  # 线性衰减扫描（固定 start=0.12, end=0.04）
+  %(prog)s -d 1 --damp-start-values 0.12 --damp-end-values 0.04
 
   # 限制扫描范围
   %(prog)s -d 0 --damp-values 0.08 0.10 --rates 128-96 --n2-values 5 10 --usecrc-values 12 16
@@ -215,21 +215,21 @@ def main():
     parser.add_argument(
         "-d", "--damp-mode", type=int, default=2,
         choices=[0, 1, 2],
-        help="阻尼模式: 0=固定阻尼, 1=严格等平均线性调度, 2=严格等平均幂律调度。默认: 2"
+        help="阻尼模式: 0=固定衰减(fixed), 1=线性衰减(linear), 2=幂律衰减(power)。默认: 2"
     )
     parser.add_argument(
         "--damp-values", type=float, nargs="+", default=None,
         help="阻尼参数扫描值列表。"
              "Mode 0: DampFixed 值，如 --damp-values 0.05 0.08 0.10；"
-             "Mode 2: p (幂指数) 值，如 --damp-values 0.1 0.3 0.5"
+             "Mode 2: DampP (幂指数) 值，如 --damp-values 0.1 0.3 0.5"
     )
     parser.add_argument(
-        "--damp-mean-values", type=float, nargs="+", default=[0.14],
-        help="Mode 1/2 的严格离散平均阻尼 mu。默认: 0.14"
+        "--damp-start-values", type=float, nargs="+", default=None,
+        help="线性衰减 (Mode 1) 的 DampStart 值列表，如 --damp-start-values 0.12 0.15"
     )
     parser.add_argument(
-        "--damp-amplitude-values", type=float, nargs="+", default=[0.02, 0.04, 0.08],
-        help="Mode 1/2 的调度幅度 A=d(0)-d(N1-1)。默认: 0.02 0.04 0.08"
+        "--damp-end-values", type=float, nargs="+", default=None,
+        help="线性衰减 (Mode 1) 的 DampEnd 值列表，如 --damp-end-values 0.04 0.06"
     )
 
     # ---- 通用扫描维度 ----
@@ -268,27 +268,20 @@ def main():
         damp_scan_values = [(v,) for v in args.damp_values]
         damp_desc = f"DampFixed: {args.damp_values}"
 
-    elif damp_mode == 1:  # 严格等平均线性调度
-        damp_scan_values = list(product(args.damp_mean_values, args.damp_amplitude_values))
-        damp_desc = (f"mu: {args.damp_mean_values}, "
-                     f"A: {args.damp_amplitude_values}")
+    elif damp_mode == 1:  # 线性衰减
+        if args.damp_start_values is None:
+            args.damp_start_values = [0.12]
+        if args.damp_end_values is None:
+            args.damp_end_values = [0.04]
+        damp_scan_values = list(product(args.damp_start_values, args.damp_end_values))
+        damp_desc = (f"DampStart: {args.damp_start_values}, "
+                     f"DampEnd: {args.damp_end_values}")
 
-    elif damp_mode == 2:  # 严格等平均幂律调度
+    elif damp_mode == 2:  # 幂律衰减
         if args.damp_values is None:
-            args.damp_values = [0.1, 0.5, 1.0]
-        damp_scan_values = list(product(
-            args.damp_mean_values, args.damp_amplitude_values, args.damp_values
-        ))
-        damp_desc = (f"mu: {args.damp_mean_values}, "
-                     f"A: {args.damp_amplitude_values}, p: {args.damp_values}")
-
-    if damp_mode in (1, 2):
-        if any(mu < 0 for mu in args.damp_mean_values):
-            parser.error("--damp-mean-values must be nonnegative")
-        if any(amplitude < 0 for amplitude in args.damp_amplitude_values):
-            parser.error("--damp-amplitude-values must be nonnegative")
-    if damp_mode == 2 and any(p < 0 for p in args.damp_values):
-        parser.error("Mode 2 power exponents must be nonnegative")
+            args.damp_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+        damp_scan_values = [(v,) for v in args.damp_values]
+        damp_desc = f"DampP: {args.damp_values}"
 
     # ---- 生成配置 ----
     rows = build_rows(
@@ -304,8 +297,8 @@ def main():
 
     damp_mode_explanation = {
         0: "固定衰减: damp = DampFixed (常数)",
-        1: "严格等平均线性: damp = mu + A * (g_1(k) - mean(g_1))",
-        2: "严格等平均幂律: damp = mu + A * (g_p(k) - mean(g_p))",
+        1: "线性衰减: damp = damp_end + (damp_start - damp_end) * (1 - k/N1)",
+        2: "幂律衰减: damp = damp_end + (damp_start - damp_end) * (1 - k/(N1-1))^p",
     }
 
     with open(output_path, "w", newline="", encoding="utf-8") as f:
