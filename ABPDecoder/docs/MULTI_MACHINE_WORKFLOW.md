@@ -411,9 +411,9 @@ ABPDecoder/
 
 | DampMode | 名称 | 扫描参数 | 说明 |
 |----------|------|---------|------|
-| 0 | 固定衰减 (fixed) | `DampFixed` | `damp = DampFixed`（常数） |
-| 1 | 线性衰减 (linear) | `DampStart`, `DampEnd` | `damp = damp_end + (damp_start - damp_end) × (1 - k/N1)` |
-| 2 | 幂律衰减 (power) | `DampP` | `damp = damp_end + (damp_start - damp_end) × (1 - k/(N1-1))^p` |
+| 0 | 固定阻尼 (fixed) | `DampFixed` | `damp = DampFixed`（常数） |
+| 1 | 严格等平均线性 (linear) | `DampFixed=mu`, `DampStart=A` | `damp = mu + A × (g_1(k) - mean(g_1))` |
+| 2 | 严格等平均幂律 (power) | `DampFixed=mu`, `DampStart=A`, `DampP=p` | `damp = mu + A × (g_p(k) - mean(g_p))` |
 
 **通用扫描维度**：码率 (N,K)、N1、N2、UseCRC — 所有维度取笛卡尔积，一条命令即可生成上百组配置。
 
@@ -423,11 +423,11 @@ ABPDecoder/
 # 固定阻尼因子扫描（DampMode=0）：扫描 0.05 ~ 0.12
 python scripts/generate_config.py -d 0 --damp-values 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12
 
-# 幂律衰减扫描（DampMode=2）：扫描 p=0.1~0.9
-python scripts/generate_config.py -d 2 --damp-values 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
+# 严格等平均幂律扫描：mu=0.14，扫描 A 和 p
+python scripts/generate_config.py -d 2 --damp-mean-values 0.14 --damp-amplitude-values 0.02 0.04 0.08 --damp-values 0.1 0.5 1.0
 
-# 线性衰减扫描（DampMode=1）：固定 start=0.12, end=0.04
-python scripts/generate_config.py -d 1 --damp-start-values 0.12 --damp-end-values 0.04
+# 严格等平均线性扫描：mu=0.14，扫描 A
+python scripts/generate_config.py -d 1 --damp-mean-values 0.14 --damp-amplitude-values 0.02 0.04 0.08
 
 # 指定输出文件
 python scripts/generate_config.py -d 0 --damp-values 0.08 0.10 0.12 -o machine_01_config.csv
@@ -491,8 +491,8 @@ python scripts/aggregate_results.py -m results/machine-03 -r Results4 -o power_s
 | 实验目标 | `generate_config.py` 命令模板 |
 |---------|------------------------------|
 | 固定阻尼因子扫描 | `python generate_config.py -d 0 --damp-values 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12` |
-| 幂律衰减 p 值扫描 | `python generate_config.py -d 2 --damp-values 0.02 0.05 0.08 0.15 0.25 0.5 1.0 1.5` |
-| 线性衰减端点扫描 | `python generate_config.py -d 1 --damp-start-values 0.12 0.15 --damp-end-values 0.02 0.04 0.06` |
+| 严格等平均幂律 \(A,p\) 扫描 | `python generate_config.py -d 2 --damp-mean-values 0.14 --damp-amplitude-values 0.02 0.04 0.08 --damp-values 0.1 0.5 1.0` |
+| 严格等平均线性 \(A\) 扫描 | `python generate_config.py -d 1 --damp-mean-values 0.14 --damp-amplitude-values 0.02 0.04 0.08` |
 | 单一配置确认 | `python generate_config.py -d 0 --damp-values 0.08 --rates 128-96 --n2-values 5 --usecrc-values 12` |
 | 不同码率对比 | `python generate_config.py -d 2 --damp-values 0.5 --rates 128-96 128-72 128-64` |
 | 快速验证（少帧数） | 生成后编辑 CSV，将 `LeastTestFrame` 改为 200，`EndSNR` 改为 2.5 |
@@ -502,9 +502,9 @@ python scripts/aggregate_results.py -m results/machine-03 -r Results4 -o power_s
 | 参数 | 说明 | 默认值 |
 |------|------|--------|
 | `-d, --damp-mode` | 阻尼模式: 0=fixed, 1=linear, 2=power | `2` |
-| `--damp-values` | Mode 0/2 的扫描值列表 | Mode 0: `0.05~0.12`; Mode 2: `0.1~0.9` |
-| `--damp-start-values` | Mode 1 的 DampStart 值列表 | `0.12` |
-| `--damp-end-values` | Mode 1 的 DampEnd 值列表 | `0.04` |
+| `--damp-values` | Mode 0 的固定阻尼或 Mode 2 的 \(p\) 列表 | Mode 0: `0.05~0.12`; Mode 2: `0.1 0.5 1.0` |
+| `--damp-mean-values` | Mode 1/2 的严格离散平均阻尼 \(\mu\) | `0.14` |
+| `--damp-amplitude-values` | Mode 1/2 的调度幅度 \(A=d(0)-d(N_1-1)\) | `0.02 0.04 0.08` |
 | `--rates` | 码率列表，格式 `N-K` | `128-96 128-72 128-64` |
 | `--n1-values` | N1 (外循环迭代次数) 列表 | `20` |
 | `--n2-values` | N2 (内循环迭代次数) 列表 | `5 10 15` |

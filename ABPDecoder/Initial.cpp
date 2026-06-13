@@ -46,6 +46,41 @@ void ReadProfile(struct ADPStruct *ADP, struct SPStruct *SP)
 	fscanf(profile, "%*s%*s%lf", &(ADP->damp_end));
 	fscanf(profile, "%*s%*s%lf", &(ADP->damp_p));
 
+	if (ADP->damp_mode < 0 || ADP->damp_mode > 2)
+	{
+		fprintf(stderr, "Invalid damping mode %d. Expected 0, 1, or 2.\n", ADP->damp_mode);
+		exit(EXIT_FAILURE);
+	}
+	if ((ADP->damp_mode == 1 || ADP->damp_mode == 2) && ADP->damp_start < 0.0)
+	{
+		fprintf(stderr, "Invalid equal-mean damping amplitude A = %.8f. A must be nonnegative.\n", ADP->damp_start);
+		exit(EXIT_FAILURE);
+	}
+	if (ADP->damp_mode == 2 && ADP->damp_p < 0.0)
+	{
+		fprintf(stderr, "Invalid equal-mean power exponent p = %.8f. p must be nonnegative.\n", ADP->damp_p);
+		exit(EXIT_FAILURE);
+	}
+	if ((ADP->damp_mode == 1 || ADP->damp_mode == 2) && ADP->N1 > 1)
+	{
+		const double exponent = (ADP->damp_mode == 1) ? 1.0 : ADP->damp_p;
+		double shape_sum = 0.0;
+		for (int k = 0; k < ADP->N1; k++)
+		{
+			const double position = 1.0 - static_cast<double>(k) / static_cast<double>(ADP->N1 - 1);
+			shape_sum += pow(position, exponent);
+		}
+		const double shape_mean = shape_sum / static_cast<double>(ADP->N1);
+		const double minimum_damping = ADP->damp_fixed - ADP->damp_start * shape_mean;
+		if (minimum_damping < 0.0)
+		{
+			fprintf(stderr,
+				"Invalid equal-mean damping parameters: mu = %.8f, A = %.8f, p = %.8f produce minimum damping %.8f.\n",
+				ADP->damp_fixed, ADP->damp_start, exponent, minimum_damping);
+			exit(EXIT_FAILURE);
+		}
+	}
+
 	fscanf(profile, "%*s%*s%d", &(SP->SNRtype));
 	fscanf(profile, "%*s%*s%lf", &(SP->startSNR));
 	fscanf(profile, "%*s%*s%lf", &(SP->endSNR));
