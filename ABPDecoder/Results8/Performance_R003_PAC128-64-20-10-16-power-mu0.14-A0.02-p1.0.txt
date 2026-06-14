@@ -1,0 +1,42 @@
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 64, K = 64, A = 40, shorten = 0, puncture = 0, CRC = 24, R = 64/128, R_net = 40/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Metric Threshold = 41.00
+* Interchange = 1, Use CRC = 16, Use Channel LLR = 0
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.00, Beta1 = 0.00, Alpha2 = 0.90, Beta2 = 0.00
+* Damping Mode = 2 (0:fixed,1:linear,2:Power-low), fixed = 0.14, start = 0.02, end = 0.04, p = 1.00
+* AWGN, BPSK, Source = 1, Seed = 173, Performance_R003_PAC128-64-20-10-16-power-mu0.14-A0.02-p1.0.txt, srand(main)
+******************************************************************************
+Program  starts  at: Sat Jun 13 20:31:49 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  2.00       2100    316      0    1.505e-01   0.000e+00   7.427e-02   54.009
+  2.50       5800    302      0    5.207e-02   0.000e+00   2.612e-02   31.714
+  3.00      21200    302      0    1.425e-02   0.000e+00   7.074e-03   20.754
+
+Program  ends    at: Sat Jun 13 20:32:16 2026
+Termination reason: Normal completion
+Total running time: 0 hours 0 minutes 27 seconds
+******************************************************************************
+
+****************************** ABP/SCLD Decoder ******************************
+* Version 1.2
+* N = 128, M = 64, K = 64, A = 40, shorten = 0, puncture = 0, CRC = 24, R = 64/128, R_net = 40/128
+* Decoding Method: ABP/MSA(20, 10), Deg-2 = 1, Metric Threshold = 41.00
+* Interchange = 1, Use CRC = 16, Use Channel LLR = 0
+* MS Type = 0 (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = 1.00, Beta1 = 0.00, Alpha2 = 0.90, Beta2 = 0.00
+* Damping Mode = 2 (0:fixed,1:linear,2:Power-low), fixed = 0.14, start = 0.02, end = 0.04, p = 1.00
+* AWGN, BPSK, Source = 1, Seed = 173, Performance_R003_PAC128-64-20-10-16-power-mu0.14-A0.02-p1.0.txt, srand(main)
+******************************************************************************
+Program  starts  at: Sat Jun 13 21:14:15 2026
+
+ Eb/No       NTF     NEF     NUF    FER         SER         BER         IT
+  2.00     278600    300      0    1.077e-03   0.000e+00   5.386e-04   6.115
+  2.50    1394700    300      0    2.151e-04   0.000e+00   1.061e-04   4.791
+  3.00    5996200    300      0    5.003e-05   0.000e+00   2.467e-05   4.094
+
+Program  ends    at: Sat Jun 13 21:31:16 2026
+Termination reason: Normal completion
+Total running time: 0 hours 17 minutes 1 seconds
+******************************************************************************
