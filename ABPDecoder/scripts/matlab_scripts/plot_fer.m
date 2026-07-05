@@ -8,24 +8,21 @@ clear; clc;
 
 %% ==================== 配置区 ====================
 
-CSV_PATH = fullfile(fileparts(mfilename('fullpath')), '..', 'results_summary.csv');
+CSV_PATH = 'D:\D_SCI_Research\PAC Code\Code\ABP_matlab_plot\results_summary_plot.csv';
 
 % ---------- 选择码率和数据源 ----------
 % 预设：machine-01 = PAC(128,96), machine-03 = PAC(128,72), machine-04 = PAC(128,64)
-SELECTED_MACHINE = 'machine-01';   % machine-01 / machine-03 / machine-04
+SELECTED_MACHINE = 'machine-03';   % machine-01 / machine-03 / machine-04
 N  = 128;                          % 码长
-K  = 96;                           % 信息位 (96 / 72 / 64)
+K  = 72;                           % 信息位 (96 / 72 / 64)
 
 % ---------- 选择 N2 ----------
 N2 = 5;                            % ABP 外迭代次数 (5 / 10 / 15)
 
 % ---------- 选择要绘制的 CRC 和阻尼策略 ----------
-CRC_VALS      = [12, 16, 20];      % 想画哪些 CRC，可删减如 [12, 16]
-DAMPING_MODES = {'fixed-0.08', 'linear-0.12-0.04', 'power-0.5'};
-% 阻尼显示名称
-DAMPING_NAMES = containers.Map(...
-    {'fixed-0.08', 'linear-0.12-0.04', 'power-0.5'}, ...
-    {'Fixed \alpha=0.08', 'Linear 0.12\rightarrow0.04', 'Power-law p=0.5'});
+CRC_VALS      = [12, 16, 20];      % 当前 CSV 有 12/16/20；如果补了 18 数据，可改成 [12,16,18]
+POWER_P_VALS  = [0.08, 0.10, 0.02];% 每个 CRC 对应一个 p；也可写成单个值，如 0.08
+BASE_DAMPING_MODES = {'fixed-0.08', 'linear-0.12-0.04'};
 
 % ---------- 颜色 & 线型 ----------
 CRC_COLORS     = {[0.00 0.45 0.74], [0.85 0.33 0.10], [0.47 0.67 0.19]};
@@ -85,9 +82,17 @@ hold on;
 hAll  = gobjects(0);
 legAll = {};
 
+if isscalar(POWER_P_VALS)
+    POWER_P_VALS = repmat(POWER_P_VALS, size(CRC_VALS));
+elseif length(POWER_P_VALS) ~= length(CRC_VALS)
+    error('POWER_P_VALS 必须是单个 p 值，或长度与 CRC_VALS 相同。');
+end
+
 for c_idx = 1:length(CRC_VALS)
     crc = CRC_VALS(c_idx);
     color = CRC_COLORS{min(c_idx, length(CRC_COLORS))};
+    powerMode = sprintf('power-%g', POWER_P_VALS(c_idx));
+    DAMPING_MODES = [BASE_DAMPING_MODES, {powerMode}];
 
     for d_idx = 1:length(DAMPING_MODES)
         dmode = DAMPING_MODES{d_idx};
@@ -111,7 +116,15 @@ for c_idx = 1:length(CRC_VALS)
             'MarkerFaceColor', color);
 
         hAll(end+1) = h;
-        dName = DAMPING_NAMES(dmode);
+        if strcmp(dmode, 'fixed-0.08')
+            dName = 'Fixed \alpha=0.08';
+        elseif strcmp(dmode, 'linear-0.12-0.04')
+            dName = 'Linear 0.12\rightarrow0.04';
+        elseif startsWith(dmode, 'power-')
+            dName = sprintf('Power-law p=%g', POWER_P_VALS(c_idx));
+        else
+            dName = dmode;
+        end
         legAll{end+1} = sprintf('CRC=%d, %s', crc, dName);
     end
 end
