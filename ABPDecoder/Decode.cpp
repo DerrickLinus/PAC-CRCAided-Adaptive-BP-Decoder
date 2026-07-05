@@ -733,14 +733,16 @@ void ABP_MSA(double snr, double* bitsoft, double* y, int** H, int N, int M, int*
 	double beta_factor = ADP->beta_factor;*/
 	ADP->check_flag = 0;
 	ADP->IterTime = 0;
-	double current_damping = 1;
-	double damping_shape_mean = 1.0;
+	double current_damping = ADP->damp_fixed;  // d0
+	double damping_shape_mean = 0.0;           // A_p
 	if (ADP->damp_mode == 2 && ADP->N1 > 1)
 	{
-		damping_shape_mean = 0.0;
-		for (int damping_k = 0; damping_k < ADP->N1; damping_k++)
-			damping_shape_mean += pow(1.0 - (double)damping_k / (ADP->N1 - 1), ADP->damp_p);
-		damping_shape_mean /= ADP->N1;
+    	for (int t = 0; t < ADP->N1; t++)
+    	{
+        	double q = 1.0 - (double)t / (double)(ADP->N1 - 1);
+        	damping_shape_mean += pow(q, ADP->damp_p);
+    	}		
+    	damping_shape_mean /= (double)ADP->N1;
 	}
 
 	ABPPool* p = &pool->abp;
@@ -973,22 +975,46 @@ void ABP_MSA(double snr, double* bitsoft, double* y, int** H, int N, int M, int*
 
 			// 变量节点更新及硬判决（这里的变量节点更新没有排除目标校验节点的信息）
 			// k 是当前内层迭代次数 (0 到 ADP->N1 - 1)
-			switch (ADP->damp_mode) {
-			case 0:
-				// 固定阻尼因子
-				current_damping = ADP->damp_fixed;
-				break;
-			case 1:
-				// 线性衰减阻尼因子
-				current_damping = ADP->damp_start - ((double)k / (double)(ADP->N1 - 1)) * (ADP->damp_start - ADP->damp_end); 
-				break;
-			case 2:
-				// 幂律衰减阻尼因子
-				// Strict equal-mean power-law damping: fixed = mean, start = amplitude.
-				current_damping = ADP->damp_fixed + ADP->damp_start *
-					((ADP->N1 > 1 ? pow(1.0 - (double)k / (ADP->N1 - 1), ADP->damp_p) : 1.0)
-						- damping_shape_mean);
-				break;
+			switch (ADP->damp_mode)
+			{
+    			case 0:
+        			// Fixed damping: d(j) = d0
+        			current_damping = ADP->damp_fixed;
+        			break;
+
+    			case 1:
+        			// Linear decay: d(j) = d_start - j/(N1-1)*(d_start-d_end)
+        			if (ADP->N1 > 1)
+        			{
+            			current_damping = ADP->damp_start-((double)k / (double)(ADP->N1 - 1))*(ADP->damp_start - ADP->damp_end);
+        			}
+        			else
+        			{
+            			current_damping = ADP->damp_start;
+        			}
+        			break;
+
+    			case 2:
+        			// Mean-preserving power-law damping:
+        			// d(j) = d0 + Delta * (q_j^p - A_p)
+        			// Here:
+        			//   damp_fixed = d0
+        			//   damp_start = Delta
+        			//   damp_p     = p
+        			if (ADP->N1 > 1)
+        			{
+            			double q = 1.0 - (double)k / (double)(ADP->N1 - 1);
+            			current_damping = ADP->damp_fixed + ADP->damp_start * (pow(q, ADP->damp_p) - damping_shape_mean);
+        			}
+        			else
+        			{
+            			current_damping = ADP->damp_fixed;
+        			}
+        			break;
+
+    			default:
+        			current_damping = ADP->damp_fixed;
+        			break;
 			}
 			for (i = 0; i < N; i++)
 			{
