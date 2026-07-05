@@ -1,4 +1,0 @@
-RunID,Label,Codefile,N,K,CRC_len,EncodeAdd0,Puncture,Shorten,DecodingMethod,N1,N2,Deg2,Interchange,CRC_len_for_ABP,UseChannelLLR,ML_metric_th,ListSize,SystemCode,ms_type,Alpha,Beta,Alpha2,Beta2,ConvEpsilon,ConvWindow,DampMode,DampFixed,DampStart,DampEnd,DampP,SNRtype,StartSNR,EndSNR,StepSNR,LeastTestFrame,LeastErrorFrame,SourceType,DisplayStep
-1,PAC128-96-N2-5,CF.Polar.128.64.txt,128,96,24,1,0,0,2,20,5,1,1,12,0,41,32,0,0,1,0,0.9,0,0.01,3,2,0.08,0.12,0.04,0.5,0,1,2,0.5,1000,100,1,100
-2,PAC128-96-N2-10,CF.Polar.128.64.txt,128,96,24,1,0,0,2,20,10,1,1,12,0,41,32,0,0,1,0,0.9,0,0.01,3,2,0.08,0.12,0.04,0.5,0,1,2,0.5,1000,100,1,100
-3,PAC128-96-N2-15,CF.Polar.128.64.txt,128,96,24,1,0,0,2,20,15,1,1,12,0,41,32,0,0,1,0,0.9,0,0.01,3,2,0.08,0.12,0.04,0.5,0,1,2,0.5,1000,100,1,100

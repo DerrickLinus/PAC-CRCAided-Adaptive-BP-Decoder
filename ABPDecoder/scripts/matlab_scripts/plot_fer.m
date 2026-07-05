@@ -8,28 +8,25 @@ clear; clc;
 
 %% ==================== 配置区 ====================
 
-CSV_PATH = fullfile(fileparts(mfilename('fullpath')), '..', 'results_summary.csv');
+CSV_PATH = 'D:\D_SCI_Research\PAC Code\Code\ABP_matlab_plot\results_summary_plot.csv';
 
 % ---------- 选择码率和数据源 ----------
 % 预设：machine-01 = PAC(128,96), machine-03 = PAC(128,72), machine-04 = PAC(128,64)
-SELECTED_MACHINE = 'machine-01';   % machine-01 / machine-03 / machine-04
+SELECTED_MACHINE = 'machine-03';   % machine-01 / machine-03 / machine-04
 N  = 128;                          % 码长
-K  = 96;                           % 信息位 (96 / 72 / 64)
+K  = 72;                           % 信息位 (96 / 72 / 64)
 
 % ---------- 选择 N2 ----------
 N2 = 5;                            % ABP 外迭代次数 (5 / 10 / 15)
 
 % ---------- 选择要绘制的 CRC 和阻尼策略 ----------
-CRC_VALS      = [12, 16, 20];      % 想画哪些 CRC，可删减如 [12, 16]
-DAMPING_MODES = {'fixed-0.08', 'linear-0.12-0.04', 'power-0.5'};
-% 阻尼显示名称
-DAMPING_NAMES = containers.Map(...
-    {'fixed-0.08', 'linear-0.12-0.04', 'power-0.5'}, ...
-    {'Fixed \alpha=0.08', 'Linear 0.12\rightarrow0.04', 'Power-law p=0.5'});
+CRC_VALS      = [12, 16, 20];      % 当前 CSV 有 12/16/20；如果补了 18 数据，可改成 [12,16,18]
+POWER_P_VALS  = [0.08, 0.10, 0.02];% 每个 CRC 对应一个 p；也可写成单个值，如 0.08
+BASE_DAMPING_MODES = {'fixed-0.08', 'linear-0.12-0.04'};
 
 % ---------- 颜色 & 线型 ----------
 CRC_COLORS     = {[0.00 0.45 0.74], [0.85 0.33 0.10], [0.47 0.67 0.19]};
-DAMPING_STYLES = {'-o', '--s', ':d'};   % fixed, linear, power
+DAMPING_STYLES = {'-o', '--s', ':d', '-.^', '--v'};
 
 % ---------- 图表设置 ----------
 SAVE_FIG    = true;            % 是否保存文件
@@ -39,6 +36,24 @@ FIG_NAME    = '';              % 留空自动生成文件名
 LINE_WIDTH  = 1.2;
 MARKER_SIZE = 7;
 FONT_SIZE   = 10;
+
+% ---------- CA-SCL 对比基线 (L=32) ----------
+% 格式: SCL_BASELINE(N, K).snr / .fer 为等长向量
+% 注意：用最大值预分配结构体数组，保证 snr/fer 字段一致
+SCL_BASELINE(128, 96) = struct('snr', [], 'fer', []);
+
+SCL_BASELINE(128, 96).snr = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0];
+SCL_BASELINE(128, 96).fer = [4.770e-01, 2.710e-01, 1.020e-01, 3.051e-02, 6.304e-03, 6.392e-04, 4.210e-05];
+
+SCL_BASELINE(128, 72).snr = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5];
+SCL_BASELINE(128, 72).fer = [8.881e-02, 2.107e-02, 3.965e-03, 5.661e-04, 4.925e-05, 2.363e-06];
+
+SCL_BASELINE(128, 64).snr = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0];
+SCL_BASELINE(128, 64).fer = [1.390e-01, 5.767e-02, 2.035e-02, 3.600e-03, 5.165e-04, 5.226e-05, 2.348e-06];
+
+SCL_LINE_SPEC = '-^k';       % 黑色带三角标记
+SCL_LINE_WIDTH = 1.5;
+SCL_MARKER_SIZE = 8;
 
 %% ==================== 主程序 ====================
 
@@ -67,9 +82,17 @@ hold on;
 hAll  = gobjects(0);
 legAll = {};
 
+if isscalar(POWER_P_VALS)
+    POWER_P_VALS = repmat(POWER_P_VALS, size(CRC_VALS));
+elseif length(POWER_P_VALS) ~= length(CRC_VALS)
+    error('POWER_P_VALS 必须是单个 p 值，或长度与 CRC_VALS 相同。');
+end
+
 for c_idx = 1:length(CRC_VALS)
     crc = CRC_VALS(c_idx);
     color = CRC_COLORS{min(c_idx, length(CRC_COLORS))};
+    powerMode = sprintf('power-%g', POWER_P_VALS(c_idx));
+    DAMPING_MODES = [BASE_DAMPING_MODES, {powerMode}];
 
     for d_idx = 1:length(DAMPING_MODES)
         dmode = DAMPING_MODES{d_idx};
@@ -93,9 +116,31 @@ for c_idx = 1:length(CRC_VALS)
             'MarkerFaceColor', color);
 
         hAll(end+1) = h;
-        dName = DAMPING_NAMES(dmode);
+        if strcmp(dmode, 'fixed-0.08')
+            dName = 'Fixed \alpha=0.08';
+        elseif strcmp(dmode, 'linear-0.12-0.04')
+            dName = 'Linear 0.12\rightarrow0.04';
+        elseif startsWith(dmode, 'power-')
+            dName = sprintf('Power-law p=%g', POWER_P_VALS(c_idx));
+        else
+            dName = dmode;
+        end
         legAll{end+1} = sprintf('CRC=%d, %s', crc, dName);
     end
+end
+
+% --- CA-SCL 对比基线 (L=32) ---
+if N <= size(SCL_BASELINE, 1) && K <= size(SCL_BASELINE, 2) ...
+        && ~isempty(SCL_BASELINE(N, K).snr)
+    scl = SCL_BASELINE(N, K);
+    hScl = semilogy(scl.snr, scl.fer, SCL_LINE_SPEC, ...
+        'LineWidth', SCL_LINE_WIDTH, ...
+        'MarkerSize', SCL_MARKER_SIZE, ...
+        'MarkerFaceColor', 'k');
+    hAll(end+1) = hScl;
+    legAll{end+1} = 'CA-SCL L=32';
+else
+    fprintf('  未找到 CA-SCL 基线数据 (N=%d, K=%d)\n', N, K);
 end
 
 hold off;

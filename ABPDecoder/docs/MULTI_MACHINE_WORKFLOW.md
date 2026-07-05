@@ -5,12 +5,13 @@
 ```
 GitHub (远程仓库)
   ├── master              ← 共享代码 + 脚本（所有机器同步）
-  ├── results/machine-01  ← PC1(dlh1、swj) 实验结果
+  ├── results/machine-01  ← PC1(dlh1、swj) 实验结果（N=128,K=96）
   ├── results/machine-02  ← PC2(dlh2) 实验结果
-  ├── results/machine-03  ← PC3(djx)  实验结果
-  ├── results/machine-04  ← PC4(yh)   实验结果
+  ├── results/machine-03  ← PC3(djx)  实验结果（N=128,K=72）
+  ├── results/machine-04  ← PC4(yh)   实验结果（N=128,k=64）
   ├── results/machine-05  ← PC5(ylj)  实验结果（暂未配置）
-  └── results/machine-06  ← PC6(swj)  实验结果（暂未配置）
+  ├── results/machine-06  ← PC6(swj)  实验结果（暂未配置）
+  └── results/machine-07  ← PC1(dlh1)  实验结果（N=128,K=96,扫描不同固定阻尼因子）
 
 每台机器本地：
   ├── master 分支代码（共享）
@@ -35,9 +36,9 @@ GitHub (远程仓库)
 
 已有 GitHub 仓库：`https://github.com/DerrickLinus/PAC-CRCAided-Adaptive-BP-Decoder.git`
 
-国内访问 GitHub 可能不稳定。有两种方案，根据你的网络情况选择。
+国内访问 GitHub 可能不稳定。有两种方案，根据网络情况选择。
 
-### 方案 A：Gitee 做主仓库（推荐，最省事）
+### 方案 A：Gitee 做主仓库
 
 在 Gitee（码云）上创建一个独立仓库（非镜像），所有机器都用 Gitee，完全不用 GitHub。
 
@@ -214,6 +215,7 @@ Desktop.ini
 | `scripts/batch_run.ps1` | 是 | master | 批量运行脚本（所有机器共用） |
 | `scripts/batch_config_template.csv` | 是 | master | 参数表模板 |
 | `scripts/aggregate_results.py` | 是 | master | 汇总脚本，生成 results_summary.csv |
+| `scripts/generate_config.py` | 是 | master | 自动生成参数扫描 CSV（支持固定/线性/幂律阻尼） |
 | `scripts/plot_fer.m` | 是 | master | MATLAB FER 画图脚本 |
 | `results_summary.csv` | **否** | — | 汇总输出，由 aggregate_results.py 生成 |
 | `Profile*.txt` | **否** | — | 运行时的临时配置，脚本自动生成 |
@@ -258,7 +260,11 @@ git stash pop # 将前面隐藏的代码取回来
 # 3. 切换到 results/machine-02 → "分支" → "合并自" → 选择 master
 ```
 
-### 6.3 配置参数表并批量运行
+### 6.3 生成参数表并批量运行
+
+#### 方式 A：用 `generate_config.py` 自动生成（推荐）
+
+大多数参数扫描场景不需要手动编辑 CSV，一条命令即可生成全部配置：
 
 ```powershell
 # === 在任意机器上 ===
@@ -266,22 +272,44 @@ git stash pop # 将前面隐藏的代码取回来
 # 1. 确认当前在正确的 results 分支
 git branch    # 应显示 * results/machine-XX
 
-# 2. 编辑本机参数 CSV（每组参数一行，见模板注释中的扫描示例）
-#    VS Studio / VS Code 直接编辑 scripts/machine_XX_config.csv
+# 2. 用 generate_config.py 生成参数扫描 CSV（详见 7.4 节）
+#    根据实验目标选择阻尼模式和扫描范围：
+cd scripts
+
+# 例如：machine-03 扫描 (128,72) 下不同 p 值的幂律衰减
+python generate_config.py -d 2 --damp-values 0.02 0.05 0.08 0.15 0.25 \
+    --rates 128-72 --n2-values 5 10 15 --usecrc-values 12 16 20 \
+    -o machine_03_config.csv
 
 # 3. 编译（如代码有更新）
 #    VS Studio: 生成 → 生成解决方案
 #    VS Code / 命令行: cmake --build build --config Release
 
 # 4. 运行批量仿真
-cd scripts
-.\batch_run.ps1 -ConfigCsv "machine_02_config.csv"
+.\batch_run.ps1 -ConfigCsv "machine_03_config.csv" -Results Results4
 
 # 5. 脚本自动完成：
 #    - 依次读取 CSV 每行 → 生成 Profile.txt → 运行仿真
-#    - 结果存入 Results/Performance_R001_xxx.txt
+#    - 结果存入 Results4/Performance_R001_xxx.txt
 #    - 日志存入 logs/batch_run_YYYYMMDD_HHmmss.log
-#    - 失败的配置备份到 Results/failed_configs/
+#    - 失败的配置备份到 Results4/failed_configs/
+```
+
+> **提示**：`generate_config.py` 生成的文件名建议包含机器编号（如 `machine_03_config.csv`），方便区分。生成后如需微调（如修改 SNR 范围），在 Excel 或文本编辑器中直接编辑 CSV 即可。
+
+#### 方式 B：手动编辑 CSV 模板
+
+如果需要跑少量特定参数、或微调已生成的 CSV：
+
+```powershell
+# 1. 从模板复制（仅首次）
+copy scripts\batch_config_template.csv scripts\machine_XX_config.csv
+
+# 2. 编辑 CSV，每组参数一行（见模板注释中的扫描示例）
+#    VS Studio / VS Code 直接编辑
+
+# 3. 编译 → 运行（同方式 A）
+.\batch_run.ps1 -ConfigCsv "machine_XX_config.csv"
 ```
 
 ### 6.4 提交结果到远程
@@ -307,7 +335,20 @@ git fetch --all
 git show results/machine-02:Results/Performance_R001_xxx.txt
 
 # 3. 运行汇总脚本，生成 results_summary.csv
+#    基本用法（使用默认配置）
 python scripts/aggregate_results.py
+
+#    指定要汇总的机器分支
+python scripts/aggregate_results.py -m results/machine-01,results/machine-02,results/machine-03
+
+#    指定结果目录（如结果存放在 Results1/、Results2/ 等目录中）
+python scripts/aggregate_results.py -r Results1
+
+#    指定输出 CSV 文件名
+python scripts/aggregate_results.py -o scan_damping.csv
+
+#    组合使用：只汇总 machine-01 和 machine-03 的 Results2/ 目录
+python scripts/aggregate_results.py -m results/machine-01,results/machine-03 -r Results2 -o scan2_summary.csv
 
 # 4. 用 Excel 打开 results_summary.csv 筛选查看，或
 #    编辑 scripts/plot_fer.m 的配置区后运行 MATLAB 画 FER 曲线对比
@@ -327,6 +368,9 @@ python scripts/aggregate_results.py
 
 # 指定 exe 路径（默认自动检测 build/ 或 x64/Release/）
 .\batch_run.ps1 -ConfigCsv "machine_02_config.csv" -ExePath "..\build\Release\ABPDecoder.exe"
+
+# 指定自定义结果目录（默认 Results/），如 Results1/、Results2/
+.\batch_run.ps1 -ConfigCsv "machine_02_config.csv" -Results Results1
 
 # 遇错即停
 .\batch_run.ps1 -ConfigCsv "machine_02_config.csv" -ContinueOnError:$false
@@ -358,6 +402,116 @@ ABPDecoder/
 > - RunID：CSV 中的行号，唯一标识一组参数，永不重用
 > - Label：参数编码，格式 `PAC{N}-{K}-{N1}-{N2}-{UseCRC}-{Damping}`
 > - 重跑同一 RunID 时 exe 以 append 模式写入，结果追加在旧文件末尾（不覆盖）。汇总脚本自动取最后一次运行结果，无需手动删除旧文件。
+
+### 7.4 `scripts/generate_config.py` — 自动生成参数扫描 CSV
+
+当需要扫描多组参数（如不同的阻尼因子、CRC 长度、迭代次数等）时，手动编辑 CSV 容易出错且繁琐。`generate_config.py` 可自动生成所有参数组合的 CSV 文件。
+
+**支持的阻尼模式**：
+
+| DampMode | 名称 | 扫描参数 | 说明 |
+|----------|------|---------|------|
+| 0 | 固定衰减 (fixed) | `DampFixed` | `damp = DampFixed`（常数） |
+| 1 | 线性衰减 (linear) | `DampStart`, `DampEnd` | `damp = damp_end + (damp_start - damp_end) × (1 - k/N1)` |
+| 2 | 幂律衰减 (power) | `DampP` | `damp = damp_end + (damp_start - damp_end) × (1 - k/(N1-1))^p` |
+
+**通用扫描维度**：码率 (N,K)、N1、N2、UseCRC — 所有维度取笛卡尔积，一条命令即可生成上百组配置。
+
+**用法示例**：
+
+```powershell
+# 固定阻尼因子扫描（DampMode=0）：扫描 0.05 ~ 0.12
+python scripts/generate_config.py -d 0 --damp-values 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12
+
+# 幂律衰减扫描（DampMode=2）：扫描 p=0.1~0.9
+python scripts/generate_config.py -d 2 --damp-values 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
+
+# 线性衰减扫描（DampMode=1）：固定 start=0.12, end=0.04
+python scripts/generate_config.py -d 1 --damp-start-values 0.12 --damp-end-values 0.04
+
+# 指定输出文件
+python scripts/generate_config.py -d 0 --damp-values 0.08 0.10 0.12 -o machine_01_config.csv
+
+# 限制扫描范围：只扫 (128,96) 码率，N2=5/10，CRC=12/16
+python scripts/generate_config.py -d 0 --damp-values 0.05 0.08 0.10 \
+    --rates 128-96 --n2-values 5 10 --usecrc-values 12 16
+
+# 查看完整参数说明
+python scripts/generate_config.py --help
+```
+
+> **提示**：生成的 CSV 可直接作为 `batch_run.ps1` 的 `-ConfigCsv` 参数使用。如需微调（如修改 SNR 范围），在 Excel 或文本编辑器中直接编辑 CSV 即可。
+
+#### 完整工作流示例：从实验设计到结果汇总
+
+以下展示一台机器上一轮完整实验的全流程（以 machine-03 扫描幂律衰减 p 值为例）：
+
+```powershell
+# ========== Step 1: 设计实验、生成配置 ==========
+cd scripts
+python generate_config.py -d 2 \
+    --damp-values 0.02 0.05 0.08 0.15 0.25 \
+    --rates 128-72 \
+    --n2-values 5 10 15 \
+    --usecrc-values 12 16 20 \
+    -o machine_03_power_scan.csv
+
+# 输出示例：
+# Generated 45 configs → machine_03_power_scan.csv
+#   阻尼模式 : 2 (power)
+#   DampP      : 5 组  [0.02, 0.05, 0.08, 0.15, 0.25]
+#   码率       : 1 组  ['128-72']
+#   N2         : 3 组  [5, 10, 15]
+#   UseCRC     : 3 组  [12, 16, 20]
+#   组合数     : 1×3×3×5 = 45
+
+# ========== Step 2: 编译（如代码有更新） ==========
+cd ..
+cmake --build build --config Release
+
+# ========== Step 3: 批量运行（本机 results 分支上） ==========
+git checkout results/machine-03
+cd scripts
+.\batch_run.ps1 -ConfigCsv "machine_03_power_scan.csv" -Results Results4
+
+# ========== Step 4: 检查结果并提交 ==========
+git status                    # 确认 Results4/ 中的新文件
+git add Results4/
+git commit -m "PC3: (128,72) 幂律衰减 p 值扫描完成，5 个 p 值 × 9 组(N2,CRC) = 45 组"
+git push origin results/machine-03
+
+# ========== Step 5: 主机汇总 ==========
+# 在主机 (PC1) 上：
+git fetch --all
+python scripts/aggregate_results.py -m results/machine-03 -r Results4 -o power_scan_m03.csv
+```
+
+#### 常用实验场景速查
+
+| 实验目标 | `generate_config.py` 命令模板 |
+|---------|------------------------------|
+| 固定阻尼因子扫描 | `python generate_config.py -d 0 --damp-values 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12` |
+| 幂律衰减 p 值扫描 | `python generate_config.py -d 2 --damp-values 0.02 0.05 0.08 0.15 0.25 0.5 1.0 1.5` |
+| 线性衰减端点扫描 | `python generate_config.py -d 1 --damp-start-values 0.12 0.15 --damp-end-values 0.02 0.04 0.06` |
+| 单一配置确认 | `python generate_config.py -d 0 --damp-values 0.08 --rates 128-96 --n2-values 5 --usecrc-values 12` |
+| 不同码率对比 | `python generate_config.py -d 2 --damp-values 0.5 --rates 128-96 128-72 128-64` |
+| 快速验证（少帧数） | 生成后编辑 CSV，将 `LeastTestFrame` 改为 200，`EndSNR` 改为 2.5 |
+
+#### 参数说明
+
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| `-d, --damp-mode` | 阻尼模式: 0=fixed, 1=linear, 2=power | `2` |
+| `--damp-values` | Mode 0/2 的扫描值列表 | Mode 0: `0.05~0.12`; Mode 2: `0.1~0.9` |
+| `--damp-start-values` | Mode 1 的 DampStart 值列表 | `0.12` |
+| `--damp-end-values` | Mode 1 的 DampEnd 值列表 | `0.04` |
+| `--rates` | 码率列表，格式 `N-K` | `128-96 128-72 128-64` |
+| `--n1-values` | N1 (外循环迭代次数) 列表 | `20` |
+| `--n2-values` | N2 (内循环迭代次数) 列表 | `5 10 15` |
+| `--usecrc-values` | UseCRC (CRC 长度) 列表 | `12 16 20` |
+| `-o, --output` | 输出 CSV 文件路径 | `batch_config_scan.csv` |
+
+> **提示**：`-o` 指定的路径如果是相对路径，会相对于 `scripts/` 目录保存。建议用 `-o machine_XX_config.csv` 直接存在 `scripts/` 下，与 `batch_run.ps1` 的默认查找路径一致。
 
 ---
 
@@ -397,7 +551,38 @@ ABPDecoder/
         └──────────┘   └──────────┘   └──────────┘
 ```
 
-### 8.2 CSV 列说明
+### 8.2 汇总脚本命令行参数
+
+`aggregate_results.py` 支持以下命令行参数，方便灵活控制汇总范围：
+
+| 参数 | 简写 | 默认值 | 说明 |
+|------|------|--------|------|
+| `--machines` | `-m` | `results/machine-01,results/machine-03,results/machine-04` | 要汇总的机器分支列表，逗号分隔 |
+| `--results-dir` | `-r` | `Results` | 各分支中存放结果文件的目录名。如果结果放在 `Results1/`、`Results2/` 等自定义目录中，通过此参数切换 |
+| `--output` | `-o` | `results_summary.csv` | 输出 CSV 文件路径（相对于仓库根目录） |
+
+**使用场景举例**：
+
+```powershell
+# 场景1：只汇总部分机器的结果
+python scripts/aggregate_results.py -m results/machine-01,results/machine-02
+
+# 场景2：不同实验轮次存在不同结果目录
+# 第一轮结果在 Results1/，第二轮在 Results2/
+python scripts/aggregate_results.py -r Results1 -o round1_summary.csv
+python scripts/aggregate_results.py -r Results2 -o round2_summary.csv
+
+# 场景3：分组对比实验
+# machine-01 和 machine-02 跑阻尼因子扫描，单独汇总
+python scripts/aggregate_results.py -m results/machine-01,results/machine-02 -o damping_scan.csv
+
+# 场景4：修改默认机器列表
+# 编辑脚本顶部 DEFAULT_MACHINES 变量，永久更改默认汇总的机器
+```
+
+> **提示**：运行 `python scripts/aggregate_results.py --help` 可随时查看完整的参数说明。
+
+### 8.3 CSV 列说明
 
 | 列名 | 来源 | 说明 |
 |------|------|------|
@@ -408,7 +593,7 @@ ABPDecoder/
 | `Damping` | 文件名 | 阻尼策略，如 `power-0.5`、`linear-0.12-0.04`、`fixed-0.08` |
 | `SNR` ~ `IT` | 文件内容 | 仿真数据点（信噪比、帧数、FER/BER、迭代次数） |
 
-### 8.3 MATLAB 画图
+### 8.4 MATLAB 画图
 
 使用 `scripts/plot_fer.m`，修改顶部配置区即可：
 
@@ -471,41 +656,17 @@ GROUP_BY = {'Damping'};        % 对比不同阻尼策略
   git add .gitattributes
   ```
 
-### 9.4 网络问题
-
-- 如果 GitHub 访问慢/不稳定，各机器配置 Gitee 镜像仓库。
-- 或使用 SSH 协议代替 HTTPS：
-  ```powershell
-  git remote set-url origin git@github.com:DerrickLinus/PAC-CRCAided-Adaptive-BP-Decoder.git
-  ```
-
-### 9.5 批量运行技巧
-
-- **参数扫描**：在 CSV 中复制同一行，修改待扫描的字段即可（如 N2=5/10/15）
-- **通宵运行**：估算 `组数 × 10分钟` 是否能在夜间完成，合理设置 SNR 范围和帧数
-- **磁盘空间**：确保 `Results/` 所在盘有足够空间（每组结果视 SNR 点数从几 KB 到几 MB 不等）
-- **断点续跑**：运行中途如需停止，按 `E` 或 `Ctrl+C` 退出当前仿真，脚本会自动跳到下一组。如按 `Ctrl+C` 中断脚本本身，删除 CSV 中已完成的行即可续跑
-
-### 9.6 VS Studio Git 操作提示
-
-- **查看分支**：底部状态栏左侧显示当前分支名，点击可切换
-- **拉取/推送**："Git 更改" 窗口顶部有 "拉取" / "推送" 按钮
-- **合并分支**：切换到目标分支 → 右键源分支 → "合并自..."
-- **查看远程分支**："Git 更改" → "分支" → 展开 "remotes/origin"
-
----
-
 ## 10. 日常操作速查表
 
 | 场景 | 在哪台机器 | 操作 |
 |------|-----------|------|
 | 修改代码 | PC1(主机) | 编辑 → 编译 → `git commit` → `git push origin master` |
 | 同步最新代码 | PC2~6 | `git checkout master` → `git pull` → `git checkout results/machine-XX` → `git merge master` |
-| 配置本机参数 | 任意机器 | 编辑 `scripts/machine_XX_config.csv` |
+| 配置本机参数 | 任意机器 | 编辑 `scripts/machine_XX_config.csv`，或用 `python scripts/generate_config.py -d <mode> --damp-values ...` 自动生成 |
 | 批量运行仿真 | 任意机器 | `cd scripts` → `.\batch_run.ps1 -ConfigCsv "machine_XX_config.csv"` |
 | 提交实验结果 | 任意机器 | `git add Results/` → `git commit -m "..."` → `git push origin results/machine-XX` |
 | 查看各机器进度 | PC1(主机) | `.\scripts\check_status.ps1`（加 `-Detail` 查看详情） |
-| 汇总所有结果 | PC1(主机) | `python scripts/aggregate_results.py` → `results_summary.csv` |
+| 汇总所有结果 | PC1(主机) | `python scripts/aggregate_results.py [-m 分支列表] [-r 结果目录] [-o 输出文件]` |
 | Excel 筛选分析 | PC1(主机) | 用 Excel 打开 `results_summary.csv`，按 `N1`/`N2`/`UseCRC`/`Damping` 列透视 |
 | MATLAB 画 FER 曲线 | PC1(主机) | 编辑 `scripts/plot_fer.m` 配置区 → 运行 |
 | 新机器加入 | 新机器 | 按第 4.2 节初始化 |
@@ -513,43 +674,5 @@ GROUP_BY = {'Damping'};        % 对比不同阻尼策略
 
 ---
 
-## 11. 从当前状态迁移的步骤
-
-### 主机 (PC1)
-```powershell
-# 1. 更新 .gitignore（添加 machine_*.csv, logs/）
-git add .gitignore
-git commit -m "更新 .gitignore: 适配批量运行工作流"
-
-# 2. 创建本机参数 CSV
-copy scripts\batch_config_template.csv scripts\machine_01_config.csv
-# 编辑 machine_01_config.csv
-
-# 3. 创建 results/machine-01 分支
-git checkout -b results/machine-01 master
-git push -u origin results/machine-01
-
-# 4. 切回 master
-git checkout master
-```
-
-### 其他机器 (PC2~6)
-```powershell
-# 1. 克隆仓库
-git clone <仓库地址>
-cd PAC-CRCAided-Adaptive-BP-Decoder
-
-# 2. 创建 results 分支
-git checkout -b results/machine-0X master
-git push -u origin results/machine-0X
-
-# 3. 创建本机参数 CSV
-copy scripts\batch_config_template.csv scripts\machine_0X_config.csv
-# 编辑 machine_0X_config.csv
-
-# 4. 编译 → 运行批量脚本
-```
-
----
-
 *文档版本 2.0，2026-05-22*
+*文档版本 3.0，2026-06-07*

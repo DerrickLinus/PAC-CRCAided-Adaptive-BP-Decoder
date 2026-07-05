@@ -10,13 +10,14 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$ConfigCsv,
     [string]$ExePath = "",
-    [switch]$ContinueOnError = $true
+    [string]$ResultsDir = "Results",
+    [bool]$ContinueOnError = $true                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 )
 
 $ErrorActionPreference = "Stop"
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $rootDir = Resolve-Path "$scriptDir\.."
-$resultsDir = Join-Path $rootDir "Results"
+$resultsDir = Join-Path $rootDir $ResultsDir
 $logsDir = Join-Path $rootDir "logs"
 if (-not (Test-Path $resultsDir)) { New-Item -ItemType Directory $resultsDir -Force | Out-Null }
 if (-not (Test-Path $logsDir)) { New-Item -ItemType Directory $logsDir -Force | Out-Null }
