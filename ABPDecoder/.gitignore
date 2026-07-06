@@ -26,18 +26,15 @@ Release/
 *.lastbuildstate
 
 # 机器专属配置（每台机器独立维护，不提交）
-Profile.txt
+Profile*.txt
 scripts/machine_*.csv
 !scripts/machine_01_config.csv
 
 # 旧结果文件
-Performance_v1.0.txt
-Performance_v1.1.txt
-Performance_v1.2.txt
 Performance_v1.3.txt
 
 # 汇总文件
-results_summary.csv
+results_*.csv
 
 # Claude Code 内部文件
 .claude/
@@ -45,3 +42,18 @@ results_summary.csv
 # 系统文件
 Thumbs.db
 Desktop.ini
+
+# pdf分析包
+tmp/
+
+# 分析
+docs/dynamic_damping_assessment_assets/
+figures/
+results_power_analysis/
+scripts/build_research_assessment_assets.py
+scripts/build_research_assessment_docx.py
+scripts/matlab_scripts/plot_damping_curve.m
+scripts/matlab_scripts/analyze_p_trend.m
+
+# 文档
+docs/Dynamic_Damping_CA_ABP_Research_Assessment_CN.md
