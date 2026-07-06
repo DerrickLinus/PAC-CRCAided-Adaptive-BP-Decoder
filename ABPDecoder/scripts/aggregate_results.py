@@ -22,6 +22,10 @@
 
   # 组合使用
   python scripts/aggregate_results.py -m results/machine-01,results/machine-03 -r Results1 -o scan1_summary.csv
+
+  # 每台机器单独指定结果目录（语法: 机器路径:结果目录，不带冒号则用 -r 的全局值）
+  # 例如汇总 machine-03/04 的 Results10 和 machine-07 的 Results3
+  python scripts/aggregate_results.py -m results/machine-03:Results10,results/machine-04:Results10,results/machine-07:Results3
 """
 
 import subprocess
@@ -54,6 +58,8 @@ def parse_args() -> argparse.Namespace:
   %(prog)s -m results/machine-01,results/machine-02
   %(prog)s -m results/machine-01,results/machine-03 -r Results1
   %(prog)s -m results/machine-04 -r Results2 -o damping_scan.csv
+  # 每台机器单独指定结果目录: 机器路径:结果目录
+  %(prog)s -m results/machine-03:Results10,results/machine-04:Results10,results/machine-07:Results3
         """.strip()
     )
     parser.add_argument(
@@ -61,7 +67,9 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="要汇总的机器分支列表，逗号分隔。"
              "默认: results/machine-01,results/machine-03,results/machine-04"
-             "（可通过修改脚本顶部 DEFAULT_MACHINES 永久更改）"
+             "（可通过修改脚本顶部 DEFAULT_MACHINES 永久更改）。"
+             "支持每台机器单独指定结果目录，语法: 机器路径:结果目录"
+             "（例如 results/machine-03:Results10）；不带冒号则使用 -r 的全局值。"
     )
     parser.add_argument(
         "-r", "--results-dir",
@@ -232,19 +240,31 @@ def main():
     args = parse_args()
 
     # 解析要汇总的机器列表
+    # 支持每台机器单独指定结果目录，语法: 机器路径:结果目录
+    # 例如 results/machine-03:Results10,results/machine-07:Results3
+    # 不带冒号时使用 -r 指定的全局结果目录（向后兼容）
     if args.machines:
-        MACHINES = [m.strip() for m in args.machines.split(",") if m.strip()]
+        machine_specs = []  # list of (machine_path, results_dir)
+        for item in args.machines.split(","):
+            item = item.strip()
+            if not item:
+                continue
+            if ":" in item:
+                path, rdir = item.split(":", 1)
+                machine_specs.append((path.strip(), rdir.strip()))
+            else:
+                machine_specs.append((item, args.results_dir))
     else:
-        MACHINES = DEFAULT_MACHINES
+        machine_specs = [(m, args.results_dir) for m in DEFAULT_MACHINES]
 
-    results_dir = args.results_dir
     output_csv = REPO_ROOT / args.output
 
     print("=" * 70)
     print("  多机器 Performance 汇总工具")
     print("=" * 70)
-    print(f"  结果目录: {results_dir}/")
-    print(f"  目标分支: {', '.join(MACHINES)}")
+    used_dirs = sorted({d for _, d in machine_specs})
+    print(f"  结果目录: {', '.join(used_dirs)}/")
+    print(f"  目标分支: {', '.join(p for p, _ in machine_specs)}")
     print(f"  输出文件: {args.output}")
 
     # Step 1: 检查远程分支是否可访问
@@ -253,23 +273,23 @@ def main():
     remote_branches = [b.strip() for b in remote_branches]
 
     available_machines = []
-    for m in MACHINES:
-        origin_m = f"origin/{m}"
+    for path, rdir in machine_specs:
+        origin_m = f"origin/{path}"
         if any(origin_m in b for b in remote_branches):
-            files = list_performance_files(origin_m, results_dir)
+            files = list_performance_files(origin_m, rdir)
             if files:
-                available_machines.append((m, origin_m, files))
-                print(f"  {m}: {len(files)} 个结果文件 (来自 {results_dir}/)")
+                available_machines.append((path, origin_m, files))
+                print(f"  {path}: {len(files)} 个结果文件 (来自 {rdir}/)")
             else:
-                print(f"  {m}: 分支存在但 {results_dir}/ 中无结果文件")
+                print(f"  {path}: 分支存在但 {rdir}/ 中无结果文件")
         else:
-            print(f"  {m}: 尚未创建")
+            print(f"  {path}: 尚未创建")
 
     if not available_machines:
         print(f"\n未找到任何结果文件。请确认：")
         print(f"  1. 已执行 git fetch --all")
         print(f"  2. 指定的机器分支已推送结果")
-        print(f"  3. 结果目录名 '{results_dir}/' 正确（可通过 -r 参数切换）")
+        print(f"  3. 结果目录名正确（可通过 -r 全局切换，或用 -m 机器:目录 单独指定）")
         return
 
     # Step 2: 提取数据
