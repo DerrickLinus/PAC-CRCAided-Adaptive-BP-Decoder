@@ -656,6 +656,40 @@ GROUP_BY = {'Damping'};        % 对比不同阻尼策略
   git add .gitattributes
   ```
 
+### 9.4 运行环境：conda 与 MinGW DLL 冲突（batch 全部 FAILED，exit=-1073741511）
+
+**症状**：`batch_run.ps1` 中所有配置瞬间失败（0.0 min），日志显示 `FAILED (exit=-1073741511, ...)`，`Results*/failed_configs/` 里只有配置、没有仿真输出；但 exe 在干净环境里单独跑却正常。
+
+**根因**：`ABPDecoder.exe` 由 **MSYS2 ucrt64 GCC** 动态编译，运行时依赖 `libgomp-1.dll`（GNU OpenMP）、`libstdc++-6.dll`、`libgcc_s_seh-1.dll`、`libwinpthread-1.dll`。这些 DLL 不在 exe 同目录，靠 PATH 从 `C:\msys64\ucrt64\bin` 加载。当 conda `(base)` 处于激活状态时，会把 `C:\Users\<用户>\anaconda3\Library\mingw-w64\bin` **前置**到 PATH，该目录里的 `m2w64-gcc-libs 5.3.0`（2016 年老版本）同名 DLL 被加载器优先命中；exe 引用的入口点在 5.3.0 中不存在 → `STATUS_ENTRYPOINT_NOT_FOUND (0xC0000139 = -1073741511)`，进程在进入 `main()` 前就崩。
+
+**判断**：
+- 退出码 `-1073741511` 即 `0xC0000139`，是 Windows 加载器错误，**不是程序逻辑错误**。
+- 检查 `libgomp-1.dll` 实际加载来源：
+  ```powershell
+  foreach ($p in ($env:PATH -split ';')) { if ($p -and (Test-Path (Join-Path $p 'libgomp-1.dll'))) { Join-Path $p 'libgomp-1.dll'; break } }
+  ```
+  若输出指向 `anaconda3\Library\mingw-w64\bin\` 即为本问题；正常应指向 `C:\msys64\ucrt64\bin\`。
+
+**解决方案**（按推荐度排序）：
+
+1. **跑 batch 前 `conda deactivate`**（当前采用）：退出 conda base，PATH 恢复干净，exe 从 msys2 ucrt64 加载正确 DLL。仿真本身不需要 conda。
+   ```powershell
+   conda deactivate          # 提示符 (base) 消失；若仍在再执行一次
+   .\batch_run.ps1 -ConfigCsv "machine_XX_config.csv" -Results Results2
+   ```
+   一劳永逸（关掉 conda 每次新开终端自动激活 base）：
+   ```powershell
+   conda config --set auto_activate_base false
+   ```
+
+2. **复制 4 个 DLL 到 exe 旁**（最稳，免疫任何 shell）：把 `libgomp-1.dll`、`libgcc_s_seh-1.dll`、`libstdc++-6.dll`、`libwinpthread-1.dll` 从 `C:\msys64\ucrt64\bin` 复制到 `build\`（exe 同目录在 DLL 搜索中永远最优先）。注意 `cmake` 全清重编后需再复制一次。
+
+3. **在 `batch_run.ps1` 里前置 ucrt64**：启动子进程前 `$env:PATH = "C:\msys64\ucrt64\bin;$env:PATH"`，仅影响脚本进程树。只对走 `batch_run.ps1` 的运行生效。
+
+4. **静态重编**：CMakeLists 加 `-static-libgcc -static-libstdc++ -static`，让 exe 自包含。最彻底但要改构建配置。
+
+> 注：此问题与"代码改了但 exe 没重编"无关——后者只是跑旧代码，不会触发加载器崩溃。改了源码后记得重新编译（见 6.1）。
+
 ## 10. 日常操作速查表
 
 | 场景 | 在哪台机器 | 操作 |
@@ -664,6 +698,7 @@ GROUP_BY = {'Damping'};        % 对比不同阻尼策略
 | 同步最新代码 | PC2~6 | `git checkout master` → `git pull` → `git checkout results/machine-XX` → `git merge master` |
 | 配置本机参数 | 任意机器 | 编辑 `scripts/machine_XX_config.csv`，或用 `python scripts/generate_config.py -d <mode> --damp-values ...` 自动生成 |
 | 批量运行仿真 | 任意机器 | `cd scripts` → `.\batch_run.ps1 -ConfigCsv "machine_XX_config.csv"` |
+| batch 全部 FAILED(exit=-1073741511) | 任意机器 | conda 抢占 MinGW DLL → 先 `conda deactivate` 再跑（详见 9.4） |
 | 提交实验结果 | 任意机器 | `git add Results/` → `git commit -m "..."` → `git push origin results/machine-XX` |
 | 查看各机器进度 | PC1(主机) | `.\scripts\check_status.ps1`（加 `-Detail` 查看详情） |
 | 汇总所有结果 | PC1(主机) | `python scripts/aggregate_results.py [-m 分支列表] [-r 结果目录] [-o 输出文件]` |
@@ -674,5 +709,5 @@ GROUP_BY = {'Damping'};        % 对比不同阻尼策略
 
 ---
 
-*文档版本 2.0，2026-05-22*
+*文档版本 4.0，2026-07-06*
 *文档版本 3.0，2026-06-07*
