@@ -101,8 +101,10 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 	{
 		printf("ideal-ABP/MSA(%d, %d), Deg-2 = %d, Metric Threshold = %.2f\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->ML_metric_th);
 		printf("* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
-		printf("* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %.2f, Beta1 = %.2f, Alpha2 = %.2f, Beta2 = %.2f\n",
-			ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
+		// printf("* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %.2f, Beta1 = %.2f, Alpha2 = %.2f, Beta2 = %.2f\n",
+		// 	ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
+		printf("* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha = %.2f, Beta = %.2f\n",
+			ADP->ms_type, ADP->alpha_factor, ADP->beta_factor);
 		printf("* Damping Mode = %d (0:fixed,1:linear,2:Power-low), fixed = %.2f, start = %.2f, end = %.2f, p = %.2f\n",
 			ADP->damp_mode, ADP->damp_fixed, ADP->damp_start, ADP->damp_end, ADP->damp_p);
 	}
@@ -110,8 +112,10 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 	{
 		printf("ABP/MSA(%d, %d), Deg-2 = %d, Metric Threshold = %.2f\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->ML_metric_th);
 		printf("* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
-		printf("* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %.2f, Beta1 = %.2f, Alpha2 = %.2f, Beta2 = %.2f\n",
-			ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
+		// printf("* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %.2f, Beta1 = %.2f, Alpha2 = %.2f, Beta2 = %.2f\n",
+		// 	ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
+		printf("* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha = %.2f, Beta = %.2f\n",
+			ADP->ms_type, ADP->alpha_factor, ADP->beta_factor);
 		printf("* Damping Mode = %d (0:fixed,1:linear,2:Power-low), fixed = %.2f, start = %.2f, end = %.2f, p = %.2f\n",
 			ADP->damp_mode, ADP->damp_fixed, ADP->damp_start, ADP->damp_end, ADP->damp_p);
 	}
@@ -154,8 +158,10 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 	{
 		fprintf(outfile, "ideal-ABP/MSA(%d, %d), Deg-2 = %d, Metric Threshold = %.2f\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->ML_metric_th);
 		fprintf(outfile, "* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
-		fprintf(outfile, "* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %.2f, Beta1 = %.2f, Alpha2 = %.2f, Beta2 = %.2f\n",
-			ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
+		// fprintf(outfile, "* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %.2f, Beta1 = %.2f, Alpha2 = %.2f, Beta2 = %.2f\n",
+		// 	ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
+		fprintf(outfile, "* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha = %.2f, Beta = %.2f\n",
+			ADP->ms_type, ADP->alpha_factor, ADP->beta_factor);
 		fprintf(outfile, "* Damping Mode = %d (0:fixed,1:linear,2:Power-low), fixed = %.2f, start = %.2f, end = %.2f, p = %.2f\n",
 			ADP->damp_mode, ADP->damp_fixed, ADP->damp_start, ADP->damp_end, ADP->damp_p);
 	}
@@ -163,8 +169,10 @@ void WriteLogo(struct SPStruct *SP, struct ADPStruct *ADP)
 	{
 		fprintf(outfile, "ABP/MSA(%d, %d), Deg-2 = %d, Metric Threshold = %.2f\n", ADP->N1, ADP->N2, ADP->Deg2, ADP->ML_metric_th);
 		fprintf(outfile, "* Interchange = %d, Use CRC = %d, Use Channel LLR = %d\n", ADP->Interchange, ADP->CRC_len_for_ABP, ADP->use_channel_LLR);
-		fprintf(outfile, "* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %.2f, Beta1 = %.2f, Alpha2 = %.2f, Beta2 = %.2f\n",
-			ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
+		// fprintf(outfile, "* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha1 = %.2f, Beta1 = %.2f, Alpha2 = %.2f, Beta2 = %.2f\n",
+		// 	ADP->ms_type, ADP->alpha_fixed, ADP->beta_fixed, ADP->alpha_fixed2, ADP->beta_fixed2);
+		fprintf(outfile, "* MS Type = %d (0:MS, 1:NMS, 2:OMS, 3:NMS+OMS), Alpha = %.2f, Beta = %.2f\n",
+			ADP->ms_type, ADP->alpha_factor, ADP->beta_factor);
 		fprintf(outfile, "* Damping Mode = %d (0:fixed,1:linear,2:Power-low), fixed = %.2f, start = %.2f, end = %.2f, p = %.2f\n",
 			ADP->damp_mode, ADP->damp_fixed, ADP->damp_start, ADP->damp_end, ADP->damp_p);
 	}

@@ -581,10 +581,10 @@ void ideal_ABP_MSA(double *bitsoft, double *y, int **H, int N, int M, int *outse
 				for (i = 0; i < Iter->CNdegree[m]; i++)
 				{
 					min_val = (i == pos) ? min2 : min1;
-					vn_index = Iter->CNindex[m][i];
-					is_reliable = (vn_index < (N - M));
-					alpha_factor = is_reliable ? ADP->alpha_fixed : ADP->alpha_fixed2;
-					beta_factor = is_reliable ? ADP->beta_fixed : ADP->beta_fixed2;
+					// vn_index = Iter->CNindex[m][i];
+					// is_reliable = (vn_index < (N - M));
+					// alpha_factor = is_reliable ? ADP->alpha_fixed : ADP->alpha_fixed2;
+					// beta_factor = is_reliable ? ADP->beta_fixed : ADP->beta_fixed2;
 
 					// ms_type: 0-标准MS, 1-NMS, 2-OMS, 3-NMS+OMS
 					if (ADP->ms_type == 0)
@@ -910,10 +910,10 @@ void ABP_MSA(double snr, double* bitsoft, double* y, int** H, int N, int M, int*
 				for (i = 0; i < Iter->CNdegree[m]; i++)
 				{
 					min_val = (i == pos) ? min2 : min1;
-					vn_index = Iter->CNindex[m][i];
-					is_reliable = (vn_index < (N - M));
-					alpha_factor = is_reliable ? ADP->alpha_fixed : ADP->alpha_fixed2;
-					beta_factor = is_reliable ? ADP->beta_fixed : ADP->beta_fixed2;
+					// vn_index = Iter->CNindex[m][i];
+					// is_reliable = (vn_index < (N - M));
+					// alpha_factor = is_reliable ? ADP->alpha_fixed : ADP->alpha_fixed2;
+					// beta_factor = is_reliable ? ADP->beta_fixed : ADP->beta_fixed2;
 
 					// ms_type: 0-标准MS, 1-NMS, 2-OMS, 3-NMS+OMS
 					if (ADP->ms_type == 0)
@@ -924,17 +924,20 @@ void ABP_MSA(double snr, double* bitsoft, double* y, int** H, int N, int M, int*
 					else if (ADP->ms_type == 1)
 					{
 						// NMS: R = alpha * min
-						R = alpha_factor * min_val;
+						// R = alpha_factor * min_val;
+						R = ADP->alpha_factor * min_val;
 					}
 					else if (ADP->ms_type == 2)
 					{
 						// OMS: R = max(min - beta, 0)
-						R = max(min_val - beta_factor, 0.0);
+						// R = max(min_val - beta_factor, 0.0);
+						R = max(min_val - ADP->beta_factor, 0.0);
 					}
 					else
 					{
 						// NMS + OMS: R = alpha * max(min - beta, 0)
-						R = alpha_factor * max(min_val - beta_factor, 0.0);
+						// R = alpha_factor * max(min_val - beta_factor, 0.0);
+						R = ADP->alpha_factor * max(min_val - ADP->beta_factor, 0.0);
 					}
 					R *= (sign * alpha[i]);
 					Iter->pLLR[Iter->CNindex[m][i]] += R; // 实际是在计算 Sum of C2V（所有连接到该变量节点的校验节点传来的消息之和）

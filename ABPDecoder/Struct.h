@@ -196,10 +196,11 @@ struct ADPStruct
 	double ReliableFactor = 1;
 
 	// Neural Min-Sum 参数
-	double alpha_fixed;				// NMS缩放因子，1.0为标准MS
-	double beta_fixed;				// OMS偏移量，0.0为标准MS
-	double alpha_fixed2;			// NMS缩放因子(不可靠比特组)
-	double beta_fixed2;				// OMS偏移量(不可靠比特组)
+	// double alpha_fixed;				// NMS缩放因子，1.0为标准MS
+	// double beta_fixed;				// OMS偏移量，0.0为标准MS
+	// double alpha_fixed2;				// NMS缩放因子(不可靠比特组)
+	// double beta_fixed2;				// OMS偏移量(不可靠比特组)
+
 	int ms_type;					// 0:标准MS, 1:NMS, 2:OMS, 3:NMS+OMS
 
 	double alpha_factor;
