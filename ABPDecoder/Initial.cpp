@@ -118,7 +118,7 @@ void ReadCodefile(struct ADPStruct *ADP)
 	}
 
 	// read the active set
-	// 使用RM 准则，忽略从文件中读取的方法
+	// 这里实际上没有从文件CF.Polar.128.64.txt中读取，而是在后面从Index_1024_RM.txt中读取的信息位
 	if (ADP->EncodeAdd0)
 	{
 		ADP->A = new int[ADP->K];
